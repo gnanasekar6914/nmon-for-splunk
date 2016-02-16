@@ -12,6 +12,9 @@ Contents:
    :maxdepth: 2
 
    about
+   releasenotes
+   knownissues
+   support
 
 
 Indices and tables

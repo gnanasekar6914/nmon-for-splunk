@@ -19,7 +19,7 @@ The Nmon Performance monitor application for Splunk will generate Performance an
 
 The core Application available on Splunk base requires Splunk 6.2.x or superior to operate normally (in distributed deployments, only search heads requires Splunk 6.2.x)
 
-The last release compatible with Splunk 6.x can be downloaded here: `Link text <https://splunkbase.splunk.com/app/1753/release/1.4.91/agree/>`_
+The last release compatible with Splunk 6.x can be downloaded here: https://splunkbase.splunk.com/app/1753/release/1.4.91/agree/
 
 The PA-nmon add-on available in the resources directory of the core Application is designed to be installed in indexers (clusters or standalone), it is compatible with Splunk 6.x (Splunk 5.x shall not be used as the App intensively uses Data Model acceleration which is not available in Splunk 5.x and prior)
 
@@ -51,13 +51,13 @@ and you are free to modify sources or participate in the development if you wish
 
 Feedback and rating the App will be greatly appreciated.
 
-* Join the Google group: `Link text <https://groups.google.com/d/forum/nmon-splunk-app>`_
+* Join the Google group: https://groups.google.com/d/forum/nmon-splunk-app
 
 
-* App's Github page: `Link text <https://github.com/guilhemmarchand/nmon-for-splunk>`_
+* App's Github page: https://github.com/guilhemmarchand/nmon-for-splunk
 
 
-* Videos: `Link text <https://www.youtube.com/channel/UCGWHd40x0A7wjk8qskyHQcQ>`_
+* Videos: https://www.youtube.com/channel/UCGWHd40x0A7wjk8qskyHQcQ
 
 
 
