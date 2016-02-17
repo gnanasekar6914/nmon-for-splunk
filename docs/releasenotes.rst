@@ -15,6 +15,16 @@ Requirements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 What has been fixed by release
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+========
+V1.6.15:
+========
+
+- App certification path, issue 1 execute permission
+- App certification path, issue 2 invalid json detected
+- App certification path, issue 3/4 duplicated stanzas
+- App certification path, issue 5 new line chars in savedsearches.conf
+
 ========
 V1.6.14:
 ========

@@ -1,6 +1,6 @@
 
 #########################################
-About Nmon Performance Monitor for Splunk
+About Nmon Performance monitor for Splunk
 #########################################
 
 * Author: Guilhem Marchand
