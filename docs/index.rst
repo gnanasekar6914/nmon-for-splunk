@@ -6,7 +6,7 @@
 Welcome to Nmon Performance monitor Splunk app for Unix and Linux systems's documentation!
 ==========================================================================================
 
-Contents:
+Overview:
 
 .. toctree::
    :maxdepth: 2
@@ -15,6 +15,8 @@ Contents:
    releasenotes
    knownissues
    support
+   openissue
+   binaries
 
 
 Indices and tables
