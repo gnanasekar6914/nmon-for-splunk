@@ -17,6 +17,13 @@ Overview:
    support
    openissue
    binaries
+   licence
+
+Installation:
+
+.. toctree::
+   :maxdepth: 2
+
 
 
 Indices and tables
