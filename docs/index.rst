@@ -19,11 +19,13 @@ Overview:
    binaries
    licence
 
-Installation:
+Documentation:
 
 .. toctree::
    :maxdepth: 2
 
+   introduction
+   topologies
 
 
 Indices and tables
