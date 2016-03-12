@@ -6,6 +6,10 @@
 Welcome to Nmon Performance monitor Splunk app for Unix and Linux systems's documentation!
 ==========================================================================================
 
+.. image:: img/splunk_nmon.png
+   :alt: splunk_nmon.png
+   :align: center
+
 Overview:
 ---------
 
@@ -29,3 +33,4 @@ Documentation:
    introduction
    deployment_matrix
    topologies
+   download
