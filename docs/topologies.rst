@@ -18,13 +18,13 @@ These deployment scenarios are detailed in the deployment section, as in an intr
 
 This is an example of deployment for standard scenario with multiple *nix clients running the addon "TA-nmon", managed trough a deployment server, indexing Nmon data into a Splunk indexer cluser running the addon "PA-nmon", exploiting Nmon data in a Search Head cluster running the core "nmon" application
 
-.. image:: topology1_realtime_example.png
+.. image:: img/topology1_realtime_example.png
    :alt: topology1_realtime_example.png
    :align: center
 
 This is an example of deployment for standard scenario with multiple *nix clients running the addon "TA-nmon" and sending data to intermediate Heavy Forwarders, all managed trough a deployment server, indexing Nmon data into a Splunk indexer cluser running the addon "PA-nmon", exploiting Nmon data in a Search Head cluster running the core "nmon" application
 
-.. image:: topology2_realtime_example.png
+.. image:: img/topology2_realtime_example.png
    :alt: topology2_realtime_example.png
    :align: center
 
@@ -32,7 +32,7 @@ This is an example of deployment for standard scenario with multiple *nix client
 
 This is an example of deployment for standard scenario with a single Heavy Forwarder Splunk instance running the addon "TA-nmon", indexing Nmon data from central NFS repositories into a Splunk indexer cluser running the addon "PA-nmon", exploiting Nmon data in a Search Head cluster running the core "nmon" application
 
-.. image:: topology3_colddata_example.png
+.. image:: img/topology3_colddata_example.png
    :alt: topology3_colddata_example.png
    :align: center
 
@@ -60,13 +60,13 @@ Although all pieces of software should work fine too on AIX and Solaris, this re
 
 **Example 1: Splunk Universal or Heavy forwarder installed on main syslog-ng collectors:**
 
-.. image:: syslog_topology1.png
+.. image:: img/syslog_topology1.png
    :alt: syslog_topology1.png
    :align: center
 
 **Example 2: Splunk Universal or Heavy forwarder installed third party servers running syslog-ng:**
 
-.. image:: syslog_topology2.png
+.. image:: img/syslog_topology2.png
    :alt: syslog_topology2.png
    :align: center
 

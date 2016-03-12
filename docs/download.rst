@@ -46,9 +46,11 @@ When downloading from Github, you MUST rename the directory to "nmon" or the App
 While the application involves using new Splunk versions capacities, the master release cannot always keep being retro compatible with older Splunk versions.
 When this is the case, the master cycle is stopped, and a cold branch will be created to host the tgz archive corresponding to that version.
 
-*Currently, here are stopped versions retro compatible with old Splunk releases:*
+*Currently, here are stopped versions for older Splunk releases:*
 
 * Last version compatible with Splunk 6.1.x:
+
+https://github.com/guilhemmarchand/nmon-for-splunk/blob/last_release_splunk_61x/nmon-performance-monitor-for-unix-and-linux-systems_14902.tgz
 
 
 

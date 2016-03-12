@@ -34,3 +34,6 @@ Documentation:
    deployment_matrix
    topologies
    download
+   installation_standalone
+   installation_distributed
+   installation_windows

@@ -19,7 +19,7 @@ This is a great "all in one" Performance Monitor tool that provides a very large
 
 The first way to use NMON is running the "nmon" command in terminal, which opens a Real time monitoring terminal interface, giving you access to many system metrics within a single screen:
 
-.. image:: nmon_screen1.gif
+.. image:: img/nmon_screen1.gif
    :alt: nmon_screen1
    :align: center
 
