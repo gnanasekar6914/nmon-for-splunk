@@ -371,7 +371,7 @@ Extract the content of the archive on your indexer in a temporary directory, exa
 
 The TA-nmon is a tar.gz archive located in the "resources" of the core Application
 
-It must be uncompressed and installed in the indexer in $SPLUNK_HOME/etc/deployment-apps/ (where $SPLUNK_HOME refers to the root directory of Splunk installation)
+It must be uncompressed and installed in $SPLUNK_HOME/etc/deployment-apps/ (where $SPLUNK_HOME refers to the root directory of Splunk installation)
 
 ::
 
@@ -489,8 +489,22 @@ Follow these steps examples to set up a server class that will push to clients t
    :alt: deployment_step9.png
    :align: center
 
+3.3. Deploying TA-nmon on master node, deployment server for performance data generation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+**For other nodes that won't have the TA-nmon published automatically (such as the master node and deployment servers), you will need to manually install the TA-nmon addon.**
 
+It must be uncompressed and installed in $SPLUNK_HOME/etc/apps/ (where $SPLUNK_HOME refers to the root directory of Splunk installation)
 
+::
 
+    cd /opt/splunk/etc/apps
+
+    tar -xvzf /tmp/nmon/resources/TA-nmon_*.tar.gz
+
+**And restart:**
+
+::
+
+    splunk restart
 
