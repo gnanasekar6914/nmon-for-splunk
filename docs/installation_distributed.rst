@@ -2,6 +2,9 @@
 Deploy to distributed deployment
 ================================
 
+
+.. _distributed_deployment_guide:
+
 ----------------------------------------
 Installation for distributed deployments
 ----------------------------------------
@@ -218,6 +221,8 @@ If you want to get Performance data to be generated automatically by the Applica
 2. Deploying the Core App to search heads
 -----------------------------------------
 
+.. _deploy_sh_cluster:
+
 2.1. Deploying the Nmon Core in a sh cluster
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -286,6 +291,8 @@ Finally push the configuration bundle to publish the Nmon core application to al
 
     splunk apply shcluster-bundle -target <URI>:<management_port> -auth <username>:<password>
 
+
+.. _deploy_sh:
 
 2.2. Deploying the Nmon Core in independent search heads or search heads in sh pooling
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

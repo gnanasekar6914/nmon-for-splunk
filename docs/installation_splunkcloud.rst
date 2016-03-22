@@ -2,20 +2,20 @@
 Deploy to Splunk Cloud
 ======================
 
-Deploying Nmon Performance Monitor in Splunk Cloud
+**Deploying Nmon Performance Monitor in Splunk Cloud**
 
-Nmon Performance Monitor can totally be installed and used will all functionality with the power of Splunk Cloud:
+Nmon Performance Monitor is entirely compatible with a Splunk Cloud deployment, offering 100% of app functionality.
 
 The Nmon core application will be deployed to Splunk Cloud
 
 Optionally, you can use Nmon Performance to monitor the Splunk Cloud instance itself (the same you would with a single Splunk instance)
 The TA-nmon App will be deployed to your servers and will send performance data to Splunk Cloud transparently
 
-STEP 1: Deploy Nmon Core Application to Splunk Cloud
+Step 1: Deploy Nmon Core Application to Splunk Cloud
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once connected to your Splunk Cloud instance, go to the Application menu management:
-
-STEP 1: Deploy Nmon Core Application to Splunk Cloud
+Install Nmon Core App
+"""""""""""""""""""""
 
 Once connected to your Splunk Cloud instance, go to the Application menu management:
 
@@ -35,13 +35,18 @@ Finally, Nmon Performance Monitor is installed:
    :alt: install_splunkcloud3.png
    :align: center
 
-STEP 2 (Optional): Activate local Performance monitor of your Splunk Cloud instance
+Step 2 (Optional): Activate local Performance monitor of your Splunk Cloud instance
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Splunk Cloud are running Linux OS, and if you like it can be easily monitored by the Nmon Core Application such that you will even know about your Splunk Cloud instance:
+Monitoring Splunk Cloud instance
+""""""""""""""""""""""""""""""""
 
-This is very simply achieved by activating local inputs scripts:
+Splunk Cloud are running Linux OS, it can be easily monitored by the Nmon Core Application:
 
-Click on Activate for both inputs (nmon_helper and nmon_clean)
+**Activate local inputs scripts:**
+
+* nmon_helper.sh
+* nmon_clean.sh
 
 .. image:: img/install_splunkcloud4.png
    :alt: install_splunkcloud4.png
@@ -53,79 +58,121 @@ Within a few minutes, Performance data will start to be collected and available 
    :alt: install_splunkcloud5.png
    :align: center
 
-STEP 3: Deploy TA-nmon to your Universal Forwarders agents to send Performance data to your Splunk Cloud instance
+Step 3: Deploy TA-nmon to your Universal Forwarders agents to send Performance data to your Splunk Cloud instance
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Configure Forwarding to Splunk Cloud
+""""""""""""""""""""""""""""""""""""
 
 If you haven't already, open the Universal Forwarder Application and follow instructions to install and configure your Universal Forwarder instances to send data to Splunk Cloud:
 
-Open the Universal Forwarder App:
+**Open the Universal Forwarder App:**
 
-screen004.png
-Follow instructions and install Splunk Credentials:
+.. image:: img/install_splunkcloud6.png
+   :alt: install_splunkcloud6.png
+   :align: center
 
-screen005.png
-Optionally if this is your first Universal Forwarder deployment to Splunk Cloud, you can easily validate your installation by confirming the Universal Forwarders sends data to Splunk Cloud:
+**Follow instructions and install Splunk Credentials:**
 
-—> Search Splunk internal events:
+.. image:: img/install_splunkcloud7.png
+   :alt: install_splunkcloud7.png
+   :align: center
 
-index=_internal
-As exposed above, you should see incoming events from your host, example:
+*If this is your first Universal Forwarder deployment to Splunk Cloud, you can easily validate your installation by confirming the Universal Forwarders sends data to Splunk Cloud:*
 
-screen006.png
-Finally deploy the TA-nmon to your Universal Forwarder instance(s):
+**Search Splunk internal events:**
 
-—> Upload the TA-nmon package to your servers
+::
 
-—> Install the TA-nmon:
+    index=_internal
 
-Manually:
+**As exposed above, you should see incoming events from your host, example:**
 
-The TA-nmon is a tar.gz archive located in the "resources" of the core Application
+.. image:: img/install_splunkcloud8.png
+   :alt: install_splunkcloud8.png
+   :align: center
+
+Deploying the TA-nmon
+"""""""""""""""""""""
+
+**Finally deploy the TA-nmon to your Universal Forwarder instance(s):**
+
+* Upload the TA-nmon package to your servers
+
+* Install the TA-nmon:
+
+**Manually:**
+
+The TA-nmon is a tar.gz archive located in the "resources" of the core Application.
+
 It must be uncompressed and installed in the indexer in $SPLUNK_HOME/etc/deployment-apps/ (where $SPLUNK_HOME refers to the root directory of Splunk installation)
-cd /opt/splunkforwarder/etc/apps
 
-tar -xvzf /tmp/TA-nmon_*.tar.gz
-Restart the Universal Forwarder
-Using Splunk CLI:
+::
+
+    cd /opt/splunkforwarder/etc/apps
+
+    tar -xvzf /tmp/TA-nmon_*.tar.gz
+
+And Restart the Universal Forwarder.
+
+**Using Splunk CLI:**
 
 You can install the TA-nmon using Splunk CLI:
-/opt/splunkforwarder/bin/splunk install app /tmp/TA-nmon_*.tar.gz -auth admin:changeme
+
+::
+
+    /opt/splunkforwarder/bin/splunk install app /tmp/TA-nmon_*.tar.gz -auth admin:changeme
+
 Restart the Universal Forwarder
-Example:
 
-[root@RHEL7 ~]# /opt/splunkforwarder/bin/splunk install app /media/BIGDATA/TA-nmon_V1.2.27.tar.gz -auth admin:changeme
-App '/media/BIGDATA/TA-nmon_V1.2.27.tar.gz' installed
-You need to restart the Splunk Server (splunkd) for your changes to take effect.
+**Example:**
 
-[root@RHEL7 ~]# /opt/splunkforwarder/bin/splunk restart
-Stopping splunkd...
-Shutting down.  Please wait, as this may take a few minutes.
-                                                           [  OK  ]
-Stopping splunk helpers...
-                                                           [  OK  ]
-Done.
+::
 
-Splunk> The Notorious B.I.G. D.A.T.A.
+    [root@RHEL7 ~]# /opt/splunkforwarder/bin/splunk install app /media/BIGDATA/TA-nmon_V1.2.27.tar.gz -auth admin:changeme
+    App '/media/BIGDATA/TA-nmon_V1.2.27.tar.gz' installed
+    You need to restart the Splunk Server (splunkd) for your changes to take effect.
 
-Checking prerequisites...
-    Checking mgmt port [8089]: open
-    Checking conf files for problems...
+    [root@RHEL7 ~]# /opt/splunkforwarder/bin/splunk restart
+    Stopping splunkd...
+    Shutting down.  Please wait, as this may take a few minutes.
+                                                               [  OK  ]
+    Stopping splunk helpers...
+                                                               [  OK  ]
+    Done.
+
+    Splunk> The Notorious B.I.G. D.A.T.A.
+
+    Checking prerequisites...
+        Checking mgmt port [8089]: open
+        Checking conf files for problems...
+        Done
+    All preliminary checks passed.
+
+    Starting splunk server daemon (splunkd)...
     Done
-All preliminary checks passed.
+                                                               [  OK  ]
+    [root@RHEL7 ~]#
 
-Starting splunk server daemon (splunkd)...
-Done
-                                                           [  OK  ]
-[root@RHEL7 ~]#
-STEP 4: Check your work and verify incoming Performance events
+Step 4: Check your work and verify incoming Performance events
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A few minutes later you will immediately start to receive incoming Performance data from your servers:
 
-screen009.png
+.. image:: img/install_splunkcloud9.png
+   :alt: install_splunkcloud9.png
+   :align: center
+
 And you will find incoming data from your host(s):
 
-screen010.png
+.. image:: img/install_splunkcloud10.png
+   :alt: install_splunkcloud10.png
+   :align: center
+
 Recommended: After you added new hosts to your deployment, you can immediately update configuration information by running the dedicated report (this is operation is done by default every hour):
 
-screen011.png
-Et voilà !!! There you go, enjoy :-)
+.. image:: img/install_splunkcloud11.png
+   :alt: install_splunkcloud11.png
+   :align: center
 
+Et voilà !!! There you go, enjoy :-)

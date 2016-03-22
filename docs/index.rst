@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Nmon Performance monitor Splunk app for Unix and Linux systems's documentation!
+Welcome to Nmon Performance monitor Splunk app for Unix and Linux systems documentation!
 ==========================================================================================
 
 .. image:: img/splunk_nmon.png
@@ -34,6 +34,11 @@ Documentation:
    deployment_matrix
    topologies
    download
+   installation_windows
    installation_standalone
    installation_distributed
-   installation_windows
+   installation_shpooling
+   installation_shcluster
+   installation_splunkcloud
+   installation_central_repositories
+   rsyslog_deployment
