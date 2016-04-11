@@ -398,7 +398,13 @@ If everything is fine in your configuration, you should start to receive incomin
 
 Running a search over the hostname of the end server:
 
-screen006.png
+.. image:: img/rsyslog_result1.png
+   :alt: rsyslog_result1.png
+   :align: center
+
 Interface example:
 
-screen007.png
+.. image:: img/rsyslog_result2.png
+   :alt: rsyslog_result2.png
+   :align: center
+
