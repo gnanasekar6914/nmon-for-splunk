@@ -1,93 +1,9 @@
-<form stylesheet="standard.css,ui_simple.css,hide_timeindicator.css,table_data_bar.css" script="link_switcher.js,autodiscover.js,table_data_bar.js">
+<form stylesheet="ui_simple.css,hide_timeindicator.css,table_data_bar.css" script="autodiscover.js,table_data_bar.js">
     <label>NMON Analyser LINUX</label>
-
-    <fieldset autoRun="false" submitButton="false">
-
-        <input type="time" token="timerange" searchWhenChanged="true">
-            <label>TimeRange:</label>
-            <default>
-                <earliestTime>-24h</earliestTime>
-                <latestTime>now</latestTime>
-            </default>
-        </input>
-
-        <input type="dropdown" token="osfilter" searchWhenChanged="true">
-            <label>Filter OS Type:</label>
-            <default>Linux</default>
-            <prefix>CPU.OStype="</prefix>
-            <suffix>"</suffix>
-            <choice value="*">Any OS</choice>
-            <choice value="Linux">Linux</choice>
-        </input>
-
-        <input type="dropdown" token="frameID" searchWhenChanged="true">
-            <label>Frame IDs:</label>
-            <!-- Populating Data Model Search -->
-            <search id="frameIDSearch">
-                <query>| tstats count AS count from datamodel=NMON_Data_CPU where (nodename = CPU) (CPU.frameID="*") ($osfilter$)
-                    groupby "CPU.frameID", "CPU.hostname" prestats=true
-                    | stats dedup_splitvals=t count AS count by "CPU.frameID"
-                    | rename "CPU.frameID" AS "frameID" | fields frameID | sort frameID</query>
-                <earliest>$timerange.earliest$</earliest>
-                <latest>$timerange.latest$</latest>
-            </search>
-            <choice value="*">Any</choice>
-            <default>*</default>
-            <fieldForLabel>frameID</fieldForLabel>
-            <fieldForValue>frameID</fieldForValue>
-        </input>
-
-        <input type="text" token="hostname-prefilter" searchWhenChanged="true">
-            <label>Optional: Filter hosts populating</label>
-            <default>*</default>
-        </input>
-
-        <input type="dropdown" token="hostname" searchWhenChanged="true">
-            <label>Host:</label>
-            <!-- Populating Data Model Search -->
-            <search id="baseSearch">
-                <query>| tstats count AS count from datamodel=NMON_Data_CPU where (nodename = CPU) (CPU.frameID=$frameID$) (CPU.hostname=$hostname-prefilter$) ($osfilter$)
-                    groupby "CPU.hostname" prestats=true
-                    | stats dedup_splitvals=t count AS count by "CPU.hostname"
-                    | rename "CPU.hostname" AS hostname
-                    | fields hostname | sort hostname
-                </query>
-                <earliest>$timerange.earliest$</earliest>
-                <latest>$timerange.latest$</latest>
-            </search>
-            <fieldForLabel>hostname</fieldForLabel>
-            <fieldForValue>hostname</fieldForValue>
-            <prefix>hostname="</prefix>
-            <suffix>"</suffix>
-        </input>
-
-        <input type="dropdown" token="span" searchWhenChanged="true">
-            <label>Span:</label>
-            <default>`inline_customspan`</default>
-            <choice value="`inline_customspan`">auto</choice>
-            <choice value="span=1m">1 minute</choice>
-            <choice value="span=2m">2 minutes</choice>
-            <choice value="span=3m">3 minutes</choice>
-            <choice value="span=4m">4 minutes</choice>
-            <choice value="span=5m">5 minutes</choice>
-            <choice value="span=10m">10 minutes</choice>
-            <choice value="span=15m">15 minutes</choice>
-            <choice value="span=30m">30 minutes</choice>
-            <choice value="span=1h">1 hour</choice>
-            <choice value="span=2h">2 hours</choice>
-            <choice value="span=12h">12 hours</choice>
-            <choice value="span=4h">4 hours</choice>
-            <choice value="span=1d">1 day</choice>
-            <choice value="span=2d">2 days</choice>
-            <choice value="span=1w">7 days</choice>
-            <choice value="span=1mon">1 month</choice>
-        </input>
-
-    </fieldset>
 
     <!-- Information panel -->
 
-    <row>
+    <row rejects="$hostname$">
         <panel>
             <html>
 
@@ -103,78 +19,134 @@
         </panel>
     </row>
 
+    <!-- Selection panel -->
+
     <row>
-        <html>
-            <div style="text-align: center;">
-                <img src="../../static/app/nmon/logos/NMON_simplelogo.svg"/>
-            </div>
-            <div style="text-align: center;">
-                <h1>Global Analysis per Host</h1>
-            </div>
-        </html>
+        <panel>
+
+            <input type="time" token="timerange" searchWhenChanged="true">
+                <label>Time Range:</label>
+                <default>
+                    <earliestTime>-24h</earliestTime>
+                    <latestTime>now</latestTime>
+                </default>
+            </input>
+
+            <input type="dropdown" token="osfilter" searchWhenChanged="true">
+                <label>Filter OS Type:</label>
+                <default>Linux</default>
+                <prefix>CPU.OStype="</prefix>
+                <suffix>"</suffix>
+                <choice value="*">Any OS</choice>
+                <choice value="Linux">Linux</choice>
+            </input>
+
+            <input type="dropdown" token="frameID" searchWhenChanged="true">
+                <label>Frame IDs:</label>
+                <!-- Populating Data Model Search -->
+                <search id="frameIDSearch">
+                    <query>| tstats count AS count from datamodel=NMON_Data_CPU where (nodename = CPU) (CPU.frameID="*") ($osfilter$)
+groupby "CPU.frameID", "CPU.hostname" prestats=true
+| stats dedup_splitvals=t count AS count by "CPU.frameID"
+| rename "CPU.frameID" AS "frameID" | fields frameID | sort frameID</query>
+                    <earliest>$timerange.earliest$</earliest>
+                    <latest>$timerange.latest$</latest>
+                </search>
+                <choice value="*">Any</choice>
+                <default>*</default>
+                <fieldForLabel>frameID</fieldForLabel>
+                <fieldForValue>frameID</fieldForValue>
+            </input>
+
+            <input type="text" token="hostname-prefilter" searchWhenChanged="true">
+                <label>Optional: Filter hosts populating</label>
+                <default>*</default>
+            </input>
+
+            <input type="dropdown" token="hostname" searchWhenChanged="true">
+                <label>Host:</label>
+                <!-- Populating Data Model Search -->
+                <search id="baseSearch">
+                    <query>| tstats count AS count from datamodel=NMON_Data_CPU where (nodename = CPU) (CPU.frameID=$frameID$) (CPU.hostname=$hostname-prefilter$) ($osfilter$)
+groupby "CPU.hostname" prestats=true
+| stats dedup_splitvals=t count AS count by "CPU.hostname"
+| rename "CPU.hostname" AS hostname
+| fields hostname | sort hostname
+                    </query>
+                    <earliest>$timerange.earliest$</earliest>
+                    <latest>$timerange.latest$</latest>
+                </search>
+                <fieldForLabel>hostname</fieldForLabel>
+                <fieldForValue>hostname</fieldForValue>
+                <prefix>hostname="</prefix>
+                <suffix>"</suffix>
+            </input>
+
+            <input type="dropdown" token="span" searchWhenChanged="true">
+                <label>Span:</label>
+                <default>`inline_customspan`</default>
+                <choice value="`inline_customspan`">auto</choice>
+                <choice value="span=1m">1 minute</choice>
+                <choice value="span=2m">2 minutes</choice>
+                <choice value="span=3m">3 minutes</choice>
+                <choice value="span=4m">4 minutes</choice>
+                <choice value="span=5m">5 minutes</choice>
+                <choice value="span=10m">10 minutes</choice>
+                <choice value="span=15m">15 minutes</choice>
+                <choice value="span=30m">30 minutes</choice>
+                <choice value="span=1h">1 hour</choice>
+                <choice value="span=2h">2 hours</choice>
+                <choice value="span=12h">12 hours</choice>
+                <choice value="span=4h">4 hours</choice>
+                <choice value="span=1d">1 day</choice>
+                <choice value="span=2d">2 days</choice>
+                <choice value="span=1w">7 days</choice>
+                <choice value="span=1mon">1 month</choice>
+            </input>
+
+        </panel>
     </row>
 
-    <!-- Configuration Search will run over earliest Alltime using the accelerated Data Model -->
 
-    <search id="configSearch">
-        <query>| tstats last("Nmon_Config.OStype") AS OStype
-last("Nmon_Config.OS_Level") AS OS_Level
-last("Nmon_Config.cpu_cores") AS cpu_cores
-last("Nmon_Config.Processor") AS Processor from datamodel=NMON_Config where (nodename = Nmon_Config) (Nmon_Config.$hostname$) groupby "Nmon_Config.hostname" prestats=true
-| stats dedup_splitvals=t last("Nmon_Config.OStype") AS OStype
-last("Nmon_Config.OS_Level") AS OS_Level
-last("Nmon_Config.cpu_cores") AS cpu_cores last("Nmon_Config.Processor") AS Processor by "Nmon_Config.hostname"
-| sort limit=0 "Nmon_Config.hostname" | fields - _span | rename "Nmon_Config.hostname" AS hostname | fields hostname, OStype, OS_Level, cpu_cores, Processor</query>
-        <earliest>0</earliest>
-        <latest>$timerange.latest$</latest>
+    <!-- Configuration Search uses the nmon_inventory data over the report -->
+
+    <search ref="NMON Inventory Linux" id="configSearch">
     </search>
 
     <row>
         <panel>
+
             <html>
                 <div style="text-align: center;">
-                    <h1>System Summary</h1>
+                    <h1>SYSTEM SUMMARY OVERVIEW</h1>
                 </div>
             </html>
 
-            <single>
+            <table rejects="$show_null_config$">
+                <title></title>
                 <search base="configSearch">
-                    <query>fields cpu_cores</query>
+                    <query>search $hostname$
+| eval Linux_memory_GB = round((Linux_memory_MB/1024),2)
+| eval Linux_swap_GB = round((Linux_swap_MB/1024),2)
+| fields cpu_cores, Processor, Linux_memory_GB, Linux_swap_GB, Linux_distribution, Linux_kernelversion, nmon_version, uptime_duration, system_startup_date
+| rename cpu_cores AS "Number of CPUs (logical CPUs)", Linux_memory_GB AS "Physical Memory (GB)", Linux_swap_GB AS "Swap Memory (GB)", Linux_distribution AS "Linux distribution", Linux_kernelversion AS "Kernel version", nmon_version AS "Version nmon", uptime_duration AS "Uptime duration (dd:HH:MM:SS)", system_startup_date AS "Last Known System startup date"
+                    </query>
+                    <!-- Progress event has access to job properties only -->
+                    <progress>
+                        <condition match="'job.resultCount' == 0">
+                            <set token="show_null_config">True</set>
+                        </condition>
+                        <condition>
+                            <unset token="show_null_config"/>
+                        </condition>
+                    </progress>
                 </search>
-                <option name="drilldown">none</option>
-                <option name="underLabel">Virtual Proc / Logical Cores</option>
-                <option name="linkView">search</option>
-                <option name="linkFields">result</option>
-                <option name="linkSearch">| tstats last("Nmon_Config.OStype") AS OStype
-last("Nmon_Config.OS_Level") AS OS_Level
-last("Nmon_Config.cpu_cores") AS cpu_cores
-last("Nmon_Config.Processor") AS Processor from datamodel=NMON_Config where (nodename = Nmon_Config) (Nmon_Config.$hostname$) groupby "Nmon_Config.hostname" prestats=true
-| stats dedup_splitvals=t last("Nmon_Config.OStype") AS OStype
-last("Nmon_Config.OS_Level") AS OS_Level
-last("Nmon_Config.cpu_cores") AS cpu_cores last("Nmon_Config.Processor") AS Processor by "Nmon_Config.hostname"
-| sort limit=0 "Nmon_Config.hostname" | fields - _span | rename "Nmon_Config.hostname" AS hostname | fields hostname, OStype, OS_Level, cpu_cores, Processor</option>
-            </single>
-
-            <single>
-                <search base="configSearch">
-                    <query>fields Processor</query>
-                </search>
-                <option name="drilldown">none</option>
-                <option name="underLabel">Processor Type</option>
-                <option name="linkView">search</option>
-                <option name="linkFields">result</option>
-                <option name="linkSearch">| tstats last("Nmon_Config.OStype") AS OStype
-last("Nmon_Config.OS_Level") AS OS_Level
-last("Nmon_Config.cpu_cores") AS cpu_cores
-last("Nmon_Config.Processor") AS Processor from datamodel=NMON_Config where (nodename = Nmon_Config) (Nmon_Config.$hostname$) groupby "Nmon_Config.hostname" prestats=true
-| stats dedup_splitvals=t last("Nmon_Config.OStype") AS OStype
-last("Nmon_Config.OS_Level") AS OS_Level
-last("Nmon_Config.cpu_cores") AS cpu_cores last("Nmon_Config.Processor") AS Processor by "Nmon_Config.hostname"
-| sort limit=0 "Nmon_Config.hostname" | fields - _span | rename "Nmon_Config.hostname" AS hostname | fields hostname, OStype, OS_Level, cpu_cores, Processor</option>
-            </single>
+            </table>
+            <html depends="$show_null_config$">
+                <p style="color:blue;margin-left:30px;font-size:14px">SYSTEM SUMMARY OVERVIEW Search returned no results, The nmon inventory data may not be available yet for this host, manually run the Nmon Inventory Generation report or wait for the auto update. (occurs every hour by default)</p>
+            </html>
 
         </panel>
-
     </row>
 
     <row>
@@ -313,15 +285,33 @@ avg("CPU.cpu_PCT") AS "CPU %"</query>
     <row>
         <panel>
 
-            <html>
-                <!-- Placeholder/container for the link switcher to appear -->
-                <div class="link-switcher" data-items="link1,link2">Select a view:<!--Links go here-->
-                </div>
-            </html>
+            <input type="link" token="cpu_all_linkinput">
+                <label></label>
+                <choice value="cpu_all_chart1">CPU_ALL, % by category</choice>
+                <choice value="cpu_all_chart2">CPU_ALL, % global usage</choice>
+                <choice value="cpu_nn_chart1">CPUnn, % global usage by processor</choice>
+                <default>cpu_all_chart1</default>
+                <change>
+                    <condition value="cpu_all_chart1">
+                        <set token="cpu_all_chart1">true</set>
+                        <unset token="cpu_all_chart2"></unset>
+                        <unset token="cpu_nn_chart1"></unset>
+                    </condition>
+                    <condition value="cpu_all_chart2">
+                        <set token="cpu_all_chart2">true</set>
+                        <unset token="cpu_all_chart1"></unset>
+                        <unset token="cpu_nn_chart1"></unset>
+                    </condition>
+                    <condition value="cpu_nn_chart1">
+                        <set token="cpu_nn_chart1">true</set>
+                        <unset token="cpu_all_chart1"></unset>
+                        <unset token="cpu_all_chart2"></unset>
+                    </condition>
+                </change>
+            </input>
 
-
-            <chart id="link1">
-                <title>CPU_ALL, % by category</title>
+            <chart depends="$cpu_all_chart1$">
+                <title></title>
                 <search base="CPU_ALL">
                     <query>fields _time,"Idle %","Sys %","User %","Wait %"</query>
                 </search>
@@ -340,7 +330,7 @@ avg("CPU.cpu_PCT") AS "CPU %"</query>
                 <option name="charting.legend.placement">bottom</option>
                 <option name="height">680px</option>
                 <option name="charting.axisTitleX.text">Time</option>
-                <option name="charting.axisTitleY.text">% CPUs</option>
+                <option name="charting.axisTitleY.text">% of CPUs utilization</option>
                 <option name="charting.axisY.minimumNumber">0</option>
                 <option name="charting.axisY.maximumNumber">100</option>
                 <drilldown target="search">
@@ -355,8 +345,8 @@ avg("CPU.Wait_PCT") AS "Wait_PCT"</link>
                 </drilldown>
             </chart>
 
-            <chart id="link2">
-                <title>CPU_ALL, % global usage</title>
+            <chart depends="$cpu_all_chart2$">
+                <title></title>
                 <search base="CPU_ALL">
                     <query>fields _time,"CPU %"</query>
                 </search>
@@ -375,7 +365,7 @@ avg("CPU.Wait_PCT") AS "Wait_PCT"</link>
                 <option name="charting.legend.placement">bottom</option>
                 <option name="height">680px</option>
                 <option name="charting.axisTitleX.text">Time</option>
-                <option name="charting.axisTitleY.text">% CPUs</option>
+                <option name="charting.axisTitleY.text">% of CPUs utilization</option>
                 <option name="charting.axisY.minimumNumber">0</option>
                 <option name="charting.axisY.maximumNumber">100</option>
                 <drilldown target="search">
@@ -384,6 +374,46 @@ groupby _time, "CPU.hostname" prestats=true span=1m
 | stats dedup_splitvals=t `CPU_ALL(max)` by _time, "CPU.hostname"
 | timechart span=1m
 avg("CPU.cpu_PCT") AS "CPU_PCT"</link>
+                </drilldown>
+            </chart>
+
+            <chart depends="$cpu_nn_chart1$">
+                <title></title>
+                <search>
+                    <query>| tstats `CPU_ALL(max)` from datamodel=NMON_Data_CPU where (nodename = CPU.CPUnn) (CPU.$hostname$) groupby _time, "CPU.hostname", "CPU.CPUnn.logical_core" prestats=true span=1m
+| stats dedup_splitvals=t `CPU_ALL(max)` by _time, "CPU.hostname", "CPU.CPUnn.logical_core"
+| fields _time,CPU.hostname,CPU.CPUnn.logical_core,CPU.cpu_PCT
+| timechart $span$ useother=f limit=0 avg("CPU.cpu_PCT") AS cpu_PCT by "CPU.CPUnn.logical_core"</query>
+                    <earliest>$timerange.earliest$</earliest>
+                    <latest>$timerange.latest$</latest>
+                </search>
+                <option name="charting.axisTitleX.visibility">visible</option>
+                <option name="charting.axisTitleY.visibility">visible</option>
+                <option name="charting.axisX.scale">linear</option>
+                <option name="charting.axisY.scale">linear</option>
+                <option name="charting.chart">line</option>
+                <option name="charting.chart.nullValueMode">gaps</option>
+                <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+                <option name="charting.chart.stackMode">stacked</option>
+                <option name="charting.chart.style">shiny</option>
+                <option name="charting.drilldown">all</option>
+                <option name="charting.layout.splitSeries">0</option>
+                <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+                <option name="charting.legend.placement">bottom</option>
+                <option name="height">680px</option>
+                <option name="charting.axisTitleX.text">Time</option>
+                <option name="charting.axisTitleY.text">% of CPU utilization</option>
+                <option name="charting.axisY.minimumNumber">0</option>
+                <option name="charting.axisY.maximumNumber">100</option>
+                <drilldown target="search">
+                    <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats `CPU_ALL(max)` from datamodel=NMON_Data_CPU where (nodename = CPU.CPUnn) (CPU.$hostname$)
+groupby _time, "CPU.hostname", "CPU.CPUnn.logical_core" prestats=true span=1m
+| stats dedup_splitvals=t `CPU_ALL(max)` by _time, "CPU.hostname", "CPU.CPUnn.logical_core"
+| timechart span=1m
+avg("CPU.Idle_PCT") AS "Idle_PCT",
+avg("CPU.Sys_PCT") AS "Sys_PCT",
+avg("CPU.User_PCT") AS "User_PCT",
+avg("CPU.Wait_PCT") AS "Wait_PCT" by "CPU.CPUnn.logical_core"</link>
                 </drilldown>
             </chart>
 
@@ -403,14 +433,69 @@ avg("CPU.cpu_PCT") AS "CPU_PCT"</link>
     <row>
         <panel>
 
-            <html>
-                <!-- Placeholder/container for the link switcher to appear -->
-                <div class="link-switcher" data-items="link10,link11,link12,link13,link14,link15">Select a view:<!--Links go here-->
-                </div>
-            </html>
+            <input type="link" token="top_linkinput">
+                <label></label>
+                <choice value="top_chart1">TOP, CPU Usage per logical core</choice>
+                <choice value="top_chart2">TOP, Memory Usage per command invocation</choice>
+                <choice value="top_chart3">TOP, Virtual Memory Usage per command invocation</choice>
+                <choice value="top_chart4">TOP, MinorFault per Command invocation</choice>
+                <choice value="top_chart5">TOP, MajorFault per Command invocation</choice>
+                <choice value="top_chart6">TOP, Shared library pages per Command invocation</choice>
+                <default>top_chart1</default>
+                <change>
+                    <condition value="top_chart1">
+                        <set token="top_chart1">true</set>
+                        <unset token="top_chart2"></unset>
+                        <unset token="top_chart3"></unset>
+                        <unset token="top_chart4"></unset>
+                        <unset token="top_chart5"></unset>
+                        <unset token="top_chart6"></unset>
+                    </condition>
+                    <condition value="top_chart2">
+                        <set token="top_chart2">true</set>
+                        <unset token="top_chart1"></unset>
+                        <unset token="top_chart3"></unset>
+                        <unset token="top_chart4"></unset>
+                        <unset token="top_chart5"></unset>
+                        <unset token="top_chart6"></unset>
+                    </condition>
+                    <condition value="top_chart3">
+                        <set token="top_chart3">true</set>
+                        <unset token="top_chart2"></unset>
+                        <unset token="top_chart1"></unset>
+                        <unset token="top_chart4"></unset>
+                        <unset token="top_chart5"></unset>
+                        <unset token="top_chart6"></unset>
+                    </condition>
+                    <condition value="top_chart4">
+                        <set token="top_chart4">true</set>
+                        <unset token="top_chart2"></unset>
+                        <unset token="top_chart3"></unset>
+                        <unset token="top_chart1"></unset>
+                        <unset token="top_chart5"></unset>
+                        <unset token="top_chart6"></unset>
+                    </condition>
+                    <condition value="top_chart5">
+                        <set token="top_chart5">true</set>
+                        <unset token="top_chart2"></unset>
+                        <unset token="top_chart3"></unset>
+                        <unset token="top_chart4"></unset>
+                        <unset token="top_chart1"></unset>
+                        <unset token="top_chart6"></unset>
+                    </condition>
+                    <condition value="top_chart6">
+                        <set token="top_chart6">true</set>
+                        <unset token="top_chart2"></unset>
+                        <unset token="top_chart3"></unset>
+                        <unset token="top_chart4"></unset>
+                        <unset token="top_chart5"></unset>
+                        <unset token="top_chart1"></unset>
+                    </condition>
+                </change>
+            </input>
 
-            <chart id="link10">
-                <title>TOP, CPU Usage per logical core</title>
+            <chart depends="$top_chart1$" rejects="$show_null_top$">
+                <title></title>
                 <search>
                     <query>| tstats max("TOP_Linux.pct_CPU") AS pct_CPU from datamodel=NMON_Data_TOP.TOP_Linux
 where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Command", "TOP_Linux.PID" prestats=true span=1m
@@ -423,6 +508,15 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
 | timechart $span$ useother=f limit=0 max(usage_per_core) as "CPU Usage per core" by Command</query>
                     <earliest>$timerange.earliest$</earliest>
                     <latest>$timerange.latest$</latest>
+                    <!-- Progress event has access to job properties only -->
+                    <progress>
+                        <condition match="'job.resultCount' == 0">
+                            <set token="show_null_top">True</set>
+                        </condition>
+                        <condition>
+                            <unset token="show_null_top"/>
+                        </condition>
+                    </progress>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -454,8 +548,8 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
                 </drilldown>
             </chart>
 
-            <chart id="link11">
-                <title>TOP, Memory Usage per command invocation</title>
+            <chart depends="$top_chart2$" rejects="$show_null_top$">
+                <title></title>
                 <search>
                     <query>| tstats max("TOP_Linux.ResText") AS ResText max("TOP_Linux.ResData") AS ResData from datamodel=NMON_Data_TOP.TOP_Linux
 where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Command", "TOP_Linux.PID" prestats=true span=1m
@@ -466,6 +560,15 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
 | timechart $span$ useother=f limit=0 max(Used_Mem_MB) as "Used_Memory" by Command</query>
                     <earliest>$timerange.earliest$</earliest>
                     <latest>$timerange.latest$</latest>
+                    <!-- Progress event has access to job properties only -->
+                    <progress>
+                        <condition match="'job.resultCount' == 0">
+                            <set token="show_null_top">True</set>
+                        </condition>
+                        <condition>
+                            <unset token="show_null_top"/>
+                        </condition>
+                    </progress>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -495,8 +598,8 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
                 </drilldown>
             </chart>
 
-            <chart id="link12">
-                <title>TOP, Virtual Memory Usage per command invocation</title>
+            <chart depends="$top_chart3$" rejects="$show_null_top$">
+                <title></title>
                 <search>
                     <query>| tstats max("TOP_Linux.Size") AS Size from datamodel=NMON_Data_TOP.TOP_Linux
 where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Command", "TOP_Linux.PID" prestats=true span=1m
@@ -507,6 +610,15 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
 | timechart $span$ useother=f limit=0 max(Virtual_Mem_MB) as "Virtual_Mem_MB" by Command</query>
                     <earliest>$timerange.earliest$</earliest>
                     <latest>$timerange.latest$</latest>
+                    <!-- Progress event has access to job properties only -->
+                    <progress>
+                        <condition match="'job.resultCount' == 0">
+                            <set token="show_null_top">True</set>
+                        </condition>
+                        <condition>
+                            <unset token="show_null_top"/>
+                        </condition>
+                    </progress>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -536,8 +648,8 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
                 </drilldown>
             </chart>
 
-            <chart id="link13">
-                <title>TOP, MinorFault per Command invocation</title>
+            <chart depends="$top_chart4$" rejects="$show_null_top$">
+                <title></title>
                 <search>
                     <query>| tstats max("TOP_Linux.MinorFault") AS MinorFault from datamodel=NMON_Data_TOP.TOP_Linux
 where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Command", "TOP_Linux.PID" prestats=true span=1m
@@ -547,6 +659,15 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
 | timechart $span$ useother=f limit=0 max(MinorFault) as "MinorFault" by Command</query>
                     <earliest>$timerange.earliest$</earliest>
                     <latest>$timerange.latest$</latest>
+                    <!-- Progress event has access to job properties only -->
+                    <progress>
+                        <condition match="'job.resultCount' == 0">
+                            <set token="show_null_top">True</set>
+                        </condition>
+                        <condition>
+                            <unset token="show_null_top"/>
+                        </condition>
+                    </progress>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -575,8 +696,8 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
                 </drilldown>
             </chart>
 
-            <chart id="link14">
-                <title>TOP, MajorFault per Command invocation</title>
+            <chart depends="$top_chart5$" rejects="$show_null_top$">
+                <title></title>
                 <search>
                     <query>| tstats max("TOP_Linux.MajorFault") AS MajorFault from datamodel=NMON_Data_TOP.TOP_Linux
 where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Command", "TOP_Linux.PID" prestats=true span=1m
@@ -586,6 +707,15 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
 | timechart $span$ useother=f limit=0 max(MajorFault) as "MajorFault" by Command</query>
                     <earliest>$timerange.earliest$</earliest>
                     <latest>$timerange.latest$</latest>
+                    <!-- Progress event has access to job properties only -->
+                    <progress>
+                        <condition match="'job.resultCount' == 0">
+                            <set token="show_null_top">True</set>
+                        </condition>
+                        <condition>
+                            <unset token="show_null_top"/>
+                        </condition>
+                    </progress>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -614,8 +744,8 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
                 </drilldown>
             </chart>
 
-            <chart id="link15">
-                <title>TOP, Shared library pages per Command invocation</title>
+            <chart depends="$top_chart6$" rejects="$show_null_top$">
+                <title></title>
                 <search>
                     <query>| tstats max("TOP_Linux.ShdLib") AS ShdLib from datamodel=NMON_Data_TOP.TOP_Linux
 where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Command", "TOP_Linux.PID" prestats=true span=1m
@@ -625,6 +755,15 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
 | timechart $span$ useother=f limit=0 max(ShdLib) as "ShdLib" by Command</query>
                     <earliest>$timerange.earliest$</earliest>
                     <latest>$timerange.latest$</latest>
+                    <!-- Progress event has access to job properties only -->
+                    <progress>
+                        <condition match="'job.resultCount' == 0">
+                            <set token="show_null_top">True</set>
+                        </condition>
+                        <condition>
+                            <unset token="show_null_top"/>
+                        </condition>
+                    </progress>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -653,6 +792,10 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
                 </drilldown>
             </chart>
 
+            <html depends="$show_null_top$">
+                <p style="color:blue;margin-left:30px;font-size:14px">Search returned no results, TOP collection (processes activity) has not been activated at nmon binary startup. (use the -t or -T option to activate the TOP collection)</p>
+            </html>
+
         </panel>
     </row>
 
@@ -671,14 +814,33 @@ max("PROC.fork") AS fork max("PROC.exec") AS exec</query>
     <row>
         <panel>
 
-            <html>
-                <!-- Placeholder/container for the link switcher to appear -->
-                <div class="link-switcher" data-items="link30,link31,link32">Select a view:<!--Links go here-->
-                </div>
-            </html>
+            <input type="link" token="proc_linkinput">
+                <label></label>
+                <choice value="proc_chart1">PROC, Kernel Threads in run queue and to be paged (RunQueue, Swap-In)</choice>
+                <choice value="proc_chart2">PROC, Context switches and system calls (pswitch, syscall)</choice>
+                <choice value="proc_chart3">PROC, Fork and Exec system calls (fork, exec)</choice>
+                <default>proc_chart1</default>
+                <change>
+                    <condition value="proc_chart1">
+                        <set token="proc_chart1">true</set>
+                        <unset token="proc_chart2"></unset>
+                        <unset token="proc_chart3"></unset>
+                    </condition>
+                    <condition value="proc_chart2">
+                        <set token="proc_chart2">true</set>
+                        <unset token="proc_chart1"></unset>
+                        <unset token="proc_chart3"></unset>
+                    </condition>
+                    <condition value="proc_chart3">
+                        <set token="proc_chart3">true</set>
+                        <unset token="proc_chart2"></unset>
+                        <unset token="proc_chart1"></unset>
+                    </condition>
+                </change>
+            </input>
 
-            <chart id="link30">
-                <title>PROC, Kernel Threads in run queue and to be paged (RunQueue, Swap-In)</title>
+            <chart depends="$proc_chart1$">
+                <title></title>
                 <search base="PROC">
                     <query>fields _time,Runnable,Swap_in</query>
                 </search>
@@ -706,8 +868,8 @@ max("PROC.fork") AS fork max("PROC.exec") AS exec</query>
                 </drilldown>
             </chart>
 
-            <chart id="link31">
-                <title>PROC, Context switches and system calls (pswitch, syscall) </title>
+            <chart depends="$proc_chart2$">
+                <title></title>
                 <search base="PROC">
                     <query>fields _time,pswitch,syscall</query>
                 </search>
@@ -735,8 +897,8 @@ max("PROC.fork") AS fork max("PROC.exec") AS exec</query>
                 </drilldown>
             </chart>
 
-            <chart id="link32">
-                <title>PROC, Fork and Exec system calls (fork, exec)</title>
+            <chart depends="$proc_chart3$">
+                <title></title>
                 <search base="PROC">
                     <query>fields _time,fork,exec</query>
                 </search>
@@ -778,14 +940,195 @@ groupby _time, "Linux.hostname" prestats=true $span$
     <row>
         <panel>
 
-            <html>
-                <!-- Placeholder/container for the link switcher to appear -->
-                <div class="link-switcher" data-items="link351,link352,link353,link354,link355,link356,link357,link358,link359,link360,link361,link362,link363">Select a view:<!--Links go here-->
-                </div>
-            </html>
-
-            <chart id="link351">
-                <title>VM, Pages dirty, under writeback or unstable</title>
+            <input type="link" token="vm_linkinput">
+                <label></label>
+                <choice value="vm_chart1">VM, Pages dirty, under writeback or unstable</choice>
+                <choice value="vm_chart2">VM, Pages allocated to page tables, mapped by files or allocated by the kernel slab allocator</choice>
+                <choice value="vm_chart3">VM, Pageins and pageouts (since last boot)</choice>
+                <choice value="vm_chart4">VM, swapins and swapouts (since last boot)</choice>
+                <choice value="vm_chart5">VM, Page allocations per zone (since last boot)</choice>
+                <choice value="vm_chart6">VM, Page frees, activations and deactivations (since last boot)</choice>
+                <choice value="vm_chart7">VM, Minor and major page faults (since last boot)</choice>
+                <choice value="vm_chart8">VM, Page refills (per zone, since last boot)</choice>
+                <choice value="vm_chart9">VM, Page steals (per zone, since last boot)</choice>
+                <choice value="vm_chart10">VM, Pages scanned by kswapd daemon (per zone, since last boot)</choice>
+                <choice value="vm_chart11">VM, Pages reclaimed directly (per zone, since last boot)</choice>
+                <choice value="vm_chart12">VM, Miscellaneous statistics</choice>
+                <default>vm_chart1</default>
+                <change>
+                    <condition value="vm_chart1">
+                        <set token="vm_chart1">true</set>
+                        <unset token="vm_chart2"></unset>
+                        <unset token="vm_chart3"></unset>
+                        <unset token="vm_chart4"></unset>
+                        <unset token="vm_chart5"></unset>
+                        <unset token="vm_chart6"></unset>
+                        <unset token="vm_chart7"></unset>
+                        <unset token="vm_chart8"></unset>
+                        <unset token="vm_chart9"></unset>
+                        <unset token="vm_chart10"></unset>
+                        <unset token="vm_chart11"></unset>
+                        <unset token="vm_chart12"></unset>
+                    </condition>
+                    <condition value="vm_chart2">
+                        <set token="vm_chart2">true</set>
+                        <unset token="vm_chart1"></unset>
+                        <unset token="vm_chart3"></unset>
+                        <unset token="vm_chart4"></unset>
+                        <unset token="vm_chart5"></unset>
+                        <unset token="vm_chart6"></unset>
+                        <unset token="vm_chart7"></unset>
+                        <unset token="vm_chart8"></unset>
+                        <unset token="vm_chart9"></unset>
+                        <unset token="vm_chart10"></unset>
+                        <unset token="vm_chart11"></unset>
+                        <unset token="vm_chart12"></unset>
+                    </condition>
+                    <condition value="vm_chart3">
+                        <set token="vm_chart3">true</set>
+                        <unset token="vm_chart2"></unset>
+                        <unset token="vm_chart1"></unset>
+                        <unset token="vm_chart4"></unset>
+                        <unset token="vm_chart5"></unset>
+                        <unset token="vm_chart6"></unset>
+                        <unset token="vm_chart7"></unset>
+                        <unset token="vm_chart8"></unset>
+                        <unset token="vm_chart9"></unset>
+                        <unset token="vm_chart10"></unset>
+                        <unset token="vm_chart11"></unset>
+                        <unset token="vm_chart12"></unset>
+                    </condition>
+                    <condition value="vm_chart4">
+                        <set token="vm_chart4">true</set>
+                        <unset token="vm_chart2"></unset>
+                        <unset token="vm_chart3"></unset>
+                        <unset token="vm_chart1"></unset>
+                        <unset token="vm_chart5"></unset>
+                        <unset token="vm_chart6"></unset>
+                        <unset token="vm_chart7"></unset>
+                        <unset token="vm_chart8"></unset>
+                        <unset token="vm_chart9"></unset>
+                        <unset token="vm_chart10"></unset>
+                        <unset token="vm_chart11"></unset>
+                        <unset token="vm_chart12"></unset>
+                    </condition>
+                    <condition value="vm_chart5">
+                        <set token="vm_chart5">true</set>
+                        <unset token="vm_chart2"></unset>
+                        <unset token="vm_chart3"></unset>
+                        <unset token="vm_chart4"></unset>
+                        <unset token="vm_chart1"></unset>
+                        <unset token="vm_chart6"></unset>
+                        <unset token="vm_chart7"></unset>
+                        <unset token="vm_chart8"></unset>
+                        <unset token="vm_chart9"></unset>
+                        <unset token="vm_chart10"></unset>
+                        <unset token="vm_chart11"></unset>
+                        <unset token="vm_chart12"></unset>
+                    </condition>
+                    <condition value="vm_chart6">
+                        <set token="vm_chart6">true</set>
+                        <unset token="vm_chart2"></unset>
+                        <unset token="vm_chart3"></unset>
+                        <unset token="vm_chart4"></unset>
+                        <unset token="vm_chart5"></unset>
+                        <unset token="vm_chart1"></unset>
+                        <unset token="vm_chart7"></unset>
+                        <unset token="vm_chart8"></unset>
+                        <unset token="vm_chart9"></unset>
+                        <unset token="vm_chart10"></unset>
+                        <unset token="vm_chart11"></unset>
+                        <unset token="vm_chart12"></unset>
+                    </condition>
+                    <condition value="vm_chart7">
+                        <set token="vm_chart7">true</set>
+                        <unset token="vm_chart2"></unset>
+                        <unset token="vm_chart3"></unset>
+                        <unset token="vm_chart4"></unset>
+                        <unset token="vm_chart5"></unset>
+                        <unset token="vm_chart6"></unset>
+                        <unset token="vm_chart1"></unset>
+                        <unset token="vm_chart8"></unset>
+                        <unset token="vm_chart9"></unset>
+                        <unset token="vm_chart10"></unset>
+                        <unset token="vm_chart11"></unset>
+                        <unset token="vm_chart12"></unset>
+                    </condition>
+                    <condition value="vm_chart8">
+                        <set token="vm_chart8">true</set>
+                        <unset token="vm_chart2"></unset>
+                        <unset token="vm_chart3"></unset>
+                        <unset token="vm_chart4"></unset>
+                        <unset token="vm_chart5"></unset>
+                        <unset token="vm_chart6"></unset>
+                        <unset token="vm_chart7"></unset>
+                        <unset token="vm_chart1"></unset>
+                        <unset token="vm_chart9"></unset>
+                        <unset token="vm_chart10"></unset>
+                        <unset token="vm_chart11"></unset>
+                        <unset token="vm_chart12"></unset>
+                    </condition>
+                    <condition value="vm_chart9">
+                        <set token="vm_chart9">true</set>
+                        <unset token="vm_chart2"></unset>
+                        <unset token="vm_chart3"></unset>
+                        <unset token="vm_chart4"></unset>
+                        <unset token="vm_chart5"></unset>
+                        <unset token="vm_chart6"></unset>
+                        <unset token="vm_chart7"></unset>
+                        <unset token="vm_chart8"></unset>
+                        <unset token="vm_chart1"></unset>
+                        <unset token="vm_chart10"></unset>
+                        <unset token="vm_chart11"></unset>
+                        <unset token="vm_chart12"></unset>
+                    </condition>
+                    <condition value="vm_chart10">
+                        <set token="vm_chart10">true</set>
+                        <unset token="vm_chart2"></unset>
+                        <unset token="vm_chart3"></unset>
+                        <unset token="vm_chart4"></unset>
+                        <unset token="vm_chart5"></unset>
+                        <unset token="vm_chart6"></unset>
+                        <unset token="vm_chart7"></unset>
+                        <unset token="vm_chart8"></unset>
+                        <unset token="vm_chart9"></unset>
+                        <unset token="vm_chart1"></unset>
+                        <unset token="vm_chart11"></unset>
+                        <unset token="vm_chart12"></unset>
+                    </condition>
+                    <condition value="vm_chart11">
+                        <set token="vm_chart11">true</set>
+                        <unset token="vm_chart2"></unset>
+                        <unset token="vm_chart3"></unset>
+                        <unset token="vm_chart4"></unset>
+                        <unset token="vm_chart5"></unset>
+                        <unset token="vm_chart6"></unset>
+                        <unset token="vm_chart7"></unset>
+                        <unset token="vm_chart8"></unset>
+                        <unset token="vm_chart9"></unset>
+                        <unset token="vm_chart10"></unset>
+                        <unset token="vm_chart1"></unset>
+                        <unset token="vm_chart12"></unset>
+                    </condition>
+                    <condition value="vm_chart12">
+                        <set token="vm_chart12">true</set>
+                        <unset token="vm_chart2"></unset>
+                        <unset token="vm_chart3"></unset>
+                        <unset token="vm_chart4"></unset>
+                        <unset token="vm_chart5"></unset>
+                        <unset token="vm_chart6"></unset>
+                        <unset token="vm_chart7"></unset>
+                        <unset token="vm_chart8"></unset>
+                        <unset token="vm_chart9"></unset>
+                        <unset token="vm_chart10"></unset>
+                        <unset token="vm_chart11"></unset>
+                        <unset token="vm_chart1"></unset>
+                    </condition>
+                </change>
+            </input>
+            
+            <chart depends="$vm_chart1$">
+                <title></title>
                 <search base="VM">
                     <query>fields _time,*nr_dirty*,*nr_writeback*,*nr_unstable*</query>
                 </search>
@@ -813,8 +1156,8 @@ groupby _time, "Linux.hostname" prestats=true span=1m
                 </drilldown>
             </chart>
 
-            <chart id="link352">
-                <title>VM, Pages allocated to page tables, mapped by files or allocated by the kernel slab allocator</title>
+            <chart depends="$vm_chart2$">
+                <title></title>
                 <search base="VM">
                     <query>fields _time,*nr_page_table_pages*,*nr_mapped*,*nr_slab*</query>
                 </search>
@@ -842,8 +1185,8 @@ groupby _time, "Linux.hostname" prestats=true span=1m
                 </drilldown>
             </chart>
 
-            <chart id="link353">
-                <title>VM, Pageins and pageouts (since last boot)</title>
+            <chart depends="$vm_chart3$">
+                <title></title>
                 <search base="VM">
                     <query>fields _time,*pgpgin*,*pgpgout*</query>
                 </search>      <option name="charting.axisTitleX.visibility">visible</option>
@@ -870,37 +1213,8 @@ groupby _time, "Linux.hostname" prestats=true span=1m
                 </drilldown>
             </chart>
 
-            <chart id="link354">
-                <title>VM, Pageins and pageouts (since last boot)</title>
-                <search base="VM">
-                    <query>fields _time,*pgpgin*,*pgpgout*</query>
-                </search>
-                <option name="charting.axisTitleX.visibility">visible</option>
-                <option name="charting.axisTitleY.visibility">visible</option>
-                <option name="charting.axisX.scale">linear</option>
-                <option name="charting.axisY.scale">linear</option>
-                <option name="charting.chart">line</option>
-                <option name="charting.chart.nullValueMode">gaps</option>
-                <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-                <option name="charting.chart.stackMode">unstacked</option>
-                <option name="charting.chart.style">shiny</option>
-                <option name="charting.drilldown">all</option>
-                <option name="charting.layout.splitSeries">0</option>
-                <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-                <option name="charting.legend.placement">bottom</option>
-                <option name="height">680px</option>
-                <option name="charting.axisTitleX.text">Time</option>
-                <option name="charting.axisY.minimumNumber">0</option>
-                <option name="charting.axisTitleY.text">Number of Pages</option>
-                <drilldown target="search">
-                    <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats `VM_Linux(max)` from datamodel=NMON_Data_VM where (nodename = Linux) (Linux.$hostname$)
-groupby _time, "Linux.hostname" prestats=true span=1m
-| timechart span=1m `VM_Linux(max)` | rename Linux.* AS *</link>
-                </drilldown>
-            </chart>
-
-            <chart id="link355">
-                <title>VM, swapins and swapouts (since last boot)</title>
+            <chart depends="$vm_chart4$">
+                <title></title>
                 <search base="VM">
                     <query>fields _time,*pswpin*,*pswpout*</query>
                 </search>
@@ -928,8 +1242,8 @@ groupby _time, "Linux.hostname" prestats=true span=1m
                 </drilldown>
             </chart>
 
-            <chart id="link356">
-                <title>VM, Page allocations per zone (since last boot)</title>
+            <chart depends="$vm_chart5$">
+                <title></title>
                 <search base="VM">
                     <query>fields _time,*pgalloc_high*,*pgalloc_normal*,*pgalloc_dma32*,*pgalloc_dma*</query>
                 </search>
@@ -957,8 +1271,8 @@ groupby _time, "Linux.hostname" prestats=true span=1m
                 </drilldown>
             </chart>
 
-            <chart id="link357">
-                <title>VM, Page frees, activations and deactivations (since last boot)</title>
+            <chart depends="$vm_chart6$">
+                <title></title>
                 <search base="VM">
                     <query>fields _time,*pgfree*,*pgactivate*,*pgdeactivate*</query>
                 </search>
@@ -986,8 +1300,8 @@ groupby _time, "Linux.hostname" prestats=true span=1m
                 </drilldown>
             </chart>
 
-            <chart id="link358">
-                <title>VM, Minor and major page faults (since last boot)</title>
+            <chart depends="$vm_chart7$">
+                <title></title>
                 <search base="VM">
                     <query>fields _time,*pgfault*,*pgmajfault*</query>
                 </search>
@@ -1015,8 +1329,8 @@ groupby _time, "Linux.hostname" prestats=true span=1m
                 </drilldown>
             </chart>
 
-            <chart id="link359">
-                <title>VM, Page refills (per zone, since last boot):</title>
+            <chart depends="$vm_chart8$">
+                <title></title>
                 <search base="VM">
                     <query>fields _time,*pgrefill_high*,*pgrefill_normal*,*pgrefill_dma32*,*pgrefill_dma*</query>
                 </search>
@@ -1044,8 +1358,8 @@ groupby _time, "Linux.hostname" prestats=true span=1m
                 </drilldown>
             </chart>
 
-            <chart id="link360">
-                <title>VM, Page steals (per zone, since last boot)</title>
+            <chart depends="$vm_chart9$">
+                <title></title>
                 <search base="VM">
                     <query>fields _time,*pgsteal_high*,*pgsteal_normal*,*pgsteal_dma32*,*pgsteal_dma*</query>
                 </search>
@@ -1073,8 +1387,8 @@ groupby _time, "Linux.hostname" prestats=true span=1m
                 </drilldown>
             </chart>
 
-            <chart id="link361">
-                <title>VM, Pages scanned by kswapd daemon (per zone, since last boot)</title>
+            <chart depends="$vm_chart10$">
+                <title></title>
                 <search base="VM">
                     <query>fields _time,*pgscan_kswapd_high*,*pgscan_kswapd_normal*,*pgscan_kswapd_dma32*,*pgscan_kswapd_dma*</query>
                 </search>
@@ -1102,8 +1416,8 @@ groupby _time, "Linux.hostname" prestats=true span=1m
                 </drilldown>
             </chart>
 
-            <chart id="link362">
-                <title>VM, Pages reclaimed directly (per zone, since last boot)</title>
+            <chart depends="$vm_chart11$">
+                <title></title>
                 <search base="VM">
                     <query>fields _time,*pgscan_direct_high*,*pgscan_direct_normal*,*pgscan_direct_dma32*,*pgscan_direct_dma*</query>
                 </search>
@@ -1131,8 +1445,8 @@ groupby _time, "Linux.hostname" prestats=true span=1m
                 </drilldown>
             </chart>
 
-            <chart id="link363">
-                <title>VM, Miscellaneous statistics</title>
+            <chart depends="$vm_chart12$">
+                <title></title>
                 <search base="VM">
                     <query>fields _time,*pginodesteal*,*slabs_scanned*,*kswapd_steal*,*kswapd_inodesteal*,*pageoutrun*,*allocstall*,*pgrotated*,*nr_bounce*</query>
                 </search>
@@ -1205,16 +1519,45 @@ max("MEM.swapfree_PCT") AS swapfree_PCT max("MEM.swaptotal") AS swaptotal_MB max
     <row>
         <panel>
 
-            <html>
-                <!-- Placeholder/container for the link switcher to appear -->
-                <div class="link-switcher" data-items="link40,link41,link42,link43">Select a view:<!--Links go here-->
-                </div>
-            </html>
-
-            <chart id="link40">
-                <title>MEM, Memory usage (% usage)</title>
+            <input type="link" token="mem_linkinput">
+                <label></label>
+                <choice value="mem_chart1">MEM, Memory used (% usage)</choice>
+                <choice value="mem_chart2">MEM, Memory used (MB usage)</choice>
+                <choice value="mem_chart3">MEM, Swap used (% usage)</choice>
+                <choice value="mem_chart4">MEM, Swap used (usage in MB)</choice>
+                <default>mem_chart1</default>
+                <change>
+                    <condition value="mem_chart1">
+                        <set token="mem_chart1">true</set>
+                        <unset token="mem_chart2"></unset>
+                        <unset token="mem_chart3"></unset>
+                        <unset token="mem_chart4"></unset>
+                    </condition>
+                    <condition value="mem_chart2">
+                        <set token="mem_chart2">true</set>
+                        <unset token="mem_chart1"></unset>
+                        <unset token="mem_chart3"></unset>
+                        <unset token="mem_chart4"></unset>
+                    </condition>
+                    <condition value="mem_chart3">
+                        <set token="mem_chart3">true</set>
+                        <unset token="mem_chart2"></unset>
+                        <unset token="mem_chart1"></unset>
+                        <unset token="mem_chart4"></unset>
+                    </condition>
+                    <condition value="mem_chart4">
+                        <set token="mem_chart4">true</set>
+                        <unset token="mem_chart2"></unset>
+                        <unset token="mem_chart3"></unset>
+                        <unset token="mem_chart1"></unset>
+                    </condition>
+                </change>
+            </input>
+            
+            <chart depends="$mem_chart1$">
+                <title></title>
                 <search base="MEM_real">
-                    <query>fields _time,*_PCT | rename *_PCT AS "* (%)"</query>
+                    <query>fields _time,*_PCT | fields - memfree_PCT | rename *_PCT AS "* (%)" | eval limit=100</query>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -1233,6 +1576,8 @@ max("MEM.swapfree_PCT") AS swapfree_PCT max("MEM.swaptotal") AS swaptotal_MB max
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisTitleY.text">Percentage (%)</option>
                 <option name="charting.axisY.minimumNumber">0</option>
+                <option name="charting.axisY.maximumNumber">101</option>
+                <option name="charting.fieldColors">{"limit": 0xff0000}</option>
                 <drilldown target="search">
                     <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats
 max("MEM.memused") AS memused_MB max("MEM.memused_PCT") AS memused_PCT max("MEM.memfree") AS memfree_MB max("MEM.memfree_PCT") AS memfree_PCT
@@ -1248,10 +1593,10 @@ max("MEM.inactive_PCT") AS inactive_PCT | fields _time,*_PCT</link>
                 </drilldown>
             </chart>
 
-            <chart id="link41">
-                <title>MEM, Memory usage (Volume usage in MB)</title>
+            <chart depends="$mem_chart2$">
+                <title></title>
                 <search base="MEM_real">
-                    <query>fields _time,*_MB | rename *_MB AS "* (MB)"</query>
+                    <query>fields _time,*_MB | fields - memfree_MB | rename *_MB AS "* (MB)"</query>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -1270,6 +1615,7 @@ max("MEM.inactive_PCT") AS inactive_PCT | fields _time,*_PCT</link>
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisTitleY.text">Megabytes (MB)</option>
                 <option name="charting.axisY.minimumNumber">0</option>
+                <option name="charting.fieldColors">{"memtotal (MB)": 0xff0000}</option>
                 <drilldown target="search">
                     <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats
 max("MEM.memused") AS memused_MB max("MEM.memused_PCT") AS memused_PCT max("MEM.memfree") AS memfree_MB max("MEM.memfree_PCT") AS memfree_PCT
@@ -1285,10 +1631,10 @@ max("MEM.inactive_PCT") AS inactive_PCT | fields _time,*_PCT</link>
                 </drilldown>
             </chart>
 
-            <chart id="link42">
-                <title>MEM, Swap usage (% usage)</title>
+            <chart depends="$mem_chart3$">
+                <title></title>
                 <search base="MEM_swap">
-                    <query>fields _time,*_PCT | rename *_PCT AS "* (%)"</query>
+                    <query>fields _time,*_PCT | fields - swapfree_PCT | rename *_PCT AS "* (%)" | eval limit=100</query>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -1307,6 +1653,8 @@ max("MEM.inactive_PCT") AS inactive_PCT | fields _time,*_PCT</link>
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisTitleY.text">Percentage (%)</option>
                 <option name="charting.axisY.minimumNumber">0</option>
+                <option name="charting.axisY.maximumNumber">101</option>
+                <option name="charting.fieldColors">{"limit": 0xff0000}</option>
                 <drilldown target="search">
                     <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats
 max("MEM.swapused") AS swapused_MB max("MEM.swapused_PCT") AS swapused_PCT max("MEM.swapfree") AS swapfree_MB
@@ -1318,10 +1666,10 @@ max("MEM.swapfree_PCT") AS swapfree_PCT max("MEM.swaptotal") AS swaptotal_MB max
                 </drilldown>
             </chart>
 
-            <chart id="link43">
-                <title>MEM, Swap usage (Volume usage in MB)</title>
+            <chart depends="$mem_chart4$">
+                <title></title>
                 <search base="MEM_swap">
-                    <query>fields _time,*_MB | rename *_MB AS "* (MB)"</query>
+                    <query>fields _time,*_MB | fields - swapfree_MB | rename *_MB AS "* (MB)"</query>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -1368,14 +1716,55 @@ max("MEM.swapfree_PCT") AS swapfree_PCT max("MEM.swaptotal") AS swaptotal_MB max
     <row>
         <panel>
 
-            <html>
-                <!-- Placeholder/container for the link switcher to appear -->
-                <div class="link-switcher" data-items="link50,link51,link52,link53,link54">Select a view:<!--Links go here-->
-                </div>
-            </html>
+            <input type="link" token="disk_linkinput">
+                <label></label>
+                <choice value="disk_chart1">DISKBSIZE, Average data transfer size</choice>
+                <choice value="disk_chart2">DISKBUSY, Disk Busy Activity</choice>
+                <choice value="disk_chart3">DISKREAD, Disk Read Data Rate</choice>
+                <choice value="disk_chart4">DISKWRITE, Disk Write Data Rate</choice>
+                <choice value="disk_chart5">DISKXFER, Disk I/O Operations per second (IOPS)</choice>
+                <default>disk_chart1</default>
+                <change>
+                    <condition value="disk_chart1">
+                        <set token="disk_chart1">true</set>
+                        <unset token="disk_chart2"></unset>
+                        <unset token="disk_chart3"></unset>
+                        <unset token="disk_chart4"></unset>
+                        <unset token="disk_chart5"></unset>
+                    </condition>
+                    <condition value="disk_chart2">
+                        <set token="disk_chart2">true</set>
+                        <unset token="disk_chart1"></unset>
+                        <unset token="disk_chart3"></unset>
+                        <unset token="disk_chart4"></unset>
+                        <unset token="disk_chart5"></unset>
+                    </condition>
+                    <condition value="disk_chart3">
+                        <set token="disk_chart3">true</set>
+                        <unset token="disk_chart1"></unset>
+                        <unset token="disk_chart2"></unset>
+                        <unset token="disk_chart4"></unset>
+                        <unset token="disk_chart5"></unset>
+                    </condition>
+                    <condition value="disk_chart4">
+                        <set token="disk_chart4">true</set>
+                        <unset token="disk_chart1"></unset>
+                        <unset token="disk_chart2"></unset>
+                        <unset token="disk_chart3"></unset>
+                        <unset token="disk_chart5"></unset>
+                    </condition>
+                    <condition value="disk_chart5">
+                        <set token="disk_chart5">true</set>
+                        <unset token="disk_chart1"></unset>
+                        <unset token="disk_chart2"></unset>
+                        <unset token="disk_chart3"></unset>
+                        <unset token="disk_chart4"></unset>
+                    </condition>
+                </change>
+            </input>
 
-            <chart id="link50">
-                <title>DISKBSIZE, Average data transfer size</title>
+            <chart depends="$disk_chart1$">
+                <title></title>
                 <search>
                     <query>| tstats max("DISKBSIZE.value") AS DISKBSIZE.value from datamodel=NMON_Data_DISKBSIZE
 where (nodename = DISKBSIZE) (DISKBSIZE.$hostname$) groupby _time, "DISKBSIZE.hostname", "DISKBSIZE.device" prestats=true span=1m
@@ -1415,8 +1804,8 @@ where (nodename = DISKBSIZE) (DISKBSIZE.$hostname$) groupby _time, "DISKBSIZE.ho
                 </drilldown>
             </chart>
 
-            <chart id="link51">
-                <title>DISKBUSY, Disk Busy Activity</title>
+            <chart depends="$disk_chart2$">
+                <title></title>
                 <search>
                     <query>| tstats max("DISKBUSY.value") AS value from datamodel=NMON_Data_DISKBUSY
 where (nodename = DISKBUSY) (DISKBUSY.$hostname$) groupby _time, "DISKBUSY.hostname", "DISKBUSY.device" prestats=true span=1m
@@ -1454,8 +1843,8 @@ where (nodename = DISKBUSY) (DISKBUSY.$hostname$) groupby _time, "DISKBUSY.hostn
                 </drilldown>
             </chart>
 
-            <chart id="link52">
-                <title>DISKREAD, Disk Read Data Rate</title>
+            <chart depends="$disk_chart3$">
+                <title></title>
                 <search id="timechart_read">
                     <query>| tstats max("DISKREADWRITE.value") AS value from datamodel=NMON_Data_DISKREADWRITE
 where (nodename = DISKREADWRITE) (DISKREADWRITE.type=DISKREAD) (DISKREADWRITE.$hostname$)
@@ -1495,8 +1884,8 @@ groupby _time, "DISKREADWRITE.hostname", "DISKREADWRITE.device" prestats=true sp
                 </drilldown>
             </chart>
 
-            <chart id="link53">
-                <title>DISKWRITE, Disk Write Data Rate</title>
+            <chart depends="$disk_chart4$">
+                <title></title>
                 <search id="timechart_write">
                     <query>| tstats max("DISKREADWRITE.value") AS value from datamodel=NMON_Data_DISKREADWRITE
 where (nodename = DISKREADWRITE) (DISKREADWRITE.type=DISKWRITE) (DISKREADWRITE.$hostname$)
@@ -1536,8 +1925,8 @@ groupby _time, "DISKREADWRITE.hostname", "DISKREADWRITE.device" prestats=true sp
                 </drilldown>
             </chart>
 
-            <chart id="link54">
-                <title>DISKXFER, Disk I/O Operations per second (IOPS)</title>
+            <chart depends="$disk_chart5$">
+                <title></title>
                 <search>
                     <query>| tstats max("DISKXFER.value") AS value from datamodel=NMON_Data_DISKXFER
 where (nodename = DISKXFER) (DISKXFER.$hostname$) groupby _time, "DISKXFER.hostname", "DISKXFER.device" prestats=true span=1m
@@ -1581,14 +1970,25 @@ where (nodename = DISKXFER) (DISKXFER.$hostname$) groupby _time, "DISKXFER.hostn
     <row>
         <panel>
 
-            <html>
-                <!-- Placeholder/container for the link switcher to appear -->
-                <div class="link-switcher" data-items="tablebar,link55">Select a view:<!--Links go here-->
-                </div>
-            </html>
+            <input type="link" token="jfs_linkinput">
+                <label></label>
+                <choice value="jfsfile_summary">JFSFILE, % file systems used (summary)</choice>
+                <choice value="jfsfile_overtime">JFSFILE, % file systems used (over time)</choice>
+                <default>jfsfile_summary</default>
+                <change>
+                    <condition value="jfsfile_summary">
+                        <set token="show_jfsfile_summary">true</set>
+                        <unset token="show_jfsfile_overtime"></unset>
+                    </condition>
+                    <condition value="jfsfile_overtime">
+                        <set token="show_jfsfile_overtime">true</set>
+                        <unset token="show_jfsfile_summary"></unset>
+                    </condition>
+                </change>
+            </input>
 
-            <table id="tablebar">
-                <title>JFSFILE, Percentage Usage of file-systems (summary)</title>
+            <table depends="$show_jfsfile_summary$" id="tablebar">
+                <title></title>
                 <search>
                     <query>| tstats max("JFS.value") AS JFS.value from datamodel=NMON_Data_JFS
 where (nodename = JFS.JFSFILE) (JFS.value&gt;=0) (JFS.$hostname$) groupby _time, "JFS.hostname", "JFS.device" prestats=true
@@ -1609,8 +2009,8 @@ where (nodename = JFS.JFSFILE) (JFS.value&gt;=0) (JFS.$hostname$) groupby _time,
                 <option name="count">20</option>
             </table>
 
-            <chart id="link55">
-                <title>JFSFILE, Percentage Usage of file-systems (evolution over time)</title>
+            <chart depends="$show_jfsfile_overtime$">
+                <title></title>
                 <search>
                     <query>| tstats max("JFS.value") AS value from datamodel=NMON_Data_JFS
 where (nodename = JFS.JFSFILE) (JFS.$hostname$) groupby _time, "JFS.device" prestats=true $span$
@@ -1660,14 +2060,25 @@ where (nodename = JFS.JFSFILE) (JFS.$hostname$) groupby _time, "JFS.device" pres
     <row>
         <panel>
 
-            <html>
-                <!-- Placeholder/container for the link switcher to appear -->
-                <div class="link-switcher" data-items="link60,link61">Select a view:<!--Links go here-->
-                </div>
-            </html>
+            <input type="link" token="net_linkinput">
+                <label></label>
+                <choice value="net">NET - Network Interfaces In/Out traffic</choice>
+                <choice value="netpacket">NETPACKET - Number of read/write packets</choice>
+                <default>net</default>
+                <change>
+                    <condition value="net">
+                        <set token="show_net">true</set>
+                        <unset token="show_nepacket"></unset>
+                    </condition>
+                    <condition value="netpacket">
+                        <set token="show_netpacket">true</set>
+                        <unset token="show_net"></unset>
+                    </condition>
+                </change>
+            </input>
 
-            <chart id="link60">
-                <title>NET - Network Interfaces Activity by Host</title>
+            <chart depends="$show_net$">
+                <title></title>
                 <search>
                     <query>| tstats max("NET_Data_types.NET.value_MBps") AS value from datamodel=NMON_Data_NET
 where (nodename = NET_Data_types.NET) (NET_Data_types.$hostname$)
@@ -1703,8 +2114,8 @@ groupby _time, "NET_Data_types.device" prestats=true span=1m
                 </drilldown>
             </chart>
 
-            <chart id="link61">
-                <title>NETPACKET - Number of read/write packets</title>
+            <chart depends="$show_netpacket$">
+                <title></title>
                 <search>
                     <query>| tstats max("NET_Data_types.value") AS value from datamodel=NMON_Data_NET
 where (nodename = NET_Data_types.NETPACKET) (NET_Data_types.$hostname$) groupby _time, "NET_Data_types.device" prestats=true $span$
@@ -1742,13 +2153,32 @@ where (nodename = NET_Data_types.NETPACKET) (NET_Data_types.$hostname$) groupby 
     <row>
         <panel>
 
-            <html>
-                <!-- Placeholder/container for the link switcher to appear -->
-                <div class="link-switcher" data-items="link70,link71,link72">Select a view:<!--Links go here-->
-                </div>
-            </html>
+            <input type="link" token="nfsserver_linkinput">
+                <label></label>
+                <choice value="nfsserverv4">NFS Server V4</choice>
+                <choice value="nfsserverv3">NFS Server V3</choice>
+                <choice value="nfsserverv2">NFS Server V2</choice>
+                <default>nfsserverv4</default>
+                <change>
+                    <condition value="nfsserver4">
+                        <set token="show_nfsserverv4">true</set>
+                        <unset token="show_nfsserverv3"></unset>
+                        <unset token="show_nfsserverv2"></unset>
+                    </condition>
+                    <condition value="nfsserver3">
+                        <set token="show_nfsserverv3">true</set>
+                        <unset token="show_nfsserverv2"></unset>
+                        <unset token="show_nfsserverv2"></unset>
+                    </condition>
+                    <condition value="nfsserver2">
+                        <set token="show_nfsserverv2">true</set>
+                        <unset token="show_nfsserverv3"></unset>
+                        <unset token="show_nfsserverv4"></unset>
+                    </condition>
+                </change>
+            </input>
 
-            <chart id="link70">
+            <chart depends="$nfsserverv4$" rejects="$show_null_nfsserverv4$">
                 <title>NFS Server V4</title>
                 <search>
                     <query>| tstats `NFSSVRV4(max)` from datamodel=NMON_Data_NFS
@@ -1759,6 +2189,15 @@ where (nodename = NFS.NFS_SERVER.NFS_V4) (NFS.$hostname$) groupby _time prestats
 | timechart useother=f limit=0 $span$ max(value) AS value by monitor</query>
                     <earliest>$timerange.earliest$</earliest>
                     <latest>$timerange.latest$</latest>
+                    <!-- Progress event has access to job properties only -->
+                    <progress>
+                        <condition match="'job.resultCount' == 0">
+                            <set token="show_null_nfsserverv4">True</set>
+                        </condition>
+                        <condition>
+                            <unset token="show_null_nfsserverv4"/>
+                        </condition>
+                    </progress>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -1787,7 +2226,7 @@ where (nodename = NFS.NFS_SERVER.NFS_V4) (NFS.$hostname$) groupby _time prestats
                 </drilldown>
             </chart>
 
-            <chart id="link71">
+            <chart depends="$nfsserverv3$" rejects="$show_null_nfsserverv3$">
                 <title>NFS Server V3</title>
                 <search>
                     <query>| tstats `NFSSVRV3(max)` from datamodel=NMON_Data_NFS
@@ -1798,6 +2237,15 @@ where (nodename = NFS.NFS_SERVER.NFS_V3) (NFS.$hostname$) groupby _time prestats
 | timechart useother=f limit=0 $span$ max(value) AS value by monitor</query>
                     <earliest>$timerange.earliest$</earliest>
                     <latest>$timerange.latest$</latest>
+                    <!-- Progress event has access to job properties only -->
+                    <progress>
+                        <condition match="'job.resultCount' == 0">
+                            <set token="show_null_nfsserverv3">True</set>
+                        </condition>
+                        <condition>
+                            <unset token="show_null_nfsserverv3"/>
+                        </condition>
+                    </progress>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -1826,7 +2274,7 @@ where (nodename = NFS.NFS_SERVER.NFS_V3) (NFS.$hostname$) groupby _time prestats
                 </drilldown>
             </chart>
 
-            <chart id="link72">
+            <chart depends="$nfsserverv2$" rejects="$show_null_nfsserverv2$">
                 <title>NFS Server V2</title>
                 <search>
                     <query>| tstats `NFSSVRV2(max)` from datamodel=NMON_Data_NFS
@@ -1837,6 +2285,15 @@ where (nodename = NFS.NFS_SERVER.NFS_V2) (NFS.$hostname$) groupby _time prestats
 | timechart useother=f limit=0 $span$ max(value) AS value by monitor</query>
                     <earliest>$timerange.earliest$</earliest>
                     <latest>$timerange.latest$</latest>
+                    <!-- Progress event has access to job properties only -->
+                    <progress>
+                        <condition match="'job.resultCount' == 0">
+                            <set token="show_null_nfsserverv2">True</set>
+                        </condition>
+                        <condition>
+                            <unset token="show_null_nfsserverv2"/>
+                        </condition>
+                    </progress>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -1865,19 +2322,50 @@ where (nodename = NFS.NFS_SERVER.NFS_V2) (NFS.$hostname$) groupby _time prestats
                 </drilldown>
             </chart>
 
+            <html depends="$show_null_nfsserverv4$">
+                <p style="color:blue;margin-left:30px;font-size:14px">Search returned no results, NFS collection is not activated or the server is not running any V4 NFS server.</p>
+            </html>
+
+            <html depends="$show_null_nfsserverv3$">
+                <p style="color:blue;margin-left:30px;font-size:14px">Search returned no results, NFS collection is not activated or the server is not running any V3 NFS server.</p>
+            </html>
+
+            <html depends="$show_null_nfsserverv2$">
+                <p style="color:blue;margin-left:30px;font-size:14px">Search returned no results, NFS collection is not activated or the server is not running any V2 NFS server.</p>
+            </html>
+
         </panel>
     </row>
 
     <row>
         <panel>
 
-            <html>
-                <!-- Placeholder/container for the link switcher to appear -->
-                <div class="link-switcher" data-items="link75,link76,link77">Select a view:<!--Links go here-->
-                </div>
-            </html>
+            <input type="link" token="nfsclient_linkinput">
+                <label></label>
+                <choice value="nfsclientv4">NFS Server V4</choice>
+                <choice value="nfsclientv3">NFS Server V3</choice>
+                <choice value="nfsclientv2">NFS Server V2</choice>
+                <default>nfsclientv4</default>
+                <change>
+                    <condition value="nfsclient4">
+                        <set token="show_nfsclientv4">true</set>
+                        <unset token="show_nfsclientv3"></unset>
+                        <unset token="show_nfsclientv2"></unset>
+                    </condition>
+                    <condition value="nfsclient3">
+                        <set token="show_nfsclientv3">true</set>
+                        <unset token="show_nfsclientv2"></unset>
+                        <unset token="show_nfsclientv2"></unset>
+                    </condition>
+                    <condition value="nfsclient2">
+                        <set token="show_nfsclientv2">true</set>
+                        <unset token="show_nfsclientv3"></unset>
+                        <unset token="show_nfsclientv4"></unset>
+                    </condition>
+                </change>
+            </input>
 
-            <chart id="link75">
+            <chart depends="$nfsserverv4$" rejects="$show_null_nfsclientv4$">
                 <title>NFS Client V4</title>
                 <search>
                     <query>| tstats `NFSCLIV4(max)` from datamodel=NMON_Data_NFS
@@ -1888,6 +2376,15 @@ where (nodename = NFS.NFS_CLIENT.NFSCLIV4) (NFS.$hostname$) groupby _time presta
 | timechart useother=f limit=0 $span$ max(value) AS value by monitor</query>
                     <earliest>$timerange.earliest$</earliest>
                     <latest>$timerange.latest$</latest>
+                    <!-- Progress event has access to job properties only -->
+                    <progress>
+                        <condition match="'job.resultCount' == 0">
+                            <set token="show_null_nfsclientv4">True</set>
+                        </condition>
+                        <condition>
+                            <unset token="show_null_nfsclientv4"/>
+                        </condition>
+                    </progress>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -1916,7 +2413,7 @@ where (nodename = NFS.NFS_CLIENT.NFSCLIV4) (NFS.$hostname$) groupby _time presta
                 </drilldown>
             </chart>
 
-            <chart id="link76">
+            <chart depends="$nfsserverv3$" rejects="$show_null_nfsclientv3$">
                 <title>NFS Client V3</title>
                 <search>
                     <query>| tstats `NFSCLIV3(max)` from datamodel=NMON_Data_NFS
@@ -1927,6 +2424,15 @@ where (nodename = NFS.NFS_CLIENT.NFSCLIV3) (NFS.$hostname$) groupby _time presta
 | timechart useother=f limit=0 $span$ max(value) AS value by monitor</query>
                     <earliest>$timerange.earliest$</earliest>
                     <latest>$timerange.latest$</latest>
+                    <!-- Progress event has access to job properties only -->
+                    <progress>
+                        <condition match="'job.resultCount' == 0">
+                            <set token="show_null_nfsclientv3">True</set>
+                        </condition>
+                        <condition>
+                            <unset token="show_null_nfsclientv3"/>
+                        </condition>
+                    </progress>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -1955,7 +2461,7 @@ where (nodename = NFS.NFS_CLIENT.NFSCLIV3) (NFS.$hostname$) groupby _time presta
                 </drilldown>
             </chart>
 
-            <chart id="link77">
+            <chart depends="$nfsserverv2$" rejects="$show_null_nfsclientv2$">
                 <title>NFS Client V2</title>
                 <search>
                     <query>| tstats `NFSCLIV2(max)` from datamodel=NMON_Data_NFS
@@ -1966,6 +2472,15 @@ where (nodename = NFS.NFS_CLIENT.NFSCLIV2) (NFS.$hostname$) groupby _time presta
 | timechart useother=f limit=0 $span$ max(value) AS value by monitor</query>
                     <earliest>$timerange.earliest$</earliest>
                     <latest>$timerange.latest$</latest>
+                    <!-- Progress event has access to job properties only -->
+                    <progress>
+                        <condition match="'job.resultCount' == 0">
+                            <set token="show_null_nfsclientv2">True</set>
+                        </condition>
+                        <condition>
+                            <unset token="show_null_nfsclientv2"/>
+                        </condition>
+                    </progress>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
@@ -1993,6 +2508,18 @@ where (nodename = NFS.NFS_CLIENT.NFSCLIV2) (NFS.$hostname$) groupby _time presta
 | timechart useother=f limit=0 span=1m max(value) AS value by monitor</link>
                 </drilldown>
             </chart>
+
+            <html depends="$show_null_nfsclientv4$">
+                <p style="color:blue;margin-left:30px;font-size:14px">Search returned no results, NFS collection is not activated or the server is not running any V4 NFS client.</p>
+            </html>
+
+            <html depends="$show_null_nfsclientv3$">
+                <p style="color:blue;margin-left:30px;font-size:14px">Search returned no results, NFS collection is not activated or the server is not running any V3 NFS client.</p>
+            </html>
+
+            <html depends="$show_null_nfsclientv2$">
+                <p style="color:blue;margin-left:30px;font-size:14px">Search returned no results, NFS collection is not activated or the server is not running any V2 NFS client.</p>
+            </html>
 
         </panel>
     </row>
