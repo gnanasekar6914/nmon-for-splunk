@@ -6,15 +6,33 @@ Release notes
 Requirements
 ^^^^^^^^^^^^
 
-* Splunk 6.2.x and later Only, for prior version download last compatible Nmon App release: V1.4.902
+* Splunk 6.3.x and later Only, for prior to 6.2.x download release: V1.6.15, for 6.1.x and prior download release: V1.4.902
 
 * Universal Forwarder v6.x is required for clients
 
 * Universal Forwarders clients system lacking a Python 2.7.x interpreter requires Perl WITH Time::HiRes module available
 
+* Proceed to upgrade as usual, people running Splunk 6.3.x please read: http://nmonsplunk.wikidot.com/documentation:userguide:upgrade:v1-7-0-for-splunk63x
+
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 What has been fixed by release
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+=====================
+V1.7.0: Major release
+=====================
+
+- Removing of the django deprecated django stack, all views were migrated to simple xml views
+- New global bootstrap navigation scheme for easy and efficient user experience with the integrated navigation
+- New dynamic help messages will inform about each step of required user action for better user experience
+- New major view with the Nmon Wall Of Performance (Nmon WOF)
+- Major improvement of Nmon Summary and Nmon Analyser views (active tokens, bar visualization for file systems and much more)
+- Rewritten Nmon predictive interface for improved predictive experience
+- Embedded Splunk 6.4.x custom viz with fallback to compatibility mode for Splunk 6.3.x
+- Improved Power architectures support (PowerLinux Little / Big endian management, LPAR monitor support for Linux, LPAR parsing model)
+- Binaries upgrade for Linux (16e / 16f), Linux binaries are now stored in tgz archive and will be uncompressed on client if applicant
+- Various bug fixes (Issues #29-#38)
+- TA-nmon and PA-nmon new packages (V1.2.37)
 
 ========
 V1.6.15:
