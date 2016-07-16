@@ -106,6 +106,16 @@
 
     </fieldset>
 
+    <!-- Help the user -->
+
+    <row rejects="$hostname$">
+        <panel>
+            <html>
+                <p style="color:red;text-align:center;font-size:14px"> - - - - - - - - - - ACTION REQUIRED: please select your server name(s) in the host selector above - - - - - - - - - -</p>
+            </html>
+        </panel>
+    </row>
+
     <!-- Information panel -->
 
     <row>
@@ -114,23 +124,111 @@
 
                 <div class="imgheader">
                     <img src="../../static/app/nmon/icons/grey_theme/info.png" alt="Info"/>
-                    <h4>Metrics information: <a href="/app/nmon/Howto_CPU_ALL_spl" target="_blank">(Open the Howto build Nmon statistics for CPU_ALL)</a></h4>
+                    <h4><a data-toggle="modal" data-target="#Help_modal">Help, information and related links for CPU statistics</a></h4>
                 </div>
 
-                <div class="list">
-                    <lu>
-                        <li><b>cpu_PCT:</b> % of CPU usage for all available cores</li>
-                        <li><b>Idle_PCT:</b> % of CPU time free, meaning not having task to do</li>
-                        <li><b>Sys_PCT:</b> % of CPU time spent in kernel mode</li>
-                    </lu>
-                </div>
+                <!-- Modal -->
+                <div class="modal custom-modal-60 fade" id="Help_modal" tabindex="-1" role="dialog" aria-labelledby="Help_modal_Label">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"></span></button>
+                                <div style="text-align: left;">
+                                    <h4 class="modal-title" id="Help_modal_Label">Integrated Navigation:</h4>
+                                </div>
+                            </div>
+                            <div class="modal-body">
 
-                <div class="list">
-                    <lu>
-                        <li><b>User_PCT:</b> % of CPU time spent in user mode</li>
-                        <li><b>Wait_PCT:</b> % of CPU time spent in waiting for resources</li>
-                    </lu>
-                    <br />
+                                <div style="text-align: center;">
+                                    <img src="../../static/app/nmon/icons/grey_theme/cpu.png" alt="CPU"/>
+                                    <h1>CPU global percentage statistics (CPU_ALL)</h1>
+                                </div>
+
+                                <div>
+                                    <br />
+                                    <br />
+                                    <i>The CPU_ALL monitor represents average metrics for all available logical CPUs to the system.</i>
+                                    <br />
+                                    <i>These metrics are common to every supported operating systems.</i>
+
+                                </div>
+
+                                <div style="text-align: left;">
+
+                                    <h1>Main metrics/fields:</h1>
+
+                                    <div class="list">
+                                        <lu>
+                                            <li><b>cpu_PCT:</b> % of CPU usage for all available cores (Sys_PCT+User_PCT+Wait_PCT)</li>
+                                            <li><b>Idle_PCT:</b> % of CPU time free, meaning not having task to do</li>
+                                            <li><b>Sys_PCT:</b> % of CPU time spent in kernel mode</li>
+                                        </lu>
+                                    </div>
+
+                                    <div class="list">
+                                        <lu>
+                                            <li><b>User_PCT:</b> % of CPU time spent in user mode</li>
+                                            <li><b>Wait_PCT:</b> % of CPU time spent in waiting for resources</li>
+                                        </lu>
+                                        <br />
+                                    </div>
+
+                                    <h1>CIM main fields:</h1>
+
+                                    <div class="list">
+                                        <lu>
+                                            <li><b>cpu_load_percent:</b> Alias to cpu_PCT (% of CPU usage for all available cores)</li>
+                                            <li><b>cpu_load_user:</b> Alias to User_PCT (% of CPU tim spent in user mode)</li>
+                                        </lu>
+                                    </div>
+
+                                </div>
+
+                                <div style="text-align:left;">
+                                    <h1>Related links:</h1>
+                                </div>
+
+                                <div style="text-align: center;" class="cat_title">
+
+                                    <a target="_blank" href="search?q=search%20eventtype%3Dnmon:performance:cpu%20type%3DCPU_ALL" class="tryitbtnxl">Explore RAW DATA »
+                                    </a>
+
+                                    <a target="_blank" href="Howto_CPU_ALL_spl" class="tryitbtnxl">HOWTO Interface »
+                                    </a>
+
+                                    <a target="_blank" href="pivot?model=%2FservicesNS%2Fnobody%2Fnmon%2Fdatamodel%2Fmodel%2FNMON_Data_CPU" class="tryitbtnxl">PIVOT Data model »
+                                    </a>
+
+                                    <a target="_blank" href="UI_data_dictionary?&amp;form.itemfilter=CPU%20USAGE%20STATISTICS" class="tryitbtnxl">CPU Data Dictionary »
+                                    </a>
+
+                                </div>
+
+                                <div style="text-align:left;">
+                                    <h1>Related metrics:</h1>
+                                </div>
+
+                                <div style="text-align: center;" class="cat_title">
+
+                                    <a target="_blank" href="search?q=search%20eventtype%3Dnmon%3Aperformance%3Acpu%20(type%3DCPU*%20NOT%20type%3DCPU_ALL)" class="tryitbtnxl">CPUnn RAW DATA »
+                                    </a>
+
+                                    <a target="_blank" href="search?q=search%20eventtype%3Dnmon%3Aperformance%3Aprocess%20type%3DTOP" class="tryitbtnxl">TOP RAW DATA »
+                                    </a>
+
+                                    <a target="_blank" href="search?q=search%20eventtype%3Dnmon%3Aperformance%3Aprocess%20type%3DUARG" class="tryitbtnxl">UARG RAW DATA »
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
 
             </html>
@@ -140,7 +238,7 @@
     <!-- Base Searches for PostProcessing -->
 
     <search id="tablestats">
-        <query>| tstats `CPU_ALL(max)` from datamodel=NMON_Data_CPU where (nodename = CPU.CPU_ALL) (CPU.hostname=$hostname-prefilter$) ($frameID$) ($osfilter$) ($hostname$) `$timefilter$(CPU)` groupby _time, "CPU.hostname" prestats=true
+        <query>| tstats `CPU_ALL(max)` from datamodel=NMON_Data_CPU where (nodename = CPU.CPU_ALL) (CPU.hostname=$hostname-prefilter$) ($frameID$) ($osfilter$) ($hostname$) `$timefilter$(CPU)` groupby _time, "CPU.hostname" prestats=true span=1m
 | stats dedup_splitvals=t `CPU_ALL(max)` by _time, "CPU.hostname"
 | $aggregate$
 | stats `CPU_ALL($statsmode$)`, sparkline($statsmode$(CPU.cpu_PCT)) As sparkline by "CPU.hostname"
@@ -152,10 +250,10 @@
     </search>
 
     <search id="gaugestats">
-        <query>| tstats `CPU_ALL(max)` from datamodel=NMON_Data_CPU where (nodename = CPU.CPU_ALL) (CPU.hostname=$hostname-prefilter$) ($frameID$) ($osfilter$) ($hostname$) `$timefilter$(CPU)` groupby _time, "CPU.hostname" prestats=true
+        <query>| tstats `CPU_ALL(max)` from datamodel=NMON_Data_CPU where (nodename = CPU.CPU_ALL) (CPU.hostname=$hostname-prefilter$) ($frameID$) ($osfilter$) ($hostname$) `$timefilter$(CPU)` groupby _time, "CPU.hostname" prestats=true span=1m
 | stats dedup_splitvals=t max("CPU.cpu_PCT") AS CPU.cpu_PCT by _time, "CPU.hostname"
 | $aggregate$
-| stats max("CPU.cpu_PCT") AS max, avg("CPU.cpu_PCT") AS avg, min("CPU.cpu_PCT") AS min by "CPU.hostname"</query>
+| stats max("CPU.cpu_PCT") AS max, avg("CPU.cpu_PCT") AS avg, median("CPU.cpu_PCT") AS median by "CPU.hostname"</query>
         <earliest>$timerange.earliest$</earliest>
         <latest>$timerange.latest$</latest>
     </search>
@@ -164,73 +262,67 @@
 
     <row>
         <panel>
-            <chart>
-                <title>Higher load</title>
+            <viz type="nmon.radial_meter">
                 <search base="gaugestats">
-                    <query>stats max(max) AS max | eval max=round(max,2) | gauge max</query>
+                    <query>eval max=round(max,2) | gauge max</query>
                 </search>
-                <option name="charting.axisTitleX.visibility">visible</option>
-                <option name="charting.axisTitleY.visibility">visible</option>
-                <option name="charting.axisX.scale">linear</option>
-                <option name="charting.axisY.scale">linear</option>
-                <option name="charting.chart">radialGauge</option>
-                <option name="charting.chart.nullValueMode">gaps</option>
-                <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-                <option name="charting.chart.stackMode">default</option>
-                <option name="charting.chart.style">shiny</option>
-                <option name="charting.drilldown">all</option>
-                <option name="charting.gaugeColors">[0x84E900,0xFFE800,0xBF3030]</option>
-                <option name="charting.layout.splitSeries">0</option>
-                <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-                <option name="charting.legend.placement">right</option>
-                <option name="height">115px</option>
-            </chart>
+                <option name="nmon.radial_meter.backgroundColor">#FFF</option>
+                <option name="nmon.radial_meter.dialColor">#d0d5d9</option>
+                <option name="nmon.radial_meter.valueColor">#555</option>
+                <option name="nmon.radial_meter.minValue">0</option>
+                <option name="nmon.radial_meter.maxValue">100</option>
+                <option name="nmon.radial_meter.useRangemap">true</option>
+                <option name="nmon.radial_meter.thresholdStyle">percentage</option>
+                <option name="nmon.radial_meter.minRangeColor">#3fc77a</option>
+                <option name="nmon.radial_meter.midRangeColor">#fbcd2f</option>
+                <option name="nmon.radial_meter.midRangeThreshold">55</option>
+                <option name="nmon.radial_meter.maxRangeColor">#b44441</option>
+                <option name="nmon.radial_meter.maxRangeThreshold">85</option>
+                <option name="nmon.radial_meter.caption">Max %CPU</option>
+                <option name="height">180px</option>
+            </viz>
         </panel>
         <panel>
-            <chart>
-                <title>Average load</title>
+            <viz type="nmon.radial_meter">
                 <search base="gaugestats">
-                    <query>stats avg(avg) AS avg | eval avg=round(avg,2) | gauge avg</query>
+                    <query>eval avg=round(avg,2) | gauge avg</query>
                 </search>
-                <option name="charting.axisTitleX.visibility">visible</option>
-                <option name="charting.axisTitleY.visibility">visible</option>
-                <option name="charting.axisX.scale">linear</option>
-                <option name="charting.axisY.scale">linear</option>
-                <option name="charting.chart.style">shiny</option>
-                <option name="charting.chart.nullValueMode">gaps</option>
-                <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-                <option name="charting.chart.stackMode">default</option>
-                <option name="charting.chart">radialGauge</option>
-                <option name="charting.drilldown">all</option>
-                <option name="charting.gaugeColors">[0x84E900,0xFFE800,0xBF3030]</option>
-                <option name="charting.layout.splitSeries">0</option>
-                <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-                <option name="charting.legend.placement">right</option>
-                <option name="height">115px</option>
-            </chart>
+                <option name="nmon.radial_meter.backgroundColor">#FFF</option>
+                <option name="nmon.radial_meter.dialColor">#d0d5d9</option>
+                <option name="nmon.radial_meter.valueColor">#555</option>
+                <option name="nmon.radial_meter.minValue">0</option>
+                <option name="nmon.radial_meter.maxValue">100</option>
+                <option name="nmon.radial_meter.useRangemap">true</option>
+                <option name="nmon.radial_meter.thresholdStyle">percentage</option>
+                <option name="nmon.radial_meter.minRangeColor">#3fc77a</option>
+                <option name="nmon.radial_meter.midRangeColor">#fbcd2f</option>
+                <option name="nmon.radial_meter.midRangeThreshold">55</option>
+                <option name="nmon.radial_meter.maxRangeColor">#b44441</option>
+                <option name="nmon.radial_meter.maxRangeThreshold">85</option>
+                <option name="nmon.radial_meter.caption">Avg %CPU</option>
+                <option name="height">180px</option>
+            </viz>
         </panel>
         <panel>
-            <chart>
-                <title>Minimal load</title>
+            <viz type="nmon.radial_meter">
                 <search base="gaugestats">
-                    <query>stats min(min) AS min | eval min=round(min,2) | gauge min</query>
+                    <query>eval median=round(median,2) | gauge median</query>
                 </search>
-                <option name="charting.axisTitleX.visibility">visible</option>
-                <option name="charting.axisTitleY.visibility">visible</option>
-                <option name="charting.axisX.scale">linear</option>
-                <option name="charting.axisY.scale">linear</option>
-                <option name="charting.chart.style">shiny</option>
-                <option name="charting.chart.nullValueMode">gaps</option>
-                <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-                <option name="charting.chart.stackMode">default</option>
-                <option name="charting.chart">radialGauge</option>
-                <option name="charting.drilldown">all</option>
-                <option name="charting.gaugeColors">[0x84E900,0xFFE800,0xBF3030]</option>
-                <option name="charting.layout.splitSeries">0</option>
-                <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-                <option name="charting.legend.placement">right</option>
-                <option name="height">115px</option>
-            </chart>
+                <option name="nmon.radial_meter.backgroundColor">#FFF</option>
+                <option name="nmon.radial_meter.dialColor">#d0d5d9</option>
+                <option name="nmon.radial_meter.valueColor">#555</option>
+                <option name="nmon.radial_meter.minValue">0</option>
+                <option name="nmon.radial_meter.maxValue">100</option>
+                <option name="nmon.radial_meter.useRangemap">true</option>
+                <option name="nmon.radial_meter.thresholdStyle">percentage</option>
+                <option name="nmon.radial_meter.minRangeColor">#3fc77a</option>
+                <option name="nmon.radial_meter.midRangeColor">#fbcd2f</option>
+                <option name="nmon.radial_meter.midRangeThreshold">55</option>
+                <option name="nmon.radial_meter.maxRangeColor">#b44441</option>
+                <option name="nmon.radial_meter.maxRangeThreshold">85</option>
+                <option name="nmon.radial_meter.caption">Median %CPU</option>
+                <option name="height">180px</option>
+            </viz>
         </panel>
     </row>
 
@@ -253,7 +345,7 @@
                 </format>
                 <drilldown target="search">
                     <link>search?earliest=$timerange.earliest$&amp;latest=$timerange.latest$&amp;q=| tstats `CPU_ALL(max)`
-from datamodel=NMON_Data_CPU where (nodename = CPU.CPU_ALL) (CPU.hostname=$click.value$) `$timefilter$(CPU)` groupby _time, "CPU.hostname" prestats=true
+from datamodel=NMON_Data_CPU where (nodename = CPU.CPU_ALL) (CPU.hostname=$click.value$) `$timefilter$(CPU)` groupby _time, "CPU.hostname" prestats=true span=1m
 | stats dedup_splitvals=t `CPU_ALL(max)` by _time, "CPU.hostname"
 | $aggregate$
 | stats `CPU_ALL($statsmode$)`, sparkline($statsmode$(CPU.cpu_PCT)) As sparkline by "CPU.hostname"

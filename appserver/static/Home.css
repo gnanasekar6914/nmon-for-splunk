@@ -8,6 +8,11 @@ color: darkslategrey;
 text-align: center;
 }
 
+/* links color */
+a {
+    color: #60799A;
+}
+
 .mainbutton_container {
     text-align: center;
     margin-top: 25px;
@@ -120,6 +125,12 @@ text-align: center;
 	margin-bottom: 10px;
 }
 
+.bootstrap_title {
+	color: #5379af;
+	margin-bottom: 5px;
+	margin-top: 5px;
+}
+
 span:hover {
     position: relative;
     font-weight: bolder;
@@ -129,7 +140,7 @@ span:hover {
 
 a.tryitbtn, a.tryitbtn:link, a.tryitbtn:visited, a.showbtn, a.showbtn:link, a.showbtn:visited {
 	display: inline-block;
-	color: #57a71c;
+	color: #469496;
 	background-color:#FFFFFF;
 	font-weight: bold;
 	font-size: 12px;
@@ -145,15 +156,75 @@ a.tryitbtn, a.tryitbtn:link, a.tryitbtn:visited, a.showbtn, a.showbtn:link, a.sh
 	margin-top: 0px;
 	margin-bottom: 5px;
 	border: 1px solid #aaaaaa;
-	border: 1px solid #57a71c;
+	border: 1px solid #469496;
 	border-radius: 5px;
 	white-space: nowrap;
+	min-width: 60px;
 }
 
 a.tryitbtn:hover,a.tryitbtn:active,a.tryitbtn:hover,a.tryitbtn:active
 {
-	background-color:#57a71c;color:#ffffff;
+	background-color:#469496;color:#ffffff;
 }
+
+a.tryitbtnxl, a.tryitbtnxl:link, a.tryitbtnxl:visited, a.showbtnxl, a.showbtnxl:link, a.showbtnxl:visited {
+	display: inline-block;
+	color: #469496;
+	background-color:#FFFFFF;
+	font-weight: bold;
+	font-size: 12px;
+	text-align: center;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 3px;
+	padding-bottom: 4px;
+	text-decoration: none;
+	margin-left: 0;
+	/* margin-left: 5px; */
+	margin-right: 10px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	border: 1px solid #aaaaaa;
+	border: 1px solid #469496;
+	border-radius: 5px;
+	white-space: nowrap;
+	min-width: 150px;
+}
+
+a.tryitbtnxl:hover,a.tryitbtnxl:active,a.tryitbtnxl:hover,a.tryitbtnxl:active
+{
+	background-color:#469496;color:#ffffff;
+}
+
+a.tryitbtnxxl, a.tryitbtnxxl:link, a.tryitbtnxxl:visited, a.showbtnxxl, a.showbtnxxl:link, a.showbtnxxl:visited {
+	display: inline-block;
+	color: #469496;
+	background-color:#FFFFFF;
+	font-weight: bold;
+	font-size: 12px;
+	text-align: center;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 3px;
+	padding-bottom: 4px;
+	text-decoration: none;
+	margin-left: 0;
+	/* margin-left: 5px; */
+	margin-right: 10px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	border: 1px solid #aaaaaa;
+	border: 1px solid #469496;
+	border-radius: 5px;
+	white-space: nowrap;
+	min-width: 220px;
+}
+
+a.tryitbtnxxl:hover,a.tryitbtnxxl:active,a.tryitbtnxxl:hover,a.tryitbtnxxl:active
+{
+	background-color:#469496;color:#ffffff;
+}
+
 
 a.tryitbtn-alt, a.tryitbtn-alt:link, a.tryitbtn-alt:visited, a.tryitbtn-alt, a.tryitbtn-alt:link, a.tryitbtn-alt:visited {
 	display: inline-block;
@@ -176,6 +247,7 @@ a.tryitbtn-alt, a.tryitbtn-alt:link, a.tryitbtn-alt:visited, a.tryitbtn-alt, a.t
 	border: 1px solid #C171B1;
 	border-radius: 5px;
 	white-space: nowrap;
+	min-width: 60px;
 }
 
 a.tryitbtn-alt:hover,a.tryitbtn-alt:active,a.tryitbtn-alt:hover,a.tryitbtn-alt:active
@@ -207,11 +279,15 @@ a.rt:hover img {
 /* Fix single label trouble with Splunk 6.3.0 */
 
 .before-label {
-  font-size: 16px !important;
+  font-size: medium !important;
 }
 
 .after-label {
-  font-size: 16px !important;
+  font-size: medium !important;
+}
+
+.single-result-unit {
+  font-size: medium !important;
 }
 
 /* Prevents modal window from generating troubles within Splunk interfaces */

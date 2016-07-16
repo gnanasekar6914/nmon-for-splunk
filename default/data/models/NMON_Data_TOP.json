@@ -610,6 +610,30 @@
                     "comment": ""
                 },
                 {
+                    "fieldName": "IOwaitTime",
+                    "owner": "TOP_Linux",
+                    "type": "number",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "IOwaitTime",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "Threads",
+                    "owner": "TOP_Linux",
+                    "type": "number",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "Threads",
+                    "comment": ""
+                },
+                {
                     "fieldName": "_time",
                     "owner": "BaseEvent",
                     "type": "timestamp",
@@ -1234,7 +1258,7 @@
         },
         {
             "objectName": "TOP_ALLOS",
-            "displayName": "TOP for All OS (CPU only)",
+            "displayName": "TOP for All OS (CPU / Memory only)",
             "parentName": "BaseEvent",
             "fields": [
                 {
@@ -1458,6 +1482,28 @@
                     "comment": "",
                     "calculationType": "Eval",
                     "expression": "strftime(_time, \"%H%M\")"
+                },
+                {
+                    "outputFields": [
+                        {
+                            "fieldName": "mem_used_MB",
+                            "owner": "TOP_ALLOS",
+                            "type": "number",
+                            "fieldSearch": "",
+                            "required": false,
+                            "multivalue": false,
+                            "hidden": false,
+                            "editable": true,
+                            "displayName": "mem_used_MB",
+                            "comment": ""
+                        }
+                    ],
+                    "calculationID": "lfze0rdybc6hqe2sqau9mgqfr",
+                    "owner": "TOP_ALLOS",
+                    "editable": true,
+                    "comment": "",
+                    "calculationType": "Eval",
+                    "expression": "(mem_used/1024)"
                 }
             ],
             "constraints": [

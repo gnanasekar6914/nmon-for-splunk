@@ -72,11 +72,24 @@
 #                                         - Manage UARG for Solaris introduced with Sarmon v1.11
 # Guilhem Marchand 12/14/2015, V1.2.14:
 #                                         - Added support for POOL monitor (AIX only)
-# Guilhem Marchand 01/16/2015, V1.2.15:
+# Guilhem Marchand 01/16/2016, V1.2.15:
 #                                         - OStype is now generated at parsing level for immediate
 #                                           availability in Splunk
+# - 04/21/2016, V1.2.16: Guilhem Marchand:
+#                                         - PowerLinux update: manage the LPAR section
+# - 04/28/2016, V1.2.17: Guilhem Marchand:
+#                                         - Add new option to enforce host name value recovered from system host name
+#                                           instead of nmon value
+# (https://answers.splunk.com/answers/395601/nmon-performance-monitor-for-unix-and-linux-system-4.html)
+# - 05/24/2016, V1.2.18: Guilhem Marchand:
+#                                         - Git Issue #35 nmon2csv.pl parser issue - per section status file does
+#                                           not get updated
+# - 05/31/2016, V1.2.19: Guilhem Marchand:
+#                                         - Manage AIX WLM data
+# - 06/06/2016, V1.2.20: Guilhem Marchand:
+#                                         - error for Solaris WLM* extraction (unexported variable)
 
-$version = "1.2.15";
+$version = "1.2.20";
 
 use Time::Local;
 use Time::HiRes;
@@ -93,10 +106,11 @@ use File::Copy;
 my $OPMODE = "";
 
 $result = GetOptions(
-    "mode=s"  => \$OPMODE,     # string
-    "version" => \$VERSION,    # flag
-    "help"    => \$help,       # flag
-    "debug"   => \$DEBUG,      # flag
+    "mode=s"   => \$OPMODE,      # string
+    "version"  => \$VERSION,     # flag
+    "use_fqdn" => \$USE_FQDN,    # flag
+    "help"     => \$help,        # flag
+    "debug"    => \$DEBUG,       # flag
 );
 
 # Show version
@@ -122,6 +136,8 @@ Please visit: http://nmonsplunk.wikidot.com/documentation:userguide:troubleshoot
 Available options are:
 	
 --mode <realtime | colddata> :Force the script to consider the data as cold data (nmon process has over) or real time data (nmon is running)
+--use_fqdn :Use the host fully qualified domain name (fqdn) as the hostname value instead of the value returned by nmon.
+**CAUTION:** This option must not be used when managing nmon data generated out of Splunk (eg. central repositories)
 --debug :Activate debugging mode for testing purposes
 --version :Show current program version \n
 "
@@ -147,8 +163,8 @@ Available options are:
 # Some specific sections per OS
 @Solaris_static_section = ("PROCSOL");
 
-# Some specific sections per OS
-@AIX_static_section = ("LPAR", "POOLS");
+# Some specfic sections for micro partitions (AIX or Power Linux)
+@LPAR_static_section = ( "LPAR", "POOLS" );
 
 # This is the TOP section which contains Performance data of top processes
 # It has a specific structure and requires specific treatment
@@ -189,6 +205,9 @@ Available options are:
 
 # AIX only dynamic sections
 @AIX_dynamic_various = ( "SEA", "SEAPACKET", "SEACHPHY" );
+
+# AIX Workload Management
+@AIX_WLM = ( "WLMCPU", "WLMMEM", "WLMBIO" );
 
 #################################################
 ## 	Your Customizations Go Here
@@ -363,9 +382,18 @@ my $OStype = "Unknown";
 while ( defined( my $l = <FILE> ) ) {
     chomp $l;
 
-    # Set HOSTNAME
-    if ( ( rindex $l, "AAA,host," ) > -1 ) {
-        ( my $t1, my $t2, $HOSTNAME ) = split( ",", $l );
+# Set HOSTNAME
+# if the option --use_fqdn has been set, use the fully qualified domain name by the running OS
+# The value will be equivalent to the stdout of the os "hostname -f" command
+# CAUTION: This option must not be used to manage nmon data out of Splunk ! (eg. central repositories)
+
+    if ($USE_FQDN) {
+        chomp( $HOSTNAME = `hostname -f` );
+    }
+    else {
+        if ( ( rindex $l, "AAA,host," ) > -1 ) {
+            ( my $t1, my $t2, $HOSTNAME ) = split( ",", $l );
+        }
     }
 
     # Set VERSION
@@ -1037,10 +1065,10 @@ foreach $FILENAME (@nmon_files) {
 
     }    # end foreach
 
-    # AIX Specific
-    if ( $OStype eq "AIX" || $OStype eq "Unknown" ) {
+    # These sections are specific for Micro Partitions, can be AIX or PowerLinux
+    if ( $OStype eq "AIX" || $OStype eq "Linux" || $OStype eq "Unknown" ) {
 
-        foreach $key (@AIX_static_section) {
+        foreach $key (@LPAR_static_section) {
             $BASEFILENAME =
 "$OUTPUT_DIR/${HOSTNAME}_${nmon_day}_${nmon_month}_${nmon_year}_${nmon_hour}${nmon_minute}${nmon_second}_${key}_${bytes}_${csv_timestamp}.nmon.csv";
             $keyref = "$HOSTNAME_VAR/" . "${HOSTNAME}.${key}_lastepoch.txt";
@@ -1204,8 +1232,8 @@ foreach $FILENAME (@nmon_files) {
                     $x =~ s/\%/pct_/g;
 
                     # $x =~ s/\W*//g;
-                    $x =~ s/\/s/ps/g;      # /s  - ps
-                    $x =~ s/\//s/g;        # / - s
+                    $x =~ s/\/s/ps/g;    # /s  - ps
+                    $x =~ s/\//s/g;      # / - s
                     $x =~ s/\(/_/g;
                     $x =~ s/\)/_/g;
                     $x =~ s/ /_/g;
@@ -1323,17 +1351,15 @@ foreach $FILENAME (@nmon_files) {
                     if ( $realtime eq "True" ) {
 
                         if ($DEBUG) {
-                            print "Last epochtime is $ZZZZ_epochtime \n";
+                            print
+"Per section write, Last epochtime is $ZZZZ_epochtime \n";
                         }
 
                         # Open keyref for writing in create mode
                         open( f, ">$keyref" );
 
-                        if ($DEBUG) {
-
-                            # save configuration extraction
-                            print f "last_epoch: $ZZZZ_epochtime \n";
-                        }
+                        # save configuration extraction
+                        print f "last_epoch: $ZZZZ_epochtime \n";
 
                     }
 
@@ -1364,7 +1390,11 @@ foreach $FILENAME (@nmon_files) {
     # UARG Section (specific)
     # Applicable for OStype AIX, Linux, Solaris or Unknown
 
-    if ( $OStype eq "AIX" || $OStype eq "Linux" || $OStype eq "Solaris" || $OStype eq "Unknown" ) {
+    if (   $OStype eq "AIX"
+        || $OStype eq "Linux"
+        || $OStype eq "Solaris"
+        || $OStype eq "Unknown" )
+    {
 
         my $sanity_check = 0;
 
@@ -1496,8 +1526,8 @@ foreach $FILENAME (@nmon_files) {
                         $x =~ s/\%/pct_/g;
 
                         # $x =~ s/\W*//g;
-                        $x =~ s/\/s/ps/g;      # /s  - ps
-                        $x =~ s/\//s/g;        # / - s
+                        $x =~ s/\/s/ps/g;    # /s  - ps
+                        $x =~ s/\//s/g;      # / - s
                         $x =~ s/\(/_/g;
                         $x =~ s/\)/_/g;
                         $x =~ s/ /_/g;
@@ -1730,17 +1760,15 @@ m/^UARG\,T\d+\,([0-9]*)\,([a-zA-Z\-\/\_\:\.0-9]*)\,(.+)/
                         if ( $realtime eq "True" ) {
 
                             if ($DEBUG) {
-                                print "Last epochtime is $ZZZZ_epochtime \n";
+                                print
+"Per section write, Last epochtime is $ZZZZ_epochtime \n";
                             }
 
                             # Open keyref for writing in create mode
                             open( f, ">$keyref" );
 
-                            if ($DEBUG) {
-
-                                # save configuration extraction
-                                print f "last_epoch: $ZZZZ_epochtime \n";
-                            }
+                            # save configuration extraction
+                            print f "last_epoch: $ZZZZ_epochtime \n";
 
                         }
 
@@ -1830,6 +1858,17 @@ m/^UARG\,T\d+\,([0-9]*)\,([a-zA-Z\-\/\_\:\.0-9]*)\,(.+)/
     if ( $OStype eq "AIX" || $OStype eq "Unknown" ) {
 
         foreach $key (@AIX_dynamic_various) {
+            $BASEFILENAME =
+"$OUTPUT_DIR/${HOSTNAME}_${nmon_day}_${nmon_month}_${nmon_year}_${nmon_hour}${nmon_minute}${nmon_second}_${key}_${bytes}_${csv_timestamp}.nmon.csv";
+            $keyref = "$HOSTNAME_VAR/" . "${HOSTNAME}.${key}_lastepoch.txt";
+
+            &variable_sections_insert($key);
+            $now = time();
+            $now = $now - $start;
+
+        }
+
+        foreach $key (@AIX_WLM) {
             $BASEFILENAME =
 "$OUTPUT_DIR/${HOSTNAME}_${nmon_day}_${nmon_month}_${nmon_year}_${nmon_hour}${nmon_minute}${nmon_second}_${key}_${bytes}_${csv_timestamp}.nmon.csv";
             $keyref = "$HOSTNAME_VAR/" . "${HOSTNAME}.${key}_lastepoch.txt";
@@ -1954,10 +1993,18 @@ sub config_extract {
     $BBB_count = 0;
 
     # Get nmon/server settings (search string, return column, delimiter)
-    $AIXVER   = &get_setting( "AIX",      2, "," );
-    $HOSTNAME = &get_setting( "host",     2, "," );
-    $DATE     = &get_setting( "AAA,date", 2, "," );
-    $TIME     = &get_setting( "AAA,time", 2, "," );
+    $AIXVER = &get_setting( "AIX", 2, "," );
+
+    # Allow hostname from OS
+    if ($USE_FQDN) {
+        chomp( $HOSTNAME = `hostname -f` );
+    }
+    else {
+        $HOSTNAME = &get_setting( "host", 2, "," );
+    }
+
+    $DATE = &get_setting( "AAA,date", 2, "," );
+    $TIME = &get_setting( "AAA,time", 2, "," );
 
     if ( $AIXVER eq "-1" ) {
         $SN = $HOSTNAME;    # Probably a Linux host
@@ -2183,7 +2230,7 @@ sub static_sections_insert {
     $x =~ s/_$//;
 
     # Count the number fields in header
-    my @c = $x =~ /,/g;
+    my @c                 = $x =~ /,/g;
     my $fieldsheadercount = @c;
 
     print INSERT (
@@ -2218,7 +2265,7 @@ qq|type,serialnum,hostname,OStype,logical_cpus,virtual_cpus,ZZZZ,interval,snapsh
         $x = join( ",", @cols[ 2 .. $n ] );
         $x =~ s/,,/,-1,/g;    # replace missing data ",," with a ",-1,"
 
-        my @c = $x =~ /,/g;
+        my @c              = $x =~ /,/g;
         my $fieldsrawcount = @c;
 
         # section dynamic name
@@ -2320,17 +2367,15 @@ qq|$comma"$datatype","$SN","$HOSTNAME","$OStype","$logical_cpus","$virtual_cpus"
             if ( $realtime eq "True" ) {
 
                 if ($DEBUG) {
-                    print "Last epochtime is $ZZZZ_epochtime \n";
+                    print
+                      "Per section write, Last epochtime is $ZZZZ_epochtime \n";
                 }
 
                 # Open keyref for writing in create mode
                 open( f, ">$keyref" );
 
-                if ($DEBUG) {
-
-                    # save configuration extraction
-                    print f "last_epoch: $ZZZZ_epochtime \n";
-                }
+                # save configuration extraction
+                print f "last_epoch: $ZZZZ_epochtime \n";
 
             }
 
@@ -2459,11 +2504,13 @@ sub variable_sections_insert {
     @devices = split( /,/, $rawdata[0] );
 
     print INSERT (
-        qq|type,serialnum,hostname,OStype,interval,snapshots,ZZZZ,device,value|);
+        qq|type,serialnum,hostname,OStype,interval,snapshots,ZZZZ,device,value|
+    );
 
     # Count the number fields in header
-    my $header = "type,serialnum,hostname,OStype,interval,snapshots,ZZZZ,device,value";
-    my @c = $header =~ /,/g;
+    my $header =
+      "type,serialnum,hostname,OStype,interval,snapshots,ZZZZ,device,value";
+    my @c                 = $header =~ /,/g;
     my $fieldsheadercount = @c;
 
     #print "\n COUNT IS $fieldsheadercount \n";
@@ -2531,7 +2578,7 @@ qq|\n$key,$SN,$HOSTNAME,$OStype,$INTERVAL,$SNAPSHOTS,$DATETIME{$cols[1]},$device
             }
 
             # Count the number fields in data
-            my @c = $finaldata =~ /,/g;
+            my @c              = $finaldata =~ /,/g;
             my $fieldsrawcount = @c;
 
             #print "\n COUNT IS $fieldsrawcount \n";
@@ -2612,17 +2659,15 @@ qq|\n$key,$SN,$HOSTNAME,$OStype,$INTERVAL,$SNAPSHOTS,$DATETIME{$cols[1]},$device
             if ( $realtime eq "True" ) {
 
                 if ($DEBUG) {
-                    print "Last epochtime is $ZZZZ_epochtime \n";
+                    print
+                      "Per sectoon write, Last epochtime is $ZZZZ_epochtime \n";
                 }
 
                 # Open keyref for writing in create mode
                 open( f, ">$keyref" );
 
-                if ($DEBUG) {
-
-                    # save configuration extraction
-                    print f "last_epoch: $ZZZZ_epochtime \n";
-                }
+                # save configuration extraction
+                print f "last_epoch: $ZZZZ_epochtime \n";
 
             }
 
@@ -2655,9 +2700,6 @@ sub solaris_wlm_section_fn {
     my $sanity_check                  = 0;
     my $sanity_check_timestampfailure = 0;
     $count = 0;
-
-    # Store last epochtime if in real time mode
-    $keyref = "$HOSTNAME_VAR/" . "${HOSTNAME}.${key}_lastepoch.txt";
 
     if ( $realtime eq "True" ) {
 
@@ -2759,7 +2801,7 @@ qq|type,serialnum,hostname,OStype,logical_cpus,interval,snapshots,ZZZZ,device,va
     # Count the number fields in header
     my $header =
 "type,serialnum,hostname,OStype,logical_cpus,interval,snapshots,ZZZZ,device,value";
-    my @c = $header =~ /,/g;
+    my @c                 = $header =~ /,/g;
     my $fieldsheadercount = @c;
 
     #print "\n COUNT IS $fieldsheadercount \n";
@@ -2827,7 +2869,7 @@ qq|\n$key,$SN,$HOSTNAME,$OStype,$logical_cpus,$INTERVAL,$SNAPSHOTS,$DATETIME{$co
             }
 
             # Count the number fields in data
-            my @c = $finaldata =~ /,/g;
+            my @c              = $finaldata =~ /,/g;
             my $fieldsrawcount = @c;
 
             #print "\n COUNT IS $fieldsrawcount \n";
@@ -2908,17 +2950,15 @@ qq|\n$key,$SN,$HOSTNAME,$OStype,$logical_cpus,$INTERVAL,$SNAPSHOTS,$DATETIME{$co
             if ( $realtime eq "True" ) {
 
                 if ($DEBUG) {
-                    print "Last epochtime is $ZZZZ_epochtime \n";
+                    print
+                      "Per section write, Last epochtime is $ZZZZ_epochtime \n";
                 }
 
                 # Open keyref for writing in create mode
                 open( f, ">$keyref" );
 
-                if ($DEBUG) {
-
-                    # save configuration extraction
-                    print f "last_epoch: $ZZZZ_epochtime \n";
-                }
+                # save configuration extraction
+                print f "last_epoch: $ZZZZ_epochtime \n";
 
             }
 
@@ -2974,8 +3014,8 @@ sub clean_up_line {
     $x =~ s/\%/Pct/g;
 
     # $x =~ s/\W*//g;
-    $x =~ s/\/s/ps/g;      # /s  - ps
-    $x =~ s/\//s/g;        # / - s
+    $x =~ s/\/s/ps/g;    # /s  - ps
+    $x =~ s/\//s/g;      # / - s
     $x =~ s/\(/_/g;
     $x =~ s/\)/_/g;
     $x =~ s/ /_/g;
@@ -3025,9 +3065,17 @@ sub get_nmon_data {
     }
 
     # Get nmon/server settings (search string, return column, delimiter)
-    $AIXVER   = &get_setting( "AIX",      2, "," );
-    $DATE     = &get_setting( "date",     2, "," );
-    $HOSTNAME = &get_setting( "host",     2, "," );
+    $AIXVER = &get_setting( "AIX",  2, "," );
+    $DATE   = &get_setting( "date", 2, "," );
+
+    # Allow hostname os
+    if ($USE_FQDN) {
+        chomp( $HOSTNAME = `hostname -f` );
+    }
+    else {
+        $HOSTNAME = &get_setting( "host", 2, "," );
+    }
+
     $INTERVAL = &get_setting( "interval", 2, "," );    # nmon sampling interval
 
     $MEMORY  = &get_setting( qq|lsconf,"Good Memory Size:|, 1, ":" );

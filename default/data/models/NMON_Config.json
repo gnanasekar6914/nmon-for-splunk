@@ -673,6 +673,75 @@
                 {
                     "outputFields": [
                         {
+                            "fieldName": "AIX_partition_type",
+                            "owner": "Nmon_Config",
+                            "type": "string",
+                            "fieldSearch": "",
+                            "required": false,
+                            "multivalue": false,
+                            "hidden": false,
+                            "editable": true,
+                            "displayName": "AIX_partition_type",
+                            "comment": ""
+                        }
+                    ],
+                    "inputField": "_raw",
+                    "calculationID": "1qhgmbmjtdxqfmelwyugg2pgb9",
+                    "owner": "Nmon_Config",
+                    "editable": true,
+                    "comment": "",
+                    "calculationType": "Rex",
+                    "expression": "BBB.+,[0-9].+,lparstat -i,\\\"Type\\s{0,}:(?P<AIX_partition_type>.+\\w)\\\""
+                },
+                {
+                    "outputFields": [
+                        {
+                            "fieldName": "AIX_partition_mode",
+                            "owner": "Nmon_Config",
+                            "type": "string",
+                            "fieldSearch": "",
+                            "required": false,
+                            "multivalue": false,
+                            "hidden": false,
+                            "editable": true,
+                            "displayName": "AIX_partition_mode",
+                            "comment": ""
+                        }
+                    ],
+                    "inputField": "_raw",
+                    "calculationID": "xhsg9w2sdsnvayk24vkdfgvi",
+                    "owner": "Nmon_Config",
+                    "editable": true,
+                    "comment": "",
+                    "calculationType": "Rex",
+                    "expression": "BBB.+,[0-9].+,lparstat -i,\\\"Mode\\s{0,}:(?P<AIX_partition_mode>.+\\w)\\\""
+                },
+                {
+                    "outputFields": [
+                        {
+                            "fieldName": "AIX_max_physical_CPUs_in_system",
+                            "owner": "Nmon_Config",
+                            "type": "string",
+                            "fieldSearch": "",
+                            "required": false,
+                            "multivalue": false,
+                            "hidden": false,
+                            "editable": true,
+                            "displayName": "AIX_max_physical_CPUs_in_system",
+                            "comment": ""
+                        }
+                    ],
+                    "inputField": "_raw",
+                    "calculationID": "z58sccdma0j60k3t8m7fu5wmi",
+                    "owner": "Nmon_Config",
+                    "editable": true,
+                    "comment": "",
+                    "calculationType": "Rex",
+                    "expression": "BBB.+,[0-9].+,lparstat -i,\\\"Maximum\\sPhysical\\sCPUs\\sin\\ssystem\\s{0,}:\\s{0,}(?P<AIX_max_physical_CPUs_in_system>.+\\w)\\\""
+                },
+                {
+                    "outputFields": [
+                        {
                             "fieldName": "cpu_cores_combo",
                             "owner": "Nmon_Config",
                             "type": "string",
@@ -740,7 +809,7 @@
                 {
                     "outputFields": [
                         {
-                            "fieldName": "Linux_processor",
+                            "fieldName": "Linux_arch",
                             "owner": "Nmon_Config",
                             "type": "string",
                             "fieldSearch": "",
@@ -748,7 +817,30 @@
                             "multivalue": false,
                             "hidden": false,
                             "editable": true,
-                            "displayName": "Linux_processor",
+                            "displayName": "Linux_arch",
+                            "comment": ""
+                        }
+                    ],
+                    "inputField": "_raw",
+                    "calculationID": "mr5mx7xy1tkik85z07ha4te29",
+                    "owner": "Nmon_Config",
+                    "editable": true,
+                    "comment": "",
+                    "calculationType": "Rex",
+                    "expression": "BBB.+,[0-9].+lscpu,.+(Architecture)\\s*:\\s+(?P<Linux_arch>.+)\\\""
+                },
+                {
+                    "outputFields": [
+                        {
+                            "fieldName": "Linux_processor_lscpu",
+                            "owner": "Nmon_Config",
+                            "type": "string",
+                            "fieldSearch": "",
+                            "required": false,
+                            "multivalue": false,
+                            "hidden": false,
+                            "editable": true,
+                            "displayName": "Linux_processor_lscpu",
                             "comment": ""
                         }
                     ],
@@ -758,7 +850,30 @@
                     "editable": true,
                     "comment": "",
                     "calculationType": "Rex",
-                    "expression": "BBB.+,[0-9].+cpuinfo,.+model\\sname.+:\\s+(?P<Linux_processor>.+)\\\""
+                    "expression": "BBB.+,[0-9].+lscpu,.+(Model\\sname|Model|Vendor\\sID)\\s*:\\s+(?P<Linux_processor_lscpu>.+)\\\""
+                },
+                {
+                    "outputFields": [
+                        {
+                            "fieldName": "Linux_processor_cpuinfo",
+                            "owner": "Nmon_Config",
+                            "type": "string",
+                            "fieldSearch": "",
+                            "required": false,
+                            "multivalue": false,
+                            "hidden": false,
+                            "editable": true,
+                            "displayName": "Linux_processor_cpuinfo",
+                            "comment": ""
+                        }
+                    ],
+                    "inputField": "_raw",
+                    "calculationID": "f4nl8hxy8679swfn8doyldi",
+                    "owner": "Nmon_Config",
+                    "editable": true,
+                    "comment": "",
+                    "calculationType": "Rex",
+                    "expression": "BBB.+,[0-9].+cpuinfo,.+(model\\sname)\\s*:\\s+(?P<Linux_processor_cpuinfo>.+)\\\""
                 },
                 {
                     "outputFields": [
@@ -1104,6 +1219,29 @@
                 {
                     "outputFields": [
                         {
+                            "fieldName": "Solaris_physical_memory_MB",
+                            "owner": "Nmon_Config",
+                            "type": "string",
+                            "fieldSearch": "",
+                            "required": false,
+                            "multivalue": false,
+                            "hidden": false,
+                            "editable": true,
+                            "displayName": "Solaris_physical_memory_MB",
+                            "comment": ""
+                        }
+                    ],
+                    "inputField": "_raw",
+                    "calculationID": "qtinojxt2tdxilf0a3qrozuxr",
+                    "owner": "Nmon_Config",
+                    "editable": true,
+                    "comment": "",
+                    "calculationType": "Rex",
+                    "expression": "BBB.,.*,prtdiag,\\\"Memory\\s*size:\\s*(?<Solaris_physical_memory_MB>\\d*)\\s*Megabytes\\\""
+                },
+                {
+                    "outputFields": [
+                        {
                             "fieldName": "Solaris_kernel",
                             "owner": "Nmon_Config",
                             "type": "string",
@@ -1302,7 +1440,7 @@
                     "editable": true,
                     "comment": "",
                     "calculationType": "Eval",
-                    "expression": "case(isnotnull(AIX_processor), AIX_processor, isnotnull(Solaris_processor), Solaris_processor, isnotnull(Linux_processor), Linux_processor)"
+                    "expression": "case(isnotnull(AIX_processor), AIX_processor, isnotnull(Solaris_processor), Solaris_processor, isnotnull(Linux_processor_lscpu), Linux_processor_lscpu + \" (arch: \" + Linux_arch + \")\" , isnull(Linux_processor_lscpu), Linux_processor_cpuinfo)"
                 },
                 {
                     "outputFields": [

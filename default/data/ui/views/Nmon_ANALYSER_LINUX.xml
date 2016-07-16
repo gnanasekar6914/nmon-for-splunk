@@ -80,6 +80,12 @@ groupby "CPU.hostname" prestats=true
                 <fieldForValue>hostname</fieldForValue>
                 <prefix>hostname="</prefix>
                 <suffix>"</suffix>
+                <!--
+                Reset the form token changed
+                -->
+                <change>
+                    <unset token="form.is_LPAR_input"></unset>
+                </change>
             </input>
 
             <input type="dropdown" token="span" searchWhenChanged="true">
@@ -107,6 +113,15 @@ groupby "CPU.hostname" prestats=true
         </panel>
     </row>
 
+    <!-- Help the user -->
+
+    <row rejects="$hostname$">
+        <panel>
+            <html>
+                <p style="color:red;text-align:center;font-size:14px"> - - - - - - - - - - ACTION REQUIRED: please select your server name(s) in the host selector above - - - - - - - - - -</p>
+            </html>
+        </panel>
+    </row>
 
     <!-- Configuration Search uses the nmon_inventory data over the report -->
 
@@ -164,7 +179,7 @@ groupby "CPU.hostname" prestats=true
                 <search>
                     <query>| tstats
 max("CPU.lpar_vp_usage") AS vp_usage max("CPU.cpu_PCT") AS pct_usage
-from datamodel=NMON_Data_CPU where (nodename = CPU) (CPU.$hostname$) groupby _time, "CPU.hostname" prestats=true span=1m
+from datamodel=NMON_Data_CPU where (nodename = CPU) (CPU.type="CPU_ALL" OR CPU.type="LPAR") (CPU.$hostname$) groupby _time, "CPU.hostname" prestats=true span=1m
 | bucket _time span=1m
 | stats dedup_splitvals=t
 max("CPU.lpar_vp_usage") AS vp_usage max("CPU.cpu_PCT") AS pct_usage by _time, "CPU.hostname"
@@ -193,7 +208,7 @@ max("CPU.lpar_vp_usage") AS vp_usage max("CPU.cpu_PCT") AS pct_usage by _time, "
                 <drilldown target="search">
                     <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats
 max("CPU.lpar_vp_usage") AS vp_usage max("CPU.cpu_PCT") AS pct_usage
-from datamodel=NMON_Data_CPU where (nodename = CPU) (CPU.$hostname$) groupby _time, "CPU.hostname" prestats=true span=1m
+from datamodel=NMON_Data_CPU where (nodename = CPU) (CPU.type="CPU_ALL" OR CPU.type="LPAR") (CPU.$hostname$) groupby _time, "CPU.hostname" prestats=true span=1m
 | bucket _time span=1m
 | stats dedup_splitvals=t
 max("CPU.lpar_vp_usage") AS vp_usage max("CPU.cpu_PCT") AS pct_usage by _time, "CPU.hostname"
@@ -421,6 +436,138 @@ avg("CPU.Wait_PCT") AS "Wait_PCT" by "CPU.CPUnn.logical_core"</link>
     </row>
 
 
+    <!-- LPAR management: Only show the LPAR is a partition -->
+
+    <row depends="$is_LPAR_input_hidden$">
+        <panel>
+            <input type="dropdown" token="is_LPAR_input" searchWhenChanged="true">
+                <label>Is LPAR:</label>
+                <search>
+                    <query>| tstats sum("CPU.is_CPU_ALL") AS CPU_ALL sum("CPU.is_LPAR_Linux") AS LPAR from datamodel=NMON_Data_CPU where (nodename = CPU) (CPU.$hostname$) groupby "CPU.hostname" prestats=true | stats dedup_splitvals=t sum("CPU.is_CPU_ALL") AS CPU_ALL sum("CPU.is_LPAR_Linux") AS LPAR by "CPU.hostname" | sort limit=0 "CPU.hostname" | fields - _span | rename "CPU.hostname" AS hostname | fields hostname, CPU_ALL, LPAR
+| eval is_LPAR=if(LPAR>0, "True", "False") | fields is_LPAR</query>
+                    <earliest>$timerange.earliest$</earliest>
+                    <latest>$timerange.latest$</latest>
+                </search>
+                <selectFirstChoice>true</selectFirstChoice>
+                <fieldForLabel>is_LPAR</fieldForLabel>
+                <fieldForValue>is_LPAR</fieldForValue>
+                <change>
+                    <condition value="True">
+                        <set token="is_LPAR">_time,*</set>
+                    </condition>
+                    <condition value="False">
+                        <unset token="is_LPAR"></unset>
+                    </condition>
+                </change>
+            </input>
+        </panel>
+    </row>
+
+    <row depends="$is_LPAR$">
+        <panel>
+
+            <input type="link" token="lpar_linkinput">
+                <label></label>
+                <choice value="lpar_chart1">LPAR, PowerLinux only, Partition statistics</choice>
+                <choice value="lpar_chart2">LPAR, PowerLinux only, Pool statistics</choice>
+                <default>lpar_chart1</default>
+                <change>
+                    <condition value="lpar_chart1">
+                        <set token="lpar_chart1">true</set>
+                        <unset token="lpar_chart2"></unset>
+                    </condition>
+                    <condition value="lpar_chart2">
+                        <set token="lpar_chart2">true</set>
+                        <unset token="lpar_chart1"></unset>
+                    </condition>
+                </change>
+            </input>
+
+            <chart depends="$lpar_chart1$">
+                <title></title>
+                <search>
+                    <query>| tstats max("CPU.lpar_vp_usage") AS lpar_vp_usage max("CPU.LPAR_Linux.partition_active_processors") AS partition_active_processors
+max("CPU.LPAR_Linux.partition_entitled_capacity") AS partition_entitled_capacity
+from datamodel=NMON_Data_CPU where (nodename = CPU.LPAR_Linux) (CPU.$hostname$)
+groupby _time, "CPU.hostname", "CPU.frameID" prestats=true span=1m
+| bucket _time span=1m
+| stats dedup_splitvals=t max("CPU.lpar_vp_usage") AS lpar_vp_usage max("CPU.LPAR_Linux.partition_active_processors") AS partition_active_processors
+max("CPU.LPAR_Linux.partition_entitled_capacity") AS partition_entitled_capacity by _time, "CPU.hostname", "CPU.frameID"
+| fields $is_LPAR$
+| timechart `inline_customspan` useother=f limit=0 max(lpar_vp_usage) AS lpar_vp_usage max(partition_entitled_capacity) As partition_entitled_capacity, max(partition_active_processors) As partition_active_processors by "CPU.hostname"</query>
+                    <earliest>$timerange.earliest$</earliest>
+                    <latest>$timerange.latest$</latest>
+                </search>
+                <option name="charting.axisTitleX.visibility">visible</option>
+                <option name="charting.axisTitleY.visibility">visible</option>
+                <option name="charting.axisX.scale">linear</option>
+                <option name="charting.axisY.scale">linear</option>
+                <option name="charting.chart">line</option>
+                <option name="charting.chart.nullValueMode">gaps</option>
+                <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+                <option name="charting.chart.stackMode">stacked</option>
+                <option name="charting.chart.style">shiny</option>
+                <option name="charting.drilldown">all</option>
+                <option name="charting.layout.splitSeries">0</option>
+                <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+                <option name="charting.legend.placement">bottom</option>
+                <option name="height">680px</option>
+                <option name="charting.axisTitleX.text">Time</option>
+                <option name="charting.axisTitleY.text">VirtualCPUs</option>
+                <option name="charting.axisY.minimumNumber">0</option>
+                <drilldown target="search">
+                    <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats max("CPU.lpar_vp_usage") AS lpar_vp_usage max("CPU.LPAR_Linux.partition_active_processors") AS partition_active_processors
+max("CPU.LPAR_Linux.partition_entitled_capacity") AS partition_entitled_capacity
+from datamodel=NMON_Data_CPU where (nodename = CPU.LPAR_Linux) (CPU.$hostname$)
+groupby _time, "CPU.hostname", "CPU.frameID" prestats=true span=1m
+| bucket _time span=1m
+| stats dedup_splitvals=t max("CPU.lpar_vp_usage") AS lpar_vp_usage max("CPU.LPAR_Linux.partition_active_processors") AS partition_active_processors
+max("CPU.LPAR_Linux.partition_entitled_capacity") AS partition_entitled_capacity by _time, "CPU.hostname", "CPU.frameID"
+| timechart span=1m useother=f limit=0 max(lpar_vp_usage) AS lpar_vp_usage max(partition_entitled_capacity) As partition_entitled_capacity, max(partition_active_processors) As partition_active_processors by "CPU.hostname"</link>
+                </drilldown>
+            </chart>
+
+            <chart depends="$lpar_chart2$">
+                <title></title>
+                <search>
+                    <query>| tstats max("CPU.lpar_pool_capacity") AS "CPU.lpar_pool_capacity" max("CPU.lpar_pool_vp_usage") AS lpar_pool_vp_usage
+from datamodel=NMON_Data_CPU where (nodename = CPU.LPAR_Linux.LPAR_Linux_Pool) (CPU.$hostname$)
+groupby _time, "CPU.frameID", "CPU.hostname" prestats=true span=1m
+| stats dedup_splitvals=t max("CPU.lpar_pool_capacity") AS "CPU.lpar_pool_capacity" max("CPU.lpar_pool_vp_usage") AS lpar_pool_vp_usage by _time, "CPU.frameID", "CPU.hostname"
+| fields $is_LPAR$
+| timechart `inline_customspan` useother=f limit=0 max(lpar_pool_vp_usage) As lpar_pool_vp_usage max(CPU.lpar_pool_capacity) AS lpar_pool_capacity by "CPU.hostname"</query>
+                    <earliest>$timerange.earliest$</earliest>
+                    <latest>$timerange.latest$</latest>
+                </search>
+                <option name="charting.axisTitleX.visibility">visible</option>
+                <option name="charting.axisTitleY.visibility">visible</option>
+                <option name="charting.axisX.scale">linear</option>
+                <option name="charting.axisY.scale">linear</option>
+                <option name="charting.chart">line</option>
+                <option name="charting.chart.nullValueMode">gaps</option>
+                <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+                <option name="charting.chart.stackMode">stacked</option>
+                <option name="charting.chart.style">shiny</option>
+                <option name="charting.drilldown">all</option>
+                <option name="charting.layout.splitSeries">0</option>
+                <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+                <option name="charting.legend.placement">bottom</option>
+                <option name="height">680px</option>
+                <option name="charting.axisTitleX.text">Time</option>
+                <option name="charting.axisTitleY.text">VirtualCPUs</option>
+                <option name="charting.axisY.minimumNumber">0</option>
+                <drilldown target="search">
+                    <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats max("CPU.lpar_pool_capacity") AS "CPU.lpar_pool_capacity" max("CPU.lpar_pool_vp_usage") AS lpar_pool_vp_usage
+from datamodel=NMON_Data_CPU where (nodename = CPU.LPAR_Linux.LPAR_Linux_Pool) (CPU.$hostname$)
+groupby _time, "CPU.frameID", "CPU.hostname" prestats=true span=1m
+| stats dedup_splitvals=t max("CPU.lpar_pool_capacity") AS "CPU.lpar_pool_capacity" max("CPU.lpar_pool_vp_usage") AS lpar_pool_vp_usage by _time, "CPU.frameID", "CPU.hostname"
+| timechart span=1m useother=f limit=0 max(lpar_pool_vp_usage) As lpar_pool_vp_usage max(CPU.lpar_pool_capacity) AS lpar_pool_capacity by "CPU.hostname"</link>
+                </drilldown>
+            </chart>
+
+        </panel>
+    </row>
+
     <row>
         <html>
             <div style="text-align: center;">
@@ -551,11 +698,11 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
             <chart depends="$top_chart2$" rejects="$show_null_top$">
                 <title></title>
                 <search>
-                    <query>| tstats max("TOP_Linux.ResText") AS ResText max("TOP_Linux.ResData") AS ResData from datamodel=NMON_Data_TOP.TOP_Linux
+                    <query>| tstats max("TOP_Linux.ResSet") AS ResSet from datamodel=NMON_Data_TOP.TOP_Linux
 where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Command", "TOP_Linux.PID" prestats=true span=1m
-| stats dedup_splitvals=t max("TOP_Linux.ResText") AS ResText max("TOP_Linux.ResData") AS ResData by _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Command", "TOP_Linux.PID"
+| stats dedup_splitvals=t max("TOP_Linux.ResSet") AS ResSet by _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Command", "TOP_Linux.PID"
 | rename "TOP_Linux.hostname" AS hostname "TOP_Linux.logical_cpus" AS logical_cpus "TOP_Linux.Command" AS Command "TOP_Linux.PID" AS PID
-| eval Used_Mem_MB=((ResData+ResText)/1024)
+| eval Used_Mem_MB=((ResSet)/1024)
 | stats sum(Used_Mem_MB) As Used_Mem_MB by _time,Command
 | timechart $span$ useother=f limit=0 max(Used_Mem_MB) as "Used_Memory" by Command</query>
                     <earliest>$timerange.earliest$</earliest>
@@ -588,11 +735,11 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
                 <option name="charting.axisY.minimumNumber">0</option>
                 <option name="charting.axisTitleY.text">Megabytes (MB)</option>
                 <drilldown target="search">
-                    <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats max("TOP_Linux.ResText") AS ResText max("TOP_Linux.ResData") AS ResData from datamodel=NMON_Data_TOP.TOP_Linux
+                    <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats max("TOP_Linux.ResSet") AS ResSet from datamodel=NMON_Data_TOP.TOP_Linux
 where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Command", "TOP_Linux.PID" prestats=true span=1m
-| stats dedup_splitvals=t max("TOP_Linux.ResText") AS ResText max("TOP_Linux.ResData") AS ResData by _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Command", "TOP_Linux.PID"
+| stats dedup_splitvals=t max("TOP_Linux.ResSet") AS ResSet by _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Command", "TOP_Linux.PID"
 | rename "TOP_Linux.hostname" AS hostname "TOP_Linux.logical_cpus" AS logical_cpus "TOP_Linux.Command" AS Command "TOP_Linux.PID" AS PID
-| eval Used_Mem_MB=((ResData%2BResText)/1024)
+| eval Used_Mem_MB=((ResSet)/1024)
 | stats sum(Used_Mem_MB) As Used_Mem_MB by _time,Command
 | timechart span=1m useother=f limit=0 max(Used_Mem_MB) as "Used_Memory" by Command</link>
                 </drilldown>
@@ -606,7 +753,7 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
 | stats dedup_splitvals=t max("TOP_Linux.Size") AS Size by _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Command", "TOP_Linux.PID"
 | rename "TOP_Linux.hostname" AS hostname "TOP_Linux.logical_cpus" AS logical_cpus "TOP_Linux.Command" AS Command "TOP_Linux.PID" AS PID
 | stats sum(Size) As Size by _time,Command
-| eval Virtual_Mem_MB=round((Size/1024),2)
+| eval Virtual_Mem_MB=(Size/1024)
 | timechart $span$ useother=f limit=0 max(Virtual_Mem_MB) as "Virtual_Mem_MB" by Command</query>
                     <earliest>$timerange.earliest$</earliest>
                     <latest>$timerange.latest$</latest>
@@ -643,7 +790,7 @@ where (nodename = TOP_Linux) (TOP_Linux.$hostname$) groupby _time, "TOP_Linux.ho
 | stats dedup_splitvals=t max("TOP_Linux.Size") AS Size by _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Command", "TOP_Linux.PID"
 | rename "TOP_Linux.hostname" AS hostname "TOP_Linux.logical_cpus" AS logical_cpus "TOP_Linux.Command" AS Command "TOP_Linux.PID" AS PID
 | stats sum(Size) As Size by _time,Command
-| eval Virtual_Mem_MB=round((Size/1024),2)
+| eval Virtual_Mem_MB=(Size/1024)
 | timechart span=1m useother=f limit=0 max(Virtual_Mem_MB) as "Virtual_Mem_MB" by Command</link>
                 </drilldown>
             </chart>
@@ -1488,30 +1635,11 @@ groupby _time, "Linux.hostname" prestats=true span=1m
         </html>
     </row>
 
-    <search id="MEM_real">
-        <query>| tstats
-max("MEM.memused") AS memused_MB max("MEM.memused_PCT") AS memused_PCT max("MEM.memfree") AS memfree_MB max("MEM.memfree_PCT") AS memfree_PCT
-max("MEM.memtotal") AS memtotal_MB max("MEM.buffers") AS buffers_MB max("MEM.buffers_PCT") AS buffers_PCT max("MEM.cached") AS cached_MB
-max("MEM.cached_PCT") AS cached_PCT max("MEM.active") AS active_MB max("MEM.active_PCT") AS active_PCT max("MEM.inactive") AS inactive_MB
-max("MEM.inactive_PCT") AS inactive_PCT from datamodel=NMON_Data_MEM where (nodename = MEM) (MEM.$hostname$)
-groupby _time, "MEM.hostname" prestats=true $span$
-| timechart dedup_splitvals=t $span$
-max("MEM.memused") AS memused_MB max("MEM.memused_PCT") AS memused_PCT max("MEM.memfree") AS memfree_MB max("MEM.memfree_PCT") AS memfree_PCT
-max("MEM.memtotal") AS memtotal_MB max("MEM.buffers") AS buffers_MB max("MEM.buffers_PCT") AS buffers_PCT max("MEM.cached") AS cached_MB
-max("MEM.cached_PCT") AS cached_PCT max("MEM.active") AS active_MB max("MEM.active_PCT") AS active_PCT max("MEM.inactive") AS inactive_MB
-max("MEM.inactive_PCT") AS inactive_PCT</query>
-        <earliest>$timerange.earliest$</earliest>
-        <latest>$timerange.latest$</latest>
-    </search>
-
-    <search id="MEM_swap">
-        <query>| tstats
-max("MEM.swapused") AS swapused_MB max("MEM.swapused_PCT") AS swapused_PCT max("MEM.swapfree") AS swapfree_MB
-max("MEM.swapfree_PCT") AS swapfree_PCT max("MEM.swaptotal") AS swaptotal_MB max("MEM.swapcached") AS swapcached_MB max("MEM.swapcached_PCT") AS swapcached_PCT
-from datamodel=NMON_Data_MEM where (nodename = MEM) (MEM.$hostname$) groupby _time, "MEM.hostname" prestats=true $span$
-| timechart dedup_splitvals=t $span$
-max("MEM.swapused") AS swapused_MB max("MEM.swapused_PCT") AS swapused_PCT max("MEM.swapfree") AS swapfree_MB
-max("MEM.swapfree_PCT") AS swapfree_PCT max("MEM.swaptotal") AS swaptotal_MB max("MEM.swapcached") AS swapcached_MB max("MEM.swapcached_PCT") AS swapcached_PCT</query>
+    <search id="memory_stats">
+        <query>| tstats `memory_linux_dm(max)` from datamodel=NMON_Data_MEM where (nodename = MEM.Linux) (MEM.$hostname$)
+groupby _time MEM.hostname prestats=true span=1m
+| stats dedup_splitvals=t `memory_linux_dm(max)` by _time, MEM.hostname
+| timechart $span$ dedup_splitvals=t avg(*) AS *</query>
         <earliest>$timerange.earliest$</earliest>
         <latest>$timerange.latest$</latest>
     </search>
@@ -1521,10 +1649,10 @@ max("MEM.swapfree_PCT") AS swapfree_PCT max("MEM.swaptotal") AS swaptotal_MB max
 
             <input type="link" token="mem_linkinput">
                 <label></label>
-                <choice value="mem_chart1">MEM, Memory used (% usage)</choice>
-                <choice value="mem_chart2">MEM, Memory used (MB usage)</choice>
-                <choice value="mem_chart3">MEM, Swap used (% usage)</choice>
-                <choice value="mem_chart4">MEM, Swap used (usage in MB)</choice>
+                <choice value="mem_chart1">MEM, Memory usage (MB) by main metrics</choice>
+                <choice value="mem_chart2">MEM, Effective memory/swap used (%)</choice>
+                <choice value="mem_chart3">MEM, Global memory/swap used (%)</choice>
+                <choice value="mem_chart4">MEM, Swap effective used/cached/free/global (MB)</choice>
                 <default>mem_chart1</default>
                 <change>
                     <condition value="mem_chart1">
@@ -1553,20 +1681,20 @@ max("MEM.swapfree_PCT") AS swapfree_PCT max("MEM.swaptotal") AS swaptotal_MB max
                     </condition>
                 </change>
             </input>
-            
+
             <chart depends="$mem_chart1$">
                 <title></title>
-                <search base="MEM_real">
-                    <query>fields _time,*_PCT | fields - memfree_PCT | rename *_PCT AS "* (%)" | eval limit=100</query>
+                <search base="memory_stats">
+                    <query>fields _time, *mem_free_MB*, *mem_cached_MB*, *mem_buffers_MB*, *mem_used_effective_MB*, *mem_total_MB*</query>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
                 <option name="charting.axisX.scale">linear</option>
                 <option name="charting.axisY.scale">linear</option>
-                <option name="charting.chart">line</option>
-                <option name="charting.chart.nullValueMode">gaps</option>
+                <option name="charting.chart">area</option>
+                <option name="charting.chart.nullValueMode">connect</option>
                 <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-                <option name="charting.chart.stackMode">unstacked</option>
+                <option name="charting.chart.stackMode">stacked</option>
                 <option name="charting.chart.style">shiny</option>
                 <option name="charting.drilldown">all</option>
                 <option name="charting.layout.splitSeries">0</option>
@@ -1574,36 +1702,39 @@ max("MEM.swapfree_PCT") AS swapfree_PCT max("MEM.swaptotal") AS swaptotal_MB max
                 <option name="charting.legend.placement">bottom</option>
                 <option name="height">680px</option>
                 <option name="charting.axisTitleX.text">Time</option>
-                <option name="charting.axisTitleY.text">Percentage (%)</option>
+                <option name="charting.axisTitleY.text">volume (MB)</option>
                 <option name="charting.axisY.minimumNumber">0</option>
-                <option name="charting.axisY.maximumNumber">101</option>
-                <option name="charting.fieldColors">{"limit": 0xff0000}</option>
+                <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+                <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+                <option name="charting.axisTitleY2.visibility">visible</option>
+                <option name="charting.axisY2.enabled">0</option>
+                <option name="charting.axisY2.scale">inherit</option>
+                <option name="charting.chart.bubbleMaximumSize">50</option>
+                <option name="charting.chart.bubbleMinimumSize">10</option>
+                <option name="charting.chart.bubbleSizeBy">area</option>
+                <option name="charting.chart.overlayFields">mem_total_MB</option>
+                <option name="charting.chart.showDataLabels">none</option>
+                <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+                <option name="charting.fieldColors">{"mem_total_MB": 0xe50000}</option>
                 <drilldown target="search">
-                    <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats
-max("MEM.memused") AS memused_MB max("MEM.memused_PCT") AS memused_PCT max("MEM.memfree") AS memfree_MB max("MEM.memfree_PCT") AS memfree_PCT
-max("MEM.memtotal") AS memtotal_MB max("MEM.buffers") AS buffers_MB max("MEM.buffers_PCT") AS buffers_PCT max("MEM.cached") AS cached_MB
-max("MEM.cached_PCT") AS cached_PCT max("MEM.active") AS active_MB max("MEM.active_PCT") AS active_PCT max("MEM.inactive") AS inactive_MB
-max("MEM.inactive_PCT") AS inactive_PCT from datamodel=NMON_Data_MEM where (nodename = MEM) (MEM.$hostname$)
-groupby _time, "MEM.hostname" prestats=true span=1m
-| timechart dedup_splitvals=t span=1m
-max("MEM.memused") AS memused_MB max("MEM.memused_PCT") AS memused_PCT max("MEM.memfree") AS memfree_MB max("MEM.memfree_PCT") AS memfree_PCT
-max("MEM.memtotal") AS memtotal_MB max("MEM.buffers") AS buffers_MB max("MEM.buffers_PCT") AS buffers_PCT max("MEM.cached") AS cached_MB
-max("MEM.cached_PCT") AS cached_PCT max("MEM.active") AS active_MB max("MEM.active_PCT") AS active_PCT max("MEM.inactive") AS inactive_MB
-max("MEM.inactive_PCT") AS inactive_PCT | fields _time,*_PCT</link>
+                    <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats `memory_linux_dm(max)` from datamodel=NMON_Data_MEM where (nodename = MEM.Linux) (MEM.$hostname$)
+groupby _time MEM.hostname prestats=true span=1m
+| stats dedup_splitvals=t `memory_linux_dm(max)` by _time, MEM.hostname
+| timechart span=1m dedup_splitvals=t avg(*) AS *</link>
                 </drilldown>
             </chart>
 
             <chart depends="$mem_chart2$">
                 <title></title>
-                <search base="MEM_real">
-                    <query>fields _time,*_MB | fields - memfree_MB | rename *_MB AS "* (MB)"</query>
+                <search base="memory_stats">
+                    <query>fields _time, *mem_used_effective_PCT*, *swap_used_effective_PCT*</query>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
                 <option name="charting.axisX.scale">linear</option>
                 <option name="charting.axisY.scale">linear</option>
                 <option name="charting.chart">line</option>
-                <option name="charting.chart.nullValueMode">gaps</option>
+                <option name="charting.chart.nullValueMode">bottom</option>
                 <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
                 <option name="charting.chart.stackMode">unstacked</option>
                 <option name="charting.chart.style">shiny</option>
@@ -1613,35 +1744,28 @@ max("MEM.inactive_PCT") AS inactive_PCT | fields _time,*_PCT</link>
                 <option name="charting.legend.placement">bottom</option>
                 <option name="height">680px</option>
                 <option name="charting.axisTitleX.text">Time</option>
-                <option name="charting.axisTitleY.text">Megabytes (MB)</option>
+                <option name="charting.axisTitleY.text">percentage (%)</option>
                 <option name="charting.axisY.minimumNumber">0</option>
-                <option name="charting.fieldColors">{"memtotal (MB)": 0xff0000}</option>
+                <option name="charting.axisY.maximumNumber">100</option>
                 <drilldown target="search">
-                    <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats
-max("MEM.memused") AS memused_MB max("MEM.memused_PCT") AS memused_PCT max("MEM.memfree") AS memfree_MB max("MEM.memfree_PCT") AS memfree_PCT
-max("MEM.memtotal") AS memtotal_MB max("MEM.buffers") AS buffers_MB max("MEM.buffers_PCT") AS buffers_PCT max("MEM.cached") AS cached_MB
-max("MEM.cached_PCT") AS cached_PCT max("MEM.active") AS active_MB max("MEM.active_PCT") AS active_PCT max("MEM.inactive") AS inactive_MB
-max("MEM.inactive_PCT") AS inactive_PCT from datamodel=NMON_Data_MEM where (nodename = MEM) (MEM.$hostname$)
-groupby _time, "MEM.hostname" prestats=true span=1m
-| timechart dedup_splitvals=t span=1m
-max("MEM.memused") AS memused_MB max("MEM.memused_PCT") AS memused_PCT max("MEM.memfree") AS memfree_MB max("MEM.memfree_PCT") AS memfree_PCT
-max("MEM.memtotal") AS memtotal_MB max("MEM.buffers") AS buffers_MB max("MEM.buffers_PCT") AS buffers_PCT max("MEM.cached") AS cached_MB
-max("MEM.cached_PCT") AS cached_PCT max("MEM.active") AS active_MB max("MEM.active_PCT") AS active_PCT max("MEM.inactive") AS inactive_MB
-max("MEM.inactive_PCT") AS inactive_PCT | fields _time,*_PCT</link>
+                    <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats `memory_linux_dm(max)` from datamodel=NMON_Data_MEM where (nodename = MEM.Linux) (MEM.$hostname$)
+groupby _time MEM.hostname prestats=true span=1m
+| stats dedup_splitvals=t `memory_linux_dm(max)` by _time, MEM.hostname
+| timechart span=1m dedup_splitvals=t avg(*) AS *</link>
                 </drilldown>
             </chart>
 
             <chart depends="$mem_chart3$">
                 <title></title>
-                <search base="MEM_swap">
-                    <query>fields _time,*_PCT | fields - swapfree_PCT | rename *_PCT AS "* (%)" | eval limit=100</query>
+                <search base="memory_stats">
+                    <query>fields _time, *mem_used_PCT*, *swap_used_PCT*</query>
                 </search>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
                 <option name="charting.axisX.scale">linear</option>
                 <option name="charting.axisY.scale">linear</option>
                 <option name="charting.chart">line</option>
-                <option name="charting.chart.nullValueMode">gaps</option>
+                <option name="charting.chart.nullValueMode">bottom</option>
                 <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
                 <option name="charting.chart.stackMode">unstacked</option>
                 <option name="charting.chart.style">shiny</option>
@@ -1651,34 +1775,32 @@ max("MEM.inactive_PCT") AS inactive_PCT | fields _time,*_PCT</link>
                 <option name="charting.legend.placement">bottom</option>
                 <option name="height">680px</option>
                 <option name="charting.axisTitleX.text">Time</option>
-                <option name="charting.axisTitleY.text">Percentage (%)</option>
+                <option name="charting.axisTitleY.text">percentage (%)</option>
                 <option name="charting.axisY.minimumNumber">0</option>
-                <option name="charting.axisY.maximumNumber">101</option>
-                <option name="charting.fieldColors">{"limit": 0xff0000}</option>
+                <option name="charting.axisY.maximumNumber">100</option>
                 <drilldown target="search">
-                    <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats
-max("MEM.swapused") AS swapused_MB max("MEM.swapused_PCT") AS swapused_PCT max("MEM.swapfree") AS swapfree_MB
-max("MEM.swapfree_PCT") AS swapfree_PCT max("MEM.swaptotal") AS swaptotal_MB max("MEM.swapcached") AS swapcached_MB max("MEM.swapcached_PCT") AS swapcached_PCT
-from datamodel=NMON_Data_MEM where (nodename = MEM) (MEM.$hostname$) groupby _time, "MEM.hostname" prestats=true span=1m
-| timechart dedup_splitvals=t span=1m
-max("MEM.swapused") AS swapused_MB max("MEM.swapused_PCT") AS swapused_PCT max("MEM.swapfree") AS swapfree_MB
-max("MEM.swapfree_PCT") AS swapfree_PCT max("MEM.swaptotal") AS swaptotal_MB max("MEM.swapcached") AS swapcached_MB max("MEM.swapcached_PCT") AS swapcached_PCT | fields _time,*_PCT</link>
+                    <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats `memory_linux_dm(max)` from datamodel=NMON_Data_MEM where (nodename = MEM.Linux) (MEM.$hostname$)
+groupby _time MEM.hostname prestats=true span=1m
+| stats dedup_splitvals=t `memory_linux_dm(max)` by _time, MEM.hostname
+| timechart span=1m dedup_splitvals=t avg(*) AS *</link>
                 </drilldown>
             </chart>
 
             <chart depends="$mem_chart4$">
                 <title></title>
-                <search base="MEM_swap">
-                    <query>fields _time,*_MB | fields - swapfree_MB | rename *_MB AS "* (MB)"</query>
+                <search base="memory_stats">
+                    <query>fields _time, *swap_free_MB*, *swap_used_effective_MB*, *swap_cached_MB*, *swap_total_MB*</query>
                 </search>
+                <earliestTime>$timerange.earliest$</earliestTime>
+                <latestTime>$timerange.latest$</latestTime>
                 <option name="charting.axisTitleX.visibility">visible</option>
                 <option name="charting.axisTitleY.visibility">visible</option>
                 <option name="charting.axisX.scale">linear</option>
                 <option name="charting.axisY.scale">linear</option>
-                <option name="charting.chart">line</option>
-                <option name="charting.chart.nullValueMode">gaps</option>
+                <option name="charting.chart">area</option>
+                <option name="charting.chart.nullValueMode">connect</option>
                 <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-                <option name="charting.chart.stackMode">unstacked</option>
+                <option name="charting.chart.stackMode">stacked</option>
                 <option name="charting.chart.style">shiny</option>
                 <option name="charting.drilldown">all</option>
                 <option name="charting.layout.splitSeries">0</option>
@@ -1686,16 +1808,25 @@ max("MEM.swapfree_PCT") AS swapfree_PCT max("MEM.swaptotal") AS swaptotal_MB max
                 <option name="charting.legend.placement">bottom</option>
                 <option name="height">680px</option>
                 <option name="charting.axisTitleX.text">Time</option>
-                <option name="charting.axisTitleY.text">Megabytes (MB)</option>
+                <option name="charting.axisTitleY.text">volume (MB)</option>
                 <option name="charting.axisY.minimumNumber">0</option>
+                <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+                <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+                <option name="charting.axisTitleY2.visibility">visible</option>
+                <option name="charting.axisY2.enabled">0</option>
+                <option name="charting.axisY2.scale">inherit</option>
+                <option name="charting.chart.bubbleMaximumSize">50</option>
+                <option name="charting.chart.bubbleMinimumSize">10</option>
+                <option name="charting.chart.bubbleSizeBy">area</option>
+                <option name="charting.chart.overlayFields">swap_total_MB</option>
+                <option name="charting.chart.showDataLabels">none</option>
+                <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+                <option name="charting.fieldColors">{"swap_total_MB": 0xe50000}</option>
                 <drilldown target="search">
-                    <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats
-max("MEM.swapused") AS swapused_MB max("MEM.swapused_PCT") AS swapused_PCT max("MEM.swapfree") AS swapfree_MB
-max("MEM.swapfree_PCT") AS swapfree_PCT max("MEM.swaptotal") AS swaptotal_MB max("MEM.swapcached") AS swapcached_MB max("MEM.swapcached_PCT") AS swapcached_PCT
-from datamodel=NMON_Data_MEM where (nodename = MEM) (MEM.$hostname$) groupby _time, "MEM.hostname" prestats=true span=1m
-| timechart dedup_splitvals=t span=1m
-max("MEM.swapused") AS swapused_MB max("MEM.swapused_PCT") AS swapused_PCT max("MEM.swapfree") AS swapfree_MB
-max("MEM.swapfree_PCT") AS swapfree_PCT max("MEM.swaptotal") AS swaptotal_MB max("MEM.swapcached") AS swapcached_MB max("MEM.swapcached_PCT") AS swapcached_PCT | fields _time,*_MB</link>
+                    <link>search?earliest=$earliest$&amp;latest=$latest$&amp;q=| tstats `memory_linux_dm(max)` from datamodel=NMON_Data_MEM where (nodename = MEM.Linux) (MEM.$hostname$)
+groupby _time MEM.hostname prestats=true span=1m
+| stats dedup_splitvals=t `memory_linux_dm(max)` by _time, MEM.hostname
+| timechart span=1m dedup_splitvals=t avg(*) AS *</link>
                 </drilldown>
             </chart>
 
@@ -2009,11 +2140,18 @@ where (nodename = JFS.JFSFILE) (JFS.value&gt;=0) (JFS.$hostname$) groupby _time,
                 <option name="count">20</option>
             </table>
 
+            <input type="text" token="fsfilter" depends="$show_jfsfile_overtime$" searchWhenChanged="true">
+                <label>Filter FileSystems by pattern:</label>
+                <default>*</default>
+                <prefix>JFS.device="</prefix>
+                <suffix>"</suffix>
+            </input>
+
             <chart depends="$show_jfsfile_overtime$">
                 <title></title>
                 <search>
                     <query>| tstats max("JFS.value") AS value from datamodel=NMON_Data_JFS
-where (nodename = JFS.JFSFILE) (JFS.$hostname$) groupby _time, "JFS.device" prestats=true $span$
+where (nodename = JFS.JFSFILE) (JFS.$hostname$) ($fsfilter$) groupby _time, "JFS.device" prestats=true $span$
 | timechart $span$ limit=0 useother=f max("JFS.value") AS value by "JFS.device"</query>
                     <earliest>$timerange.earliest$</earliest>
                     <latest>$timerange.latest$</latest>
@@ -2160,17 +2298,17 @@ where (nodename = NET_Data_types.NETPACKET) (NET_Data_types.$hostname$) groupby 
                 <choice value="nfsserverv2">NFS Server V2</choice>
                 <default>nfsserverv4</default>
                 <change>
-                    <condition value="nfsserver4">
+                    <condition value="nfsserverv4">
                         <set token="show_nfsserverv4">true</set>
-                        <unset token="show_nfsserverv3"></unset>
                         <unset token="show_nfsserverv2"></unset>
+                        <unset token="show_nfsserverv3"></unset>
                     </condition>
-                    <condition value="nfsserver3">
+                    <condition value="nfsserverv3">
                         <set token="show_nfsserverv3">true</set>
                         <unset token="show_nfsserverv2"></unset>
-                        <unset token="show_nfsserverv2"></unset>
+                        <unset token="show_nfsserverv4"></unset>
                     </condition>
-                    <condition value="nfsserver2">
+                    <condition value="nfsserverv2">
                         <set token="show_nfsserverv2">true</set>
                         <unset token="show_nfsserverv3"></unset>
                         <unset token="show_nfsserverv4"></unset>
@@ -2178,7 +2316,7 @@ where (nodename = NET_Data_types.NETPACKET) (NET_Data_types.$hostname$) groupby 
                 </change>
             </input>
 
-            <chart depends="$nfsserverv4$" rejects="$show_null_nfsserverv4$">
+            <chart depends="$show_nfsserverv4$" rejects="$show_null_nfsserverv4$">
                 <title>NFS Server V4</title>
                 <search>
                     <query>| tstats `NFSSVRV4(max)` from datamodel=NMON_Data_NFS
@@ -2226,7 +2364,7 @@ where (nodename = NFS.NFS_SERVER.NFS_V4) (NFS.$hostname$) groupby _time prestats
                 </drilldown>
             </chart>
 
-            <chart depends="$nfsserverv3$" rejects="$show_null_nfsserverv3$">
+            <chart depends="$show_nfsserverv3$" rejects="$show_null_nfsserverv3$">
                 <title>NFS Server V3</title>
                 <search>
                     <query>| tstats `NFSSVRV3(max)` from datamodel=NMON_Data_NFS
@@ -2274,7 +2412,7 @@ where (nodename = NFS.NFS_SERVER.NFS_V3) (NFS.$hostname$) groupby _time prestats
                 </drilldown>
             </chart>
 
-            <chart depends="$nfsserverv2$" rejects="$show_null_nfsserverv2$">
+            <chart depends="$show_nfsserverv2$" rejects="$show_null_nfsserverv2$">
                 <title>NFS Server V2</title>
                 <search>
                     <query>| tstats `NFSSVRV2(max)` from datamodel=NMON_Data_NFS
@@ -2342,22 +2480,22 @@ where (nodename = NFS.NFS_SERVER.NFS_V2) (NFS.$hostname$) groupby _time prestats
 
             <input type="link" token="nfsclient_linkinput">
                 <label></label>
-                <choice value="nfsclientv4">NFS Server V4</choice>
-                <choice value="nfsclientv3">NFS Server V3</choice>
-                <choice value="nfsclientv2">NFS Server V2</choice>
+                <choice value="nfsclientv4">NFS Client V4</choice>
+                <choice value="nfsclientv3">NFS Client V3</choice>
+                <choice value="nfsclientv2">NFS Client V2</choice>
                 <default>nfsclientv4</default>
                 <change>
-                    <condition value="nfsclient4">
+                    <condition value="nfsclientv4">
                         <set token="show_nfsclientv4">true</set>
-                        <unset token="show_nfsclientv3"></unset>
                         <unset token="show_nfsclientv2"></unset>
+                        <unset token="show_nfsclientv3"></unset>
                     </condition>
-                    <condition value="nfsclient3">
+                    <condition value="nfsclientv3">
                         <set token="show_nfsclientv3">true</set>
                         <unset token="show_nfsclientv2"></unset>
-                        <unset token="show_nfsclientv2"></unset>
+                        <unset token="show_nfsclientv4"></unset>
                     </condition>
-                    <condition value="nfsclient2">
+                    <condition value="nfsclientv2">
                         <set token="show_nfsclientv2">true</set>
                         <unset token="show_nfsclientv3"></unset>
                         <unset token="show_nfsclientv4"></unset>
@@ -2365,7 +2503,7 @@ where (nodename = NFS.NFS_SERVER.NFS_V2) (NFS.$hostname$) groupby _time prestats
                 </change>
             </input>
 
-            <chart depends="$nfsserverv4$" rejects="$show_null_nfsclientv4$">
+            <chart depends="$show_nfsclientv4$" rejects="$show_null_nfsclientv4$">
                 <title>NFS Client V4</title>
                 <search>
                     <query>| tstats `NFSCLIV4(max)` from datamodel=NMON_Data_NFS
@@ -2413,7 +2551,7 @@ where (nodename = NFS.NFS_CLIENT.NFSCLIV4) (NFS.$hostname$) groupby _time presta
                 </drilldown>
             </chart>
 
-            <chart depends="$nfsserverv3$" rejects="$show_null_nfsclientv3$">
+            <chart depends="$show_nfsclientv3$" rejects="$show_null_nfsclientv3$">
                 <title>NFS Client V3</title>
                 <search>
                     <query>| tstats `NFSCLIV3(max)` from datamodel=NMON_Data_NFS
@@ -2461,7 +2599,7 @@ where (nodename = NFS.NFS_CLIENT.NFSCLIV3) (NFS.$hostname$) groupby _time presta
                 </drilldown>
             </chart>
 
-            <chart depends="$nfsserverv2$" rejects="$show_null_nfsclientv2$">
+            <chart depends="$show_nfsclientv2$" rejects="$show_null_nfsclientv2$">
                 <title>NFS Client V2</title>
                 <search>
                     <query>| tstats `NFSCLIV2(max)` from datamodel=NMON_Data_NFS

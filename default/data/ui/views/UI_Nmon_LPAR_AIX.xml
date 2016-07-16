@@ -97,6 +97,24 @@
             <choice value="rename CPU.LPAR.lpar_vp_PCT_usage AS usage">Usage vs VirtualCPUs % Usage</choice>
             <choice value="rename CPU.LPAR.lpar_ec_usage AS usage">Usage vs Entitled</choice>
             <choice value="rename CPU.LPAR.lpar_ec_PCT_usage AS usage">Usage vs Entitled % usage</choice>
+            <change>
+                <condition value="rename CPU.lpar_vp_usage AS usage">
+                    <set token="unity_label">Virtual CPUs (nbr)</set>
+                    <set token="unity_minilabel">vCPUs</set>
+                </condition>
+                <condition value="rename CPU.LPAR.lpar_vp_PCT_usage AS usage">
+                    <set token="unity_label">Percentage of capacity (%)</set>
+                    <set token="unity_minilabel">%</set>
+                </condition>
+                <condition value="rename CPU.LPAR.lpar_ec_usage AS usage">
+                    <set token="unity_label">Virtual CPUs (nbr)</set>
+                    <set token="unity_minilabel">vCPUs</set>
+                </condition>
+                <condition value="rename CPU.LPAR.lpar_ec_PCT_usage AS usage">
+                    <set token="unity_label">Percentage of capacity (%)</set>
+                    <set token="unity_minilabel">%</set>
+                </condition>
+            </change>
         </input>
 
         <input type="checkbox" token="charting" searchWhenChanged="true">
@@ -119,10 +137,20 @@ groupby _time,"CPU.frameID","CPU.hostname" prestats=true span=1m
 | sort limit=0 _time
 | where usage&gt;0
 | stats min(usage) As min_usage, avg(usage) As avg_usage, max(usage) As max_usage, max(CPU.entitled) As entitled, max(CPU.virtualCPUs) As virtualCPUs, sparkline($statsmode$(usage)) As sparkline by "CPU.frameID","CPU.hostname"
-| rename "CPU.frameID" AS frameID, "CPU.hostname" AS hostname | sort limit=0 frameID | eval avg_usage=round(avg_usage,2)</query>
+| rename "CPU.frameID" AS frameID, "CPU.hostname" AS hostname | sort limit=0 frameID | eval avg_usage=round(avg_usage,3)</query>
         <earliest>$timerange.earliest$</earliest>
         <latest>$timerange.latest$</latest>
     </search>
+
+    <!-- Help the user -->
+
+    <row rejects="$hostname$">
+        <panel>
+            <html>
+                <p style="color:red;text-align:center;font-size:14px"> - - - - - - - - - - ACTION REQUIRED: please select your server name(s) in the host selector above - - - - - - - - - -</p>
+            </html>
+        </panel>
+    </row>
 
     <!-- Information panel -->
 
@@ -132,19 +160,106 @@ groupby _time,"CPU.frameID","CPU.hostname" prestats=true span=1m
 
                 <div class="imgheader">
                     <img src="../../static/app/nmon/icons/grey_theme/info.png" alt="Info"/>
-                    <h4>Metrics information:  <a href="/app/nmon/Howto_LPAR_partitions_spl" target="_blank">(Open the Howto build Nmon statistics for LPAR)</a></h4>
+                    <h4><a data-toggle="modal" data-target="#Help_modal">Help, information and related links for LPAR statistics</a></h4>
                 </div>
-                <div class="list">
-                    <lu>
-                        <li><b>max/avg/min_usage:</b> CPU usage in Virtual CPU units / Percentage, evaluated over EC / VP</li>
-                        <li><b>entitled:</b> Entitled capacity of the partition</li>
-                        <li><b>virtualCPUs:</b> Number of virtual processors in the LPAR definition</li>
-                    </lu>
+
+                <!-- Modal -->
+                <div class="modal custom-modal-60 fade" id="Help_modal" tabindex="-1" role="dialog" aria-labelledby="Help_modal_Label">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"></span></button>
+                                <div style="text-align: left;">
+                                    <h4 class="modal-title" id="Help_modal_Label">Integrated Navigation:</h4>
+                                </div>
+                            </div>
+                            <div class="modal-body">
+
+                                <div style="text-align: center;">
+                                    <img src="../../static/app/nmon/icons/grey_theme/cpu.png" alt="CPU"/>
+                                    <h1>CPU global percentage statistics for IBM AIX partitions</h1>
+                                </div>
+
+                                <div>
+                                    <br />
+                                    <br />
+                                    <i>The LPAR monitor contains IBM Power partitions specific CPU statistics.</i>
+                                    <br />
+                                    <i>These metrics are available only for IBM Pseries and partitions running AIX or PowerLinux.</i>
+
+                                </div>
+
+                                <div style="text-align: left;">
+
+                                    <h1>Main metrics/fields:</h1>
+
+                                    <div class="list">
+                                        <lu>
+                                            <li><b>max/avg/min_usage:</b> CPU usage in Virtual CPU units / Percentage</li>
+                                            <li><b>entitled:</b> Entitled capacity of the partition</li>
+                                            <li><b>virtualCPUs:</b> Number of virtual processors in the LPAR definition</li>
+                                        </lu>
+                                    </div>
+
+                                </div>
+
+                                <div style="text-align:left;">
+                                    <h1>Related links:</h1>
+                                </div>
+
+                                <div style="text-align: center;" class="cat_title">
+
+                                    <a target="_blank" href="search?q=search%20eventtype%3Dnmon:performance:cpu%20type%3DLPAR%20OStype%3DAIX" class="tryitbtnxl">Explore RAW DATA »
+                                    </a>
+
+                                    <a target="_blank" href="Howto_LPAR_partitions_spl" class="tryitbtnxl">HOWTO Interface »
+                                    </a>
+
+                                    <a target="_blank" href="Nmon_Summary" class="tryitbtnxl">NMON SUMMARY Interface »
+                                    </a>
+
+                                    <a target="_blank" href="Nmon_ANALYSER_AIX" class="tryitbtnxl">NMON ANALYSER Interface »
+                                    </a>
+
+                                    <a target="_blank" href="pivot?model=%2FservicesNS%2Fnobody%2Fnmon%2Fdatamodel%2Fmodel%2FNMON_Data_CPU" class="tryitbtnxl">PIVOT Data model »
+                                    </a>
+
+                                    <a target="_blank" href="UI_data_dictionary?&amp;form.itemfilter=CPU%20USAGE%20STATISTICS" class="tryitbtnxl">CPU Data Dictionary »
+                                    </a>
+
+                                </div>
+
+                                <div style="text-align:left;">
+                                    <h1>Related metrics:</h1>
+                                </div>
+
+                                <div style="text-align: center;" class="cat_title">
+
+                                    <a target="_blank" href="search?q=search%20eventtype%3Dnmon%3Aperformance%3Acpu%20(type%3DCPU_ALL)" class="tryitbtnxl">CPU_ALL RAW DATA »
+                                    </a>
+
+                                    <a target="_blank" href="search?q=search%20eventtype%3Dnmon%3Aperformance%3Aprocess%20type%3DTOP" class="tryitbtnxl">TOP RAW DATA »
+                                    </a>
+
+                                    <a target="_blank" href="search?q=search%20eventtype%3Dnmon%3Aperformance%3Aprocess%20type%3DUARG" class="tryitbtnxl">UARG RAW DATA »
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
 
             </html>
         </panel>
     </row>
+
 
     <row>
         <panel>
@@ -154,15 +269,17 @@ groupby _time,"CPU.frameID","CPU.hostname" prestats=true span=1m
                     <query>stats max(max_usage) AS max</query>
                 </search>
                 <option name="underLabel">Maximum Load</option>
+                <option name="afterLabel">$unity_minilabel$</option>
                 <option name="linkView">search</option>
                 <option name="numberPrecision">0.00</option>
             </single>
 
             <single>
                 <search base="Global">
-                    <query>stats avg(avg_usage) AS avg | eval avg=round(avg,2)</query>
+                    <query>stats avg(avg_usage) AS avg | eval avg=round(avg,3)</query>
                 </search>
                 <option name="underLabel">Average Load</option>
+                <option name="afterLabel">$unity_minilabel$</option>
                 <option name="linkView">search</option>
                 <option name="numberPrecision">0.00</option>
             </single>
@@ -172,13 +289,14 @@ groupby _time,"CPU.frameID","CPU.hostname" prestats=true span=1m
                     <query>stats min(min_usage) AS min</query>
                 </search>
                 <option name="underLabel">Minimal Load</option>
+                <option name="afterLabel">$unity_minilabel$</option>
                 <option name="linkView">search</option>
                 <option name="numberPrecision">0.00</option>
             </single>
 
             <table>
                 <search base="Global">
-                    <query>foreach max_usage,avg_usage,min_usage [ eval "&lt;&lt;FIELD&gt;&gt;"=round('&lt;&lt;FIELD&gt;&gt;', 2) ] | fields hostname,frameID,max_usage,avg_usage,min_usage,entitled,virtualCPUs,sparkline</query>
+                    <query>foreach max_usage,avg_usage,min_usage [ eval "&lt;&lt;FIELD&gt;&gt;"=round('&lt;&lt;FIELD&gt;&gt;', 3) ] | fields hostname,frameID,max_usage,avg_usage,min_usage,entitled,virtualCPUs,sparkline</query>
                 </search>
                 <option name="wrap">true</option>
                 <option name="rowNumbers">false</option>
@@ -201,7 +319,7 @@ groupby _time,"CPU.frameID","CPU.hostname" prestats=true span=1m
 | $aggregate$
 | sort limit=0 _time
 | stats min(usage) As min_usage, avg(usage) As avg_usage, max(usage) As max_usage, max(CPU.entitled) As entitled, max(CPU.virtualCPUs) As virtualCPUs, sparkline($statsmode$(usage)) As sparkline by "CPU.frameID","CPU.hostname"
-| rename "CPU.frameID" AS frameID, "CPU.hostname" AS hostname | sort limit=0 frameID | eval avg_usage=round(avg_usage,2)</link>
+| rename "CPU.frameID" AS frameID, "CPU.hostname" AS hostname | sort limit=0 frameID | eval avg_usage=round(avg_usage,3)</link>
                 </drilldown>
             </table>
 
@@ -321,7 +439,7 @@ groupby _time,"CPU.frameID","CPU.hostname" prestats=true `custominline_span`
 | $indicator$
 | $aggregate$
 | stats min(usage) As min_usage, avg(usage) As avg_usage, max(usage) As max_usage, max(CPU.entitled) As entitled, max(CPU.virtualCPUs) As virtualCPUs by _time,"CPU.frameID","CPU.hostname"
-| rename "CPU.frameID" AS frameID, "CPU.hostname" AS hostname | eval avg_usage=round(avg_usage,2)</link>
+| rename "CPU.frameID" AS frameID, "CPU.hostname" AS hostname | eval avg_usage=round(avg_usage,3)</link>
                 </drilldown>
             </chart>
         </panel>

@@ -1,6 +1,6 @@
 <form stylesheet="ui_simple.css,panel_decoration.css">
     <label>UI UARG, Search Commands Arguments</label>
-    <description>User Interface for the TOP monitor on Linux Systems</description>
+    <description>User Interface for the UARG data on Linux systems</description>
 
     <fieldset autoRun="false" submitButton="false">
 
@@ -17,7 +17,6 @@
             <default>Linux</default>
             <choice value="*">Any OS</choice>
             <choice value="Linux">Linux</choice>
-            <choice value="Solaris">Solaris</choice>
         </input>
 
         <input type="text" token="hostname-prefilter" searchWhenChanged="true">
@@ -63,6 +62,120 @@
         </input>
 
     </fieldset>
+
+    <!-- Help the user -->
+
+    <row rejects="$hostname$">
+        <panel>
+            <html>
+                <p style="color:red;text-align:center;font-size:14px"> - - - - - - - - - - ACTION REQUIRED: please select your server name(s) in the host selector above - - - - - - - - - -</p>
+            </html>
+        </panel>
+    </row>
+
+    <!-- Information panel -->
+
+    <row>
+        <panel>
+            <html>
+
+                <div class="imgheader">
+                    <img src="../../static/app/nmon/icons/grey_theme/info.png" alt="Info"/>
+                    <h4><a data-toggle="modal" data-target="#Help_modal">Help, information and related links for UARG data</a></h4>
+                </div>
+
+                <!-- Modal -->
+                <div class="modal custom-modal-60 fade" id="Help_modal" tabindex="-1" role="dialog" aria-labelledby="Help_modal_Label">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"></span></button>
+                                <div style="text-align: left;">
+                                    <h4 class="modal-title" id="Help_modal_Label">Integrated Navigation:</h4>
+                                </div>
+                            </div>
+                            <div class="modal-body">
+
+                                <div style="text-align: center;">
+                                    <img src="../../static/app/nmon/icons/grey_theme/process.png" alt="CPU"/>
+                                    <h1>Processes full arguments (UARG)</h1>
+                                </div>
+
+                                <div>
+                                    <br />
+                                    <br />
+                                    The UARG monitor captures the full argument line of processes on a per PID level, it is highly related to the TOP monitor which contains performance metrics for theses processes.
+                                    <br />
+                                </div>
+
+                                <div style="text-align: left;">
+
+                                    <h1>Main fields:</h1>
+
+                                    <div class="list">
+                                        <lu>
+                                            <li><b>PID:</b> The PID number of the process</li>
+                                            <li><b>ProgName:</b> The name of the main command invocation. (equivalent to Command in TOP data)</li>
+                                            <li><b>FullCommand:</b> List of arguments that were associated with this PID</li>
+                                        </lu>
+                                    </div>
+
+                                </div>
+
+                                <div style="text-align:left;">
+                                    <h1>Related links:</h1>
+                                </div>
+
+                                <div style="text-align: center;" class="cat_title">
+
+                                    <a target="_blank" href="search?q=search%20eventtype%3Dnmon:performance:process%20type%3DUARG%20OStype%3DLinux" class="tryitbtnxl">Explore RAW DATA »
+                                    </a>
+
+                                    <a target="_blank" href="Howto_TOP_spl" class="tryitbtnxl">HOWTO Interface for TOP »
+                                    </a>
+
+                                    <a target="_blank" href="pivot?model=%2FservicesNS%2Fnobody%2Fnmon%2Fdatamodel%2Fmodel%2FNMON_Data_UARG" class="tryitbtnxl">PIVOT Data model »
+                                    </a>
+
+                                    <a target="_blank" href="pivot?model=%2FservicesNS%2Fnobody%2Fnmon%2Fdatamodel%2Fmodel%2FNMON_Data_TOP" class="tryitbtnxl">PIVOT Data model for TOP »
+                                    </a>
+
+                                    <a target="_blank" href="UI_data_dictionary?&amp;form.itemfilter=PROCESSES%20STATISTICS" class="tryitbtnxl">Processes Data Dictionary »
+                                    </a>
+
+                                    <a target="_blank" href="../../../dj/en-us/nmon/UI_Usage_per_process_dj_LINUX" class="tryitbtnxl">Bubblechart dashboard »
+                                    </a>
+
+                                </div>
+
+                                <div style="text-align:left;">
+                                    <h1>Related metrics:</h1>
+                                </div>
+
+                                <div style="text-align: center;" class="cat_title">
+
+                                    <a target="_blank" href="search?q=search%20eventtype%3Dnmon%3Aperformance%3Aprocess%20type%3DTOP%20OStype%3DLinux" class="tryitbtnxl">TOP RAW DATA »
+                                    </a>
+
+                                    <a target="_blank" href="search?q=search%20eventtype%3Dnmon%3Aperformance%3Acpu%20type%3DCPU_ALL%20OStype%3DLinux" class="tryitbtnxl">CPU_ALL RAW DATA »
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </html>
+        </panel>
+    </row>
+
     <row>
         <panel id="process">
             <title>Commands arguments</title>

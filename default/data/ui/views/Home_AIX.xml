@@ -1,6 +1,6 @@
 <dashboard script="panel_resize.js" stylesheet="Home.css,hover.css,hide_timeindicator.css" hideEdit="true">
     <label>AIX Home</label>
-    <description>AIX NMON Performance Monitor - Version 1.6.16</description>
+    <description>AIX NMON Performance Monitor - Version 1.7.0</description>
 
     <!-- Global Search -->
 
@@ -13,7 +13,74 @@
         <panel>
             <html>
                 <div style="text-align: center;">
-                    <a class="button2 glow" target="_blank" href="Nmon_Summary?form.osfilter=AIX">NMON SUMMARY</a>
+                    <a class="button2_lowpadding glow" data-toggle="modal" data-target="#Nmon_Summary_modal">NMON SUMMARY</a>
+                </div>
+
+                <!-- Modal -->
+                <div class="modal custom-modal-60 fade" id="Nmon_Summary_modal" tabindex="-1" role="dialog" aria-labelledby="Nmon_Summary_modal_Label">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"></span></button>
+                                <div style="text-align: left;">
+                                    <h4 class="modal-title" id="Nmon_Summary_modal_Label">NMON SUMMARY: Choice menu</h4>
+                                </div>
+                            </div>
+                            <div class="modal-body">
+
+                                <div style="text-align: left;">
+                                    <h1>Select your view:</h1>
+                                </div>
+
+                                <div class="mainbutton_container">
+
+                                    <div class="mainbutton">
+                                        <a class="button2_lowpadding glow" target="_blank" href="Nmon_Summary?form.osfilter=AIX">  NMON SUMMARY LIGHT  </a>
+                                    </div>
+
+                                    <div class="mainbutton">
+                                        <a class="button2_lowpadding glow" target="_blank" href="Nmon_WOF?form.OStype=AIX"> NMON WALL OF PERFORMANCE </a>
+                                    </div>
+
+                                </div>
+
+                                <div class="customleft">
+                                    <h1>NMON SUMMARY LIGHT:</h1>
+                                </div>
+
+                                <div style="text-align: left;">
+                                    <p>
+                                        The SUMMARY LIGHT interface is a single-server view that provides main system metrics information from one view, such as CPU utilization, memory and processes statistics.
+                                        <br />
+                                        This dashboard provides an easy and fast view of key system metrics of your server.
+                                        <br />
+                                    </p>
+
+                                </div>
+
+                                <div class="customleft">
+                                    <h1>NMON WALL OF PERFORMANCE:</h1>
+                                </div>
+
+                                <div style="text-align: left;">
+
+                                    <p>
+                                        The WALL OF PERFORMANCE interface is a multi-server advanced view that proposes from a single page most system metrics activity in single forms visualizations.
+                                        <br />
+                                        Each metric can be activated to access within the same page time oriented advanced charts.
+                                        <br />
+                                        <br />
+                                        This dashboard can be easily cloned to customize the list of servers to be monitored, and will be usable anywhere in Splunk, in or out of the Nmon App.
+                                    </p>
+
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </html>
         </panel>
@@ -21,7 +88,7 @@
         <panel>
             <html>
                 <div style="text-align: center;">
-                    <a class="button2 glow" target="_blank" href="Nmon_ANALYSER_AIX?form.osfilter=AIX">NMON ANALYSER</a>
+                    <a class="button2_lowpadding glow" target="_blank" href="Nmon_ANALYSER_AIX?form.osfilter=AIX">NMON ANALYSER</a>
                 </div>
             </html>
         </panel>
@@ -29,7 +96,7 @@
         <panel>
             <html>
                 <div style="text-align: center;">
-                    <a class="button2 glow" target="_blank" href="Nmon_baseline_AIX">NMON BASELINE</a>
+                    <a class="button2_lowpadding glow" target="_blank" href="Nmon_baseline_AIX">NMON BASELINE</a>
                 </div>
             </html>
         </panel>
@@ -58,7 +125,6 @@
         </panel>
     </row>
 
-
     <row>
         <panel>
             <html>
@@ -71,16 +137,404 @@
                 <div class="imgminiheader">
                     <h4>
                         <i>
-                            Data Categories:  <a href="search?q=search%20eventtype=nmon:*" target="_blank">Explore All</a> /
-                            Event Types: <a href="search?q=search%20eventtype%3Dnmon:performance" target="_blank">nmon:performance</a> (Performance data),
-                            <a href="search?q=search%20eventtype%3Dnmon:config" target="_blank">nmon:config</a> (Configuration data),
-                            <a href="search?q=search%20eventtype%3Dnmon:collect" target="_blank">nmon:collect</a> (Nmon raw data generation),
-                            <a href="search?q=search%20eventtype%3Dnmon:processing" target="_blank">nmon:processing</a> (Nmon raw data processing)
+                            Data Categories:  <a data-toggle="modal" data-target="#exploreall_modal">Explore All</a> /
+                            Event Types: <a data-toggle="modal" data-target="#performance_modal">nmon:performance</a> (Performance data),
+                            <a data-toggle="modal" data-target="#config_modal">nmon:config</a> (Configuration data),
+                            <a data-toggle="modal" data-target="#collect_modal">nmon:collect</a> (Nmon raw data generation),
+                            <a data-toggle="modal" data-target="#processing_modal" target="_blank">nmon:processing</a> (Nmon raw data processing)
                             &#160;-&#160;&#160;&#160;<a href="Help" target="_blank">About Nmon Performance Monitor</a>
                         </i>
                     </h4>
                 </div>
 
+                <!-- Modal -->
+                <div class="modal custom-modal-60 fade" id="exploreall_modal" tabindex="-1" role="dialog" aria-labelledby="Help_modal_Label">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"></span></button>
+                                <div style="text-align: left;">
+                                    <h4 class="modal-title" id="Help_modal_Label">Integrated Navigation:</h4>
+                                </div>
+                            </div>
+                            <div class="modal-body">
+
+                                <div style="text-align: center; color: lightslategrey;">
+                                    <img src="../../static/app/nmon/logos/NMON_simplelogo_48px.svg" alt="NMON"/>
+                                    <h1>Nmon data navigation</h1>
+                                </div>
+
+                                <div>
+                                    <br />
+                                    <br />
+                                    The Nmon application implements eventtypes to provide an easy and structured access to every piece of data within the app.
+                                    <br />
+                                    On the top most level, the main eventtype provides access to all raw data:
+                                </div>
+
+                                <div style="text-align: center;">
+                                    <div class="bootstrap_title">
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon" class="tryitbtnxxl">eventtype=nmon »
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                                <div>
+                                    On sub-levels, Top interest eventtypes will contain the performance metrics data (nmon:performance) and configuration data (nmon:config)
+                                    The nmon:collect eventtype contains information about nmon processes generation that will collect the performance and configuration data on servers.
+                                    The nmon:processing eventtype contains information about processing steps that converts the nmon data into usable data for Splunk.
+                                </div>
+
+                                <div style="text-align: center;">
+                                    <div class="bootstrap_title">
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance" class="tryitbtnxxl">eventtype=nmon:performance »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:config" class="tryitbtnxxl">eventtype=nmon:config »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:collect" class="tryitbtnxxl">eventtype=nmon:collect »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:processing" class="tryitbtnxxl">eventtype=nmon:processing »
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                                <div>
+                                    In the nmon:performance data, the "key" is the <b>type</b> field.
+                                    <br />
+                                    This field contains the monitor identifier that matches a category of metrics, such as "type=CPU_ALL". (global CPU usage in percentage)
+                                    <br />
+                                    For convenience, main monitors have been categorized into main eventtypes, but on the nmon:performance level any monitor can be filtered adding the "type=xxxx" search.
+                                </div>
+
+                                <div style="text-align: center;">
+                                    <div class="bootstrap_title">
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance:cpu" class="tryitbtnxxl">eventtype=nmon:performance:cpu »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance:memory" class="tryitbtnxxl">eventtype=nmon:performance:memory »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance:process" class="tryitbtnxxl">eventtype=nmon:performance:process »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance:kernel" class="tryitbtnxxl">eventtype=nmon:performance:kernel »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance:adapters" class="tryitbtnxxl">eventtype=nmon:performance:adapters »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance:storage" class="tryitbtnxxl">eventtype=nmon:performance:storage »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance:network" class="tryitbtnxxl">eventtype=nmon:performance:network »
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                                <div>
+                                    Note that searching for the CPU_ALL data for example, can be identically achieved by using "eventtype:nmon:performance type=CPU_ALL" or "eventtype:nmon:performance:cpu type=CPU_ALL".
+                                </div>
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal -->
+                <div class="modal custom-modal-60 fade" id="performance_modal" tabindex="-1" role="dialog" aria-labelledby="Help_modal_Label">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"></span></button>
+                                <div style="text-align: left;">
+                                    <h4 class="modal-title" id="Help_modal_Label">Integrated Navigation:</h4>
+                                </div>
+                            </div>
+                            <div class="modal-body">
+
+                                <div style="text-align: center; color: lightslategrey;">
+                                    <img src="../../static/app/nmon/logos/NMON_simplelogo_48px.svg" alt="NMON"/>
+                                    <h1>Nmon data navigation</h1>
+                                </div>
+
+                                <div>
+                                    <br />
+                                    <br />
+                                    The nmon:performance eventtype contains all the data related to performance metrics of your systems.
+                                    <br />
+                                    In the nmon:performance data, the "key" is the <b>type</b> field.
+                                    <br />
+                                    This field contains the monitor identifier that matches a category of metrics, such as "type=CPU_ALL". (global CPU usage in percentage)
+                                </div>
+
+                                <div style="text-align: center;">
+                                    <div class="bootstrap_title">
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance" class="tryitbtnxxl">eventtype=nmon:performance »
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                                <div>
+                                    For convenience, main monitors have been categorized into main eventtypes, but on the nmon:performance level any monitor can be filtered adding the "type=xxxx" search.
+                                </div>
+
+                                <div style="text-align: center;">
+                                    <div class="bootstrap_title">
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance:cpu" class="tryitbtnxxl">eventtype=nmon:performance:cpu »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance:memory" class="tryitbtnxxl">eventtype=nmon:performance:memory »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance:process" class="tryitbtnxxl">eventtype=nmon:performance:process »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance:kernel" class="tryitbtnxxl">eventtype=nmon:performance:kernel »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance:adapters" class="tryitbtnxxl">eventtype=nmon:performance:adapters »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance:storage" class="tryitbtnxxl">eventtype=nmon:performance:storage »
+                                        </a>
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:performance:network" class="tryitbtnxxl">eventtype=nmon:performance:network »
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                                <div>
+                                    Note that searching for the CPU_ALL data for example, can be identically achieved by using "eventtype:nmon:performance type=CPU_ALL" or "eventtype:nmon:performance:cpu type=CPU_ALL".
+                                </div>
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal -->
+                <div class="modal custom-modal-60 fade" id="config_modal" tabindex="-1" role="dialog" aria-labelledby="Help_modal_Label">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"></span></button>
+                                <div style="text-align: left;">
+                                    <h4 class="modal-title" id="Help_modal_Label">Integrated Navigation:</h4>
+                                </div>
+                            </div>
+                            <div class="modal-body">
+
+                                <div style="text-align: center; color: lightslategrey;">
+                                    <img src="../../static/app/nmon/logos/NMON_simplelogo_48px.svg" alt="NMON"/>
+                                    <h1>Nmon data navigation</h1>
+                                </div>
+
+                                <div>
+                                    <br />
+                                    <br />
+                                    The nmon:config eventtype contains all the data related to the configuration of your systems.
+                                    <br />
+                                    <br />
+                                    These are the AAA and BBB* sections of nmon raw data, generated during the nmon binary startup.
+                                    <br />
+                                    The events are long multi-lines events stored per host, in default configuration these data will be extracted almost every 2 hours as the data will not change unless
+                                    a new nmon process gets launched.
+                                </div>
+
+                                <div style="text-align: center;">
+                                    <div class="bootstrap_title">
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:config" class="tryitbtnxxl">eventtype=nmon:config »
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                                <div>
+                                    The nmon:config data is associated with the generation of the nmon_inventory lookup and the Nmon_Config data model.
+                                    <br />
+                                    The nmon_inventory lookup table is being generated by a scheduled report (which runs by default every hour) that extracts main configuration items (number of CPUs, volume of physical memory...)
+                                    from the nmon:configuration data over the Nmon_Config data model.
+                                    <br />
+                                    Once the nmon_inventory data has been generated, it is ready to be used and explored within various interfaces.
+                                </div>
+
+                                <div style="text-align: center;">
+                                    <div class="bootstrap_title">
+
+                                        <a target="_blank" href="UI_Nmon_CONFIG" class="tryitbtnxxl">CONFIG interface (raw config viewer) »
+                                        </a>
+
+                                        <a target="_blank" href="UI_Nmon_CONFIG_simple_inventory" class="tryitbtnxxl">INVENTORY interface (config reporting) »
+                                        </a>
+
+                                        <a target="_blank" href="pivot?model=%2FservicesNS%2Fnobody%2Fnmon%2Fdatamodel%2Fmodel%2FNMON_Config" class="tryitbtnxxl">NMON_Config datamodel »
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal -->
+                <div class="modal custom-modal-60 fade" id="collect_modal" tabindex="-1" role="dialog" aria-labelledby="Help_modal_Label">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"></span></button>
+                                <div style="text-align: left;">
+                                    <h4 class="modal-title" id="Help_modal_Label">Integrated Navigation:</h4>
+                                </div>
+                            </div>
+                            <div class="modal-body">
+
+                                <div style="text-align: center; color: lightslategrey;">
+                                    <img src="../../static/app/nmon/logos/NMON_simplelogo_48px.svg" alt="NMON"/>
+                                    <h1>Nmon data navigation</h1>
+                                </div>
+
+                                <div>
+                                    <br />
+                                    <br />
+                                    The nmon:collect eventtype contains all the data related to the nmon processes generation on your systems.
+                                    <br />
+                                    <br />
+                                    These are the ouput of the input script "nmon_helper.sh" thats gets automatically launched by Splunk when deploying the Nmon App.
+                                    <br />
+                                    By default, the nmon_helper.sh script gets started every minute, its main job is to verify the status of the current nmon process, and start a new one if conditions requires it.
+                                </div>
+
+                                <div style="text-align: center;">
+                                    <div class="bootstrap_title">
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:collect" class="tryitbtnxxl">eventtype=nmon:collect »
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                                <div>
+                                    Many nmon starting options can be controlled through the "nmon.conf" configuration file during the deployment of the App, get more information on the online Wiki:
+                                </div>
+
+                                <div style="text-align: center;">
+                                    <div class="bootstrap_title">
+
+                                        <a target="_blank" href="http://nmonsplunk.wikidot.com/documentation:reference-materials:nmonhelper" class="tryitbtnxxl">Online help: nmon_helper.sh »
+                                        </a>
+
+                                        <a target="_blank" href="http://nmonsplunk.wikidot.com/documentation:userguide:configuration-files:nmonconf" class="tryitbtnxxl">Online help: nmon.conf »
+                                        </a>
+
+                                        <a target="_blank" href="http://nmonsplunk.wikidot.com/documentation:userguide:configure:collection" class="tryitbtnxxl">Online help: manage nmon collection »
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal -->
+                <div class="modal custom-modal-60 fade" id="processing_modal" tabindex="-1" role="dialog" aria-labelledby="Help_modal_Label">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"></span></button>
+                                <div style="text-align: left;">
+                                    <h4 class="modal-title" id="Help_modal_Label">Integrated Navigation:</h4>
+                                </div>
+                            </div>
+                            <div class="modal-body">
+
+                                <div style="text-align: center; color: lightslategrey;">
+                                    <img src="../../static/app/nmon/logos/NMON_simplelogo_48px.svg" alt="NMON"/>
+                                    <h1>Nmon data navigation</h1>
+                                </div>
+
+                                <div>
+                                    <br />
+                                    <br />
+                                    The nmon:processing eventtype contains all the data related to the nmon processing steps that converts nmon data into usable data for Splunk.
+                                    <br />
+                                    <br />
+                                    These are the ouput of nmon2csv Python and Perl parsers provided within the App.
+                                    <br />
+                                    Every time an existing raw nmon file is updated, or a new one gets created, Splunk will call parsers scripts and generate appropriated data.
+                                </div>
+
+                                <div style="text-align: center;">
+                                    <div class="bootstrap_title">
+
+                                        <a target="_blank" href="search?q=search%20eventtype=nmon:processing" class="tryitbtnxxl">eventtype=nmon:processing »
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                                <div>
+                                    Many nmon starting options can be controlled through the "nmon.conf" configuration file during the deployment of the App, get more information on the online Wiki:
+                                </div>
+
+                                <div style="text-align: center;">
+                                    <div class="bootstrap_title">
+
+                                        <a target="_blank" href="http://nmonsplunk.wikidot.com/documentation:userguide:sourcetype:nmon-processing" class="tryitbtnxxl">Online help: brief description »
+                                        </a>
+
+                                        <a target="_blank" href="http://nmonsplunk.wikidot.com/documentation:reference-materials:nmon2csv" class="tryitbtnxxl">Online help: parsers documentation »
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
 
             </html>
             <single>
@@ -108,6 +562,7 @@
             </single>
             <single>
                 <search ref="Volume of Data indexed Today"></search>
+                <option name="numberPrecision">0.00</option>
                 <option name="linkView">search</option>
                 <option name="afterLabel">MB Indexed</option>
                 <option name="underLabel">TODAY / EVOLUTION VS YESTERDAY</option>
@@ -226,12 +681,6 @@
                         </span>
                     </a>
 
-                    <a target="_blank" href="UI_RT_Nmon_CPU_ALL?form.osfilter=AIX" class="rt">
-                        <span title="Click here to access Real Time search simplified interface for this section">
-                            <img src="../../static/app/nmon/logos/Others/RT_icon.png" alt="RT"/>
-                        </span>
-                    </a>
-
                 </div>
 
                 <div class="cat_title">
@@ -246,12 +695,6 @@
 &#013;
 • Statistics can be returned in global usage or main category: Sys,User,Wait,Idle">
                             ALL OS: Percentage of CPU Utilization per logical core
-                        </span>
-                    </a>
-
-                    <a target="_blank" href="UI_RT_Nmon_CPUnn?form.osfilter=AIX" class="rt">
-                        <span title="Click here to access Real Time search simplified interface for this section">
-                            <img src="../../static/app/nmon/logos/Others/RT_icon.png" alt="RT"/>
                         </span>
                     </a>
 
@@ -272,12 +715,6 @@
                         </span>
                     </a>
 
-                    <a target="_blank" href="UI_RT_Nmon_LPAR_AIX" class="rt">
-                        <span title="Click here to access Real Time search simplified interface for this section">
-                            <img src="../../static/app/nmon/logos/Others/RT_icon.png" alt="RT"/>
-                        </span>
-                    </a>
-
                 </div>
 
                 <div class="cat_title">
@@ -292,12 +729,6 @@
 &#013;
 • For IBM P6 generation and more, a Micro Partition that has App access will return the load of it's Pool, and the load of the PSeries if it is part of the DefaultPool">
                             Pool Virtual CPU Utilization
-                        </span>
-                    </a>
-
-                    <a target="_blank" href="UI_RT_Nmon_LPAR_AIX_poolconso" class="rt">
-                        <span title="Click here to access Real Time search simplified interface for this section">
-                            <img src="../../static/app/nmon/logos/Others/RT_icon.png" alt="RT"/>
                         </span>
                     </a>
 
@@ -320,6 +751,19 @@
 
                 </div>
 
+                <div class="cat_title">
+
+                    <a dtarget="_blank" href="UI_Nmon_WLM_AIX?form.monitor=WLMCPU" class="tryitbtn">WLM CPU »
+                    </a>
+
+                    <a target="_blank" href="UI_Nmon_WLM_AIX?form.monitor=WLMCPU">
+                        <span title="CPU Utilization statistics in Percentage (%) for Workload Manager &#013;">
+                            Workload Manager CPU %
+                        </span>
+                    </a>
+
+                </div>
+
             </html>
 
         </panel>
@@ -334,7 +778,7 @@
 
                 <div class="imgheader">
                     <img src="../../static/app/nmon/icons/grey_theme/process.png" alt="Process"/>
-                    <h2><a href="UI_data_dictionary?form.osfilter=AIX%3Dtrue&amp;form.itemfilter=KERNEL%20STATISTICS&amp;form.itemfilter=PROCESSES%20STATISTICS&amp;form.itemfilter=PAGING%20STATISTICS&amp;form.itemfilter=FIBER%20CHANNEL%20STATISTICS" target="_blank">Process, Kernel, I/O Statistics</a></h2>
+                    <h2><a href="UI_data_dictionary?form.osfilter=AIX%3Dtrue&amp;form.itemfilter=KERNEL%20STATISTICS&amp;form.itemfilter=PROCESSES%20STATISTICS&amp;form.itemfilter=PAGING%20STATISTICS&amp;form.itemfilter=FIBER%20CHANNEL%20STATISTICS&amp;form.itemfilter=BLOCK%20STATISTICS" target="_blank">Process, Kernel, I/O Statistics</a></h2>
 
                 </div>
 
@@ -362,10 +806,10 @@
 
                 <div class="cat_title">
 
-                    <a target="_blank" href="UI_Nmon_UARG?form.osfilter=AIX" class="tryitbtn">UARG »
+                    <a target="_blank" href="UI_Nmon_UARG_AIX" class="tryitbtn">UARG »
                     </a>
 
-                    <a target="_blank" href="UI_Nmon_UARG?form.osfilter=AIX">
+                    <a target="_blank" href="UI_Nmon_UARG_AIX">
                         <span title="Search for PIDs, Commands and Full Arguments of Processes &#013;
 &#013;
 • With UARG, get detailed information about Commands registered: PID, Full arguments and more &#013;
@@ -458,6 +902,19 @@ And more">
 
                 </div>
 
+                <div class="cat_title">
+
+                    <a dtarget="_blank" href="UI_Nmon_WLM_AIX?form.monitor=WLMBIO" class="tryitbtn">WLM BIO »
+                    </a>
+
+                    <a target="_blank" href="UI_Nmon_WLM_AIX?form.monitor=WLMBIO">
+                        <span title="Block I/O Utilization statistics in Percentage (%) for Workload Manager &#013;">
+                            Workload Manager Block I/O %
+                        </span>
+                    </a>
+
+                </div>
+
             </html>
 
         </panel>
@@ -523,6 +980,19 @@ And more">
 &#013;
 • Cache Hit Ratio, System Buffer Accesses...">
                             Various Memory Statistics
+                        </span>
+                    </a>
+
+                </div>
+
+                <div class="cat_title">
+
+                    <a dtarget="_blank" href="UI_Nmon_WLM_AIX?form.monitor=WLMMEM" class="tryitbtn">WLM MEM »
+                    </a>
+
+                    <a target="_blank" href="UI_Nmon_WLM_AIX?form.monitor=WLMMEM">
+                        <span title="Memory Utilization statistics in Percentage (%) for Workload Manager &#013;">
+                            Workload Manager Memory %
                         </span>
                     </a>
 
@@ -803,18 +1273,16 @@ And more">
 
                 <div class="cat_title">
 
-                    <a target="_blank" href="../../../dj/en-us/nmon/UI_Predict_dj" class="tryitbtn-alt">PREDICTIVE »
+                    <a target="_blank" href="UI_Nmon_predict?form.osfilter=AIX" class="tryitbtn-alt">PREDICTIVE »
                     </a>
 
-                    <a target="_blank" href="../../../dj/en-us/nmon/UI_Predict_dj">
+                    <a target="_blank" href="UI_Nmon_predict?form.osfilter=AIX">
                         <span title="CPU Predictive Analysis Interface &#013;
 &#013;
 • Using the predict Splunk command, this interface will help trying to estimate future CPU load of your systems &#013;
 &#013;
-• Choose between available algorithms: Local Level (LL), Seasonal Local Level (LLP) and Local Level Trend (LLT) &#013;
-&#013;
-• Interact with the Prediction adding your own input knowledge to take in consideration futures projects and so on">
-                            CPU Usage Predictive Interface
+• Choose between available algorithms: Local Level (LL), Seasonal Local Level (LLP) and Local Level Trend (LLT) &#013;">
+                            Predictive interface, forecast future using predict
                         </span>
                     </a>
 
@@ -867,7 +1335,7 @@ And more">
 
                 <div class="cat_title">
 
-                    <a target="_blank" href="Dashboard_BubbleChart_top_hosts_AIX" class="tryitbtn-alt">TOP CPU »
+                    <a target="_blank" href="Dashboard_BubbleChart_top_hosts_AIX" class="tryitbtn-alt">TOP HOSTS DASH »
                     </a>
 
                     <a target="_blank" href="Dashboard_BubbleChart_top_hosts_AIX">
@@ -886,18 +1354,18 @@ And more">
 
                 <div class="cat_title">
 
-                    <a target="_blank" href="../../../dj/en-us/nmon/UI_TOPChart_dj_AIX" class="tryitbtn-alt">TOP CPU »
+                    <a target="_blank" href="Dashboard_bulletcharts?form.osfilter=AIX" class="tryitbtn-alt">BULLET DASH »
                     </a>
 
-                    <a target="_blank" href="../../../dj/en-us/nmon/UI_TOPChart_dj_AIX">
-                        <span title="PieChart: TOP Hosts CPU and Memory Usage &#013;
+                    <a target="_blank" href="Dashboard_bulletcharts?form.osfilter=AIX">
+                        <span title="Bullet charts Dashboard: Analysis of main system metrics in bullet charts &#013;
 &#013;
-• Evaluate the TOP 30 CPU Usage hosts in d3chart Donut chart / CPU Usage hosts in Statistics table &#013;
+• TOP hosts by CPU usage / TOP hosts by physical and virtual memory usage &#013;
 &#013;
-• Evaluate the TOP 30 Real Memory Usage hosts in d3chart Donut chart / Real Memory Usage hosts in Statistics table &#013;
+• TOP Commands (processes) consumming CPU and Memory in your deployment &#013;
 &#013;
-• Evaluate the TOP 30 Virtual Memory Usage hosts in d3chart Donut chart / Virtual Memory Usage hosts in Statistics table">
-                            PieChart: TOP hosts CPU Usage
+• Advanced drilldown facilities for insight analysis">
+                            Bullet Chart: TOP Servers / TOP Processes
                         </span>
                     </a>
 
@@ -905,17 +1373,17 @@ And more">
 
                 <div class="cat_title">
 
-                    <a target="_blank" href="../../../dj/en-us/nmon/UI_Usage_per_process_dj_AIX" class="tryitbtn-alt">TOP CPU &amp; MEM »
+                    <a target="_blank" href="Dashboard_Bubblechart_top_processes?&amp;form.osfilter=AIX" class="tryitbtn-alt">TOP PROCESSES DASH »
                     </a>
 
-                    <a target="_blank" href="../../../dj/en-us/nmon/UI_Usage_per_process_dj_AIX">
+                    <a target="_blank" href="Dashboard_Bubblechart_top_processes?&amp;form.osfilter=AIX">
                         <span title="D3chart: Processes CPU and Memory Usage &#013;
 &#013;
 • Evaluate Processes CPU and Memory usage in d3chart BubbleChart to instantly represent major Command invocations &#013;
 &#013;
 • Represent this CPU / Memory usage in a d3chart chart over time &#013;
 &#013;">
-                            D3chart: Processes CPU and Memory Usage
+                            Processes CPU and Memory Usage
                         </span>
                     </a>
 
