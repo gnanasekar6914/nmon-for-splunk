@@ -28,7 +28,7 @@ Documentation:
 --------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    introduction
    deployment_matrix
@@ -42,3 +42,4 @@ Documentation:
    installation_splunkcloud
    installation_central_repositories
    rsyslog_deployment
+   Userguide
