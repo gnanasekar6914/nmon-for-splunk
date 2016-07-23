@@ -282,7 +282,7 @@ max("TOP_ALLOS.pct_CPU") AS pct_CPU by _time, "TOP_ALLOS.hostname", "TOP_ALLOS.l
                 <option name="nmon.radial_meter.maxRangeColor">#b44441</option>
                 <option name="nmon.radial_meter.maxRangeThreshold">85</option>
                 <option name="nmon.radial_meter.caption">Max %CPU</option>
-                <option name="height">180px</option>
+                <option name="height">180</option>
             </viz>
         </panel>
         <panel>
@@ -303,7 +303,7 @@ max("TOP_ALLOS.pct_CPU") AS pct_CPU by _time, "TOP_ALLOS.hostname", "TOP_ALLOS.l
                 <option name="nmon.radial_meter.maxRangeColor">#b44441</option>
                 <option name="nmon.radial_meter.maxRangeThreshold">85</option>
                 <option name="nmon.radial_meter.caption">Avg %CPU</option>
-                <option name="height">180px</option>
+                <option name="height">180</option>
             </viz>
         </panel>
         <panel>
@@ -324,7 +324,7 @@ max("TOP_ALLOS.pct_CPU") AS pct_CPU by _time, "TOP_ALLOS.hostname", "TOP_ALLOS.l
                 <option name="nmon.radial_meter.maxRangeColor">#b44441</option>
                 <option name="nmon.radial_meter.maxRangeThreshold">85</option>
                 <option name="nmon.radial_meter.caption">Median %CPU</option>
-                <option name="height">180px</option>
+                <option name="height">180</option>
             </viz>
         </panel>
     </row>
@@ -361,7 +361,6 @@ max("TOP_ALLOS.pct_CPU") AS pct_CPU by _time, "TOP_ALLOS.hostname", "TOP_ALLOS.l
                 </search>
                 <option name="drilldown">none</option>
                 <option name="underLabel">Operating System Level</option>
-                <option name="linkView">search</option>
             </single>
 
         </panel>
@@ -382,7 +381,6 @@ max("TOP_ALLOS.pct_CPU") AS pct_CPU by _time, "TOP_ALLOS.hostname", "TOP_ALLOS.l
                 </search>
                 <option name="drilldown">none</option>
                 <option name="underLabel">Processor Type</option>
-                <option name="linkView">search</option>
             </single>
 
         </panel>
@@ -396,8 +394,7 @@ max("TOP_ALLOS.pct_CPU") AS pct_CPU by _time, "TOP_ALLOS.hostname", "TOP_ALLOS.l
                 </search>
                 <option name="drilldown">none</option>
                 <option name="underLabel">Total Memory</option>
-                <option name="linkView">search</option>
-                <option name="afterLabel">MB</option>
+                <option name="unit">MB</option>
             </single>
 
             <single>
@@ -406,8 +403,7 @@ max("TOP_ALLOS.pct_CPU") AS pct_CPU by _time, "TOP_ALLOS.hostname", "TOP_ALLOS.l
                 </search>
                 <option name="drilldown">none</option>
                 <option name="underLabel">Total Paging Space</option>
-                <option name="linkView">search</option>
-                <option name="afterLabel">MB</option>
+                <option name="unit">MB</option>
             </single>
 
         </panel>
@@ -466,7 +462,7 @@ max("CPU.lpar_vp_usage") AS vp_usage max("CPU.cpu_PCT") AS pct_usage by _time, "
                 <option name="charting.layout.splitSeries">0</option>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">bottom</option>
-                <option name="height">350px</option>
+                <option name="height">350</option>
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisTitleY.text">$CPU_datasource_minilabel$</option>
                 <option name="charting.axisY.minimumNumber">0</option>
@@ -502,7 +498,7 @@ groupby _time, "DISKXFER.hostname", "DISKXFER.device" prestats=true span=1m
                 <option name="charting.layout.splitSeries">0</option>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">bottom</option>
-                <option name="height">350px</option>
+                <option name="height">350</option>
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisTitleY.text">I/O per second</option>
                 <option name="charting.axisY.minimumNumber">0</option>
@@ -585,7 +581,7 @@ avg("CPU.Wait_PCT") AS "Wait %"</query>
                 <option name="charting.legend.placement">top</option>
                 <option name="charting.axisY.minimumNumber">0</option>
                 <option name="charting.axisY.maximumNumber">100</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
             </chart>
         </panel>
     </row>
@@ -633,7 +629,7 @@ avg("CPU.Wait_PCT") AS "Wait %"</query>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">top</option>
                 <option name="charting.axisY.minimumNumber">0</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
             </chart>
         </panel>
     </row>
@@ -676,7 +672,7 @@ avg("CPU.Wait_PCT") AS "Wait %"</query>
                 <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">top</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
             </chart>
         </panel>
     </row>
@@ -722,7 +718,7 @@ avg("CPU.Wait_PCT") AS "Wait %"</query>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">top</option>
                 <option name="charting.axisY.minimumNumber">0</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
             </chart>
         </panel>
     </row>
@@ -770,7 +766,7 @@ avg("CPU.Wait_PCT") AS "Wait %"</query>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">top</option>
                 <option name="charting.axisY.minimumNumber">0</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
             </chart>
         </panel>
     </row>
@@ -816,7 +812,7 @@ avg("CPU.Wait_PCT") AS "Wait %"</query>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">top</option>
                 <option name="charting.axisY.minimumNumber">0</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
             </chart>
         </panel>
     </row>
@@ -862,7 +858,7 @@ avg("CPU.Wait_PCT") AS "Wait %"</query>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">top</option>
                 <option name="charting.axisY.minimumNumber">0</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
             </chart>
         </panel>
     </row>
@@ -930,7 +926,7 @@ avg("CPU.Wait_PCT") AS "Wait %"</query>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">top</option>
                 <option name="charting.axisY.minimumNumber">0</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
             </chart>
         </panel>
         <panel>
@@ -973,7 +969,7 @@ avg("CPU.Wait_PCT") AS "Wait %"</query>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">top</option>
                 <option name="charting.axisY.minimumNumber">0</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
             </chart>
         </panel>
     </row>
@@ -1019,7 +1015,7 @@ avg("CPU.Wait_PCT") AS "Wait %"</query>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">top</option>
                 <option name="charting.axisY.minimumNumber">0</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
             </chart>
         </panel>
         <panel>
@@ -1061,7 +1057,7 @@ avg("CPU.Wait_PCT") AS "Wait %"</query>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">top</option>
                 <option name="charting.axisY.minimumNumber">0</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
             </chart>
         </panel>
     </row>
@@ -1102,7 +1098,7 @@ groupby _time MEM.hostname prestats=true span=1m
                 <option name="charting.layout.splitSeries">0</option>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">bottom</option>
-                <option name="height">350px</option>
+                <option name="height">350</option>
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisTitleY.text">Percentage (%)</option>
                 <option name="charting.axisY.minimumNumber">0</option>
@@ -1155,7 +1151,7 @@ max("TOP_ALLOS.pct_CPU") AS pct_CPU by _time, "TOP_ALLOS.hostname", "TOP_ALLOS.l
                 <option name="charting.layout.splitSeries">0</option>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">bottom</option>
-                <option name="height">350px</option>
+                <option name="height">350</option>
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisY.minimumNumber">0</option>
                 <option name="charting.axisTitleY.text">Logical Core</option>
@@ -1289,7 +1285,7 @@ avg(swapused_MB) AS swapused_MB avg(swapfree_MB) AS swapfree_MB avg(swaptotal_MB
                 <option name="charting.layout.splitSeries">0</option>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">bottom</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisTitleY.text">volume (MB)</option>
                 <option name="charting.axisY.minimumNumber">0</option>
@@ -1324,7 +1320,7 @@ avg(swapused_MB) AS swapused_MB avg(swapfree_MB) AS swapfree_MB avg(swaptotal_MB
                 <option name="charting.layout.splitSeries">0</option>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">bottom</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisTitleY.text">Percentage (%)</option>
                 <option name="charting.axisY.minimumNumber">0</option>
@@ -1348,7 +1344,7 @@ avg(swapused_MB) AS swapused_MB avg(swapfree_MB) AS swapfree_MB avg(swaptotal_MB
                 <option name="charting.layout.splitSeries">0</option>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">bottom</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisTitleY.text">Megabytes (MB)</option>
                 <option name="charting.axisY.minimumNumber">0</option>
@@ -1376,7 +1372,7 @@ avg(swapused_MB) AS swapused_MB avg(swapfree_MB) AS swapfree_MB avg(swaptotal_MB
                 <option name="charting.layout.splitSeries">0</option>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">bottom</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisTitleY.text">volume (MB)</option>
                 <option name="charting.axisY.minimumNumber">0</option>
@@ -1411,7 +1407,7 @@ avg(swapused_MB) AS swapused_MB avg(swapfree_MB) AS swapfree_MB avg(swaptotal_MB
                 <option name="charting.layout.splitSeries">0</option>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">bottom</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisTitleY.text">Megabytes (MB)</option>
                 <option name="charting.axisY.minimumNumber">0</option>
@@ -1437,7 +1433,7 @@ avg(swapused_MB) AS swapused_MB avg(swapfree_MB) AS swapfree_MB avg(swaptotal_MB
                 <option name="charting.layout.splitSeries">0</option>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">bottom</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisTitleY.text">Megabytes (MB)</option>
                 <option name="charting.axisY.minimumNumber">0</option>
@@ -1478,11 +1474,11 @@ avg(swapused_MB) AS swapused_MB avg(swapfree_MB) AS swapfree_MB avg(swaptotal_MB
                 </search>
                 <option name="drilldown">none</option>
                 <option name="underLabel">TOP Process</option>
-                <option name="linkView">search</option>
                 <option name="numberPrecision">0.00</option>
-                <option name="beforeLabel">Command</option>
-                <option name="linkFields">result</option>
-                <option name="linkSearch">| tstats
+                <option name="unit">Command</option>
+                <option name="unitPosition">debore</option>
+                <drilldown target="search">
+                <link>search?q=| tstats
 max("TOP_ALLOS.pct_CPU") AS pct_CPU from datamodel=NMON_Data_TOP.TOP_ALLOS where (nodename = TOP_ALLOS) (TOP_ALLOS.hostname=$hostname$)
 groupby _time, "TOP_ALLOS.hostname", "TOP_ALLOS.logical_cpus", "TOP_ALLOS.Command", "TOP_ALLOS.PID" prestats=true span=1m
 | bucket _time span=1m
@@ -1500,7 +1496,8 @@ max("TOP_ALLOS.pct_CPU") AS pct_CPU by _time, "TOP_ALLOS.hostname", "TOP_ALLOS.l
 | stats avg(usage_per_core) as avg_usage_per_core, max(usage_per_core) as max_usage_per_core by Command
 | eval avg_usage_per_core=round(avg_usage_per_core,2)
 | eval max_usage_per_core=round(max_usage_per_core,2)
-| sort - avg_usage_per_core</option>
+| sort - avg_usage_per_core</link>
+                </drilldown>
             </single>
 
             <single>
@@ -1509,11 +1506,11 @@ max("TOP_ALLOS.pct_CPU") AS pct_CPU by _time, "TOP_ALLOS.hostname", "TOP_ALLOS.l
                 </search>
                 <option name="drilldown">none</option>
                 <option name="underLabel">Average Conso for this Command</option>
-                <option name="linkView">search</option>
                 <option name="numberPrecision">0.00</option>
-                <option name="beforeLabel">core conso</option>
-                <option name="linkFields">result</option>
-                <option name="linkSearch">| tstats
+                <option name="unit">core conso</option>
+                <option name="unitPosition">before</option>
+                <drilldown target="search">
+                    <link>search?q=| tstats
 max("TOP_ALLOS.pct_CPU") AS pct_CPU from datamodel=NMON_Data_TOP.TOP_ALLOS where (nodename = TOP_ALLOS) (TOP_ALLOS.hostname=$hostname$)
 groupby _time, "TOP_ALLOS.hostname", "TOP_ALLOS.logical_cpus", "TOP_ALLOS.Command", "TOP_ALLOS.PID" prestats=true span=1m
 | bucket _time span=1m
@@ -1531,7 +1528,8 @@ max("TOP_ALLOS.pct_CPU") AS pct_CPU by _time, "TOP_ALLOS.hostname", "TOP_ALLOS.l
 | stats avg(usage_per_core) as avg_usage_per_core, max(usage_per_core) as max_usage_per_core by Command
 | eval avg_usage_per_core=round(avg_usage_per_core,2)
 | eval max_usage_per_core=round(max_usage_per_core,2)
-| sort - avg_usage_per_core</option>
+| sort - avg_usage_per_core</link>
+                </drilldown>
             </single>
 
             <single>
@@ -1540,11 +1538,11 @@ max("TOP_ALLOS.pct_CPU") AS pct_CPU by _time, "TOP_ALLOS.hostname", "TOP_ALLOS.l
                 </search>
                 <option name="drilldown">none</option>
                 <option name="underLabel">Max Conso for this Command</option>
-                <option name="linkView">search</option>
                 <option name="numberPrecision">0.00</option>
-                <option name="beforeLabel">core conso</option>
-                <option name="linkFields">result</option>
-                <option name="linkSearch">| tstats
+                <option name="unit">core conso</option>
+                <option name="unitPosition">before</option>
+                <drilldown target="search">
+<link>search?q=| tstats
 max("TOP_ALLOS.pct_CPU") AS pct_CPU from datamodel=NMON_Data_TOP.TOP_ALLOS where (nodename = TOP_ALLOS) (TOP_ALLOS.hostname=$hostname$)
 groupby _time, "TOP_ALLOS.hostname", "TOP_ALLOS.logical_cpus", "TOP_ALLOS.Command", "TOP_ALLOS.PID" prestats=true span=1m
 | bucket _time span=1m
@@ -1562,7 +1560,8 @@ max("TOP_ALLOS.pct_CPU") AS pct_CPU by _time, "TOP_ALLOS.hostname", "TOP_ALLOS.l
 | stats avg(usage_per_core) as avg_usage_per_core, max(usage_per_core) as max_usage_per_core by Command
 | eval avg_usage_per_core=round(avg_usage_per_core,2)
 | eval max_usage_per_core=round(max_usage_per_core,2)
-| sort - avg_usage_per_core</option>
+| sort - avg_usage_per_core</link>
+                </drilldown>
             </single>
 
         </panel>
@@ -1604,7 +1603,7 @@ groupby _time, "TOP_Linux.frameID", "TOP_Linux.hostname", "TOP_Linux.logical_cpu
                     <option name="lineColor">#5379af</option>
                     <option name="fillColor">#CCDDFF</option>
                     <option name="lineWidth">1</option>
-                    <option name="height">25px</option>
+                    <option name="height">25</option>
                 </format>
             </table>
             <table depends="$is_AIX$">
@@ -1639,7 +1638,7 @@ groupby _time, "TOP_AIX.frameID", "TOP_AIX.hostname", "TOP_AIX.logical_cpus", "T
                     <option name="lineColor">#5379af</option>
                     <option name="fillColor">#CCDDFF</option>
                     <option name="lineWidth">1</option>
-                    <option name="height">25px</option>
+                    <option name="height">25</option>
                 </format>
             </table>
             <table depends="$is_Solaris$">
@@ -1673,7 +1672,7 @@ groupby _time, "TOP_Solaris.frameID", "TOP_Solaris.hostname", "TOP_Solaris.logic
                     <option name="lineColor">#5379af</option>
                     <option name="fillColor">#CCDDFF</option>
                     <option name="lineWidth">1</option>
-                    <option name="height">25px</option>
+                    <option name="height">25</option>
                 </format>
             </table>
         </panel>
@@ -1709,7 +1708,7 @@ groupby _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Comman
                     <option name="lineColor">#5379af</option>
                     <option name="fillColor">#CCDDFF</option>
                     <option name="lineWidth">1</option>
-                    <option name="height">25px</option>
+                    <option name="height">25</option>
                 </format>
             </table>
             <table depends="$is_AIX$">
@@ -1736,7 +1735,7 @@ groupby _time, "TOP_Linux.hostname", "TOP_Linux.logical_cpus", "TOP_Linux.Comman
                     <option name="lineColor">#5379af</option>
                     <option name="fillColor">#CCDDFF</option>
                     <option name="lineWidth">1</option>
-                    <option name="height">25px</option>
+                    <option name="height">25</option>
                 </format>
             </table>
             <table depends="$is_Solaris$">
@@ -1767,7 +1766,7 @@ groupby _time, "TOP_Solaris.frameID", "TOP_Solaris.hostname", "TOP_Solaris.logic
                     <option name="lineColor">#5379af</option>
                     <option name="fillColor">#CCDDFF</option>
                     <option name="lineWidth">1</option>
-                    <option name="height">25px</option>
+                    <option name="height">25</option>
                 </format>
             </table>
         </panel>
@@ -1867,7 +1866,7 @@ where (nodename = JFS.JFSFILE) (JFS.value&gt;=0) (JFS.hostname=$hostname$) ($fsf
                 <option name="charting.layout.splitSeries">0</option>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">$charting.legend.placement$</option>
-                <option name="height">500px</option>
+                <option name="height">500</option>
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisTitleY.text">% Used</option>
                 <option name="charting.axisY.minimumNumber">0</option>

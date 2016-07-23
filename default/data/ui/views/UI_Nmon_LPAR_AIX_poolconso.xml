@@ -283,8 +283,8 @@
                     <query>stats max(max_usage) AS max</query>
                 </search>
                 <option name="underLabel">Maximum Load</option>
-                <option name="afterLabel">$unity_minilabel$</option>
-                <option name="linkView">search</option>
+                <option name="unitPosition">after</option>
+                <option name="unit">$unity_minilabel$</option>
                 <option name="numberPrecision">0.00</option>
             </single>
 
@@ -293,8 +293,8 @@
                     <query>stats avg(avg_usage) AS avg | eval avg=round(avg,3)</query>
                 </search>
                 <option name="underLabel">Average Load</option>
-                <option name="afterLabel">$unity_minilabel$</option>
-                <option name="linkView">search</option>
+                <option name="unitPosition">after</option>
+                <option name="unit">$unity_minilabel$</option>
                 <option name="numberPrecision">0.00</option>
             </single>
 
@@ -303,8 +303,8 @@
                     <query>stats min(min_usage) AS min</query>
                 </search>
                 <option name="underLabel">Minimal Load</option>
-                <option name="afterLabel">$unity_minilabel$</option>
-                <option name="linkView">search</option>
+                <option name="unitPosition">after</option>
+                <option name="unit">$unity_minilabel$</option>
                 <option name="numberPrecision">0.00</option>
             </single>
 
@@ -321,7 +321,7 @@
                     <option name="lineColor">#5379af</option>
                     <option name="fillColor">#CCDDFF</option>
                     <option name="lineWidth">1</option>
-                    <option name="height">25px</option>
+                    <option name="height">25</option>
                 </format>
             </table>
 
@@ -424,7 +424,7 @@ $statsmode$(usage) As usage $addindicator$ by "CPU.hostname"</query>
                 <option name="charting.layout.splitSeries">0</option>
                 <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
                 <option name="charting.legend.placement">$charting.legend.placement$</option>
-                <option name="height">680px</option>
+                <option name="height">680</option>
                 <option name="charting.axisTitleX.text">Time</option>
                 <option name="charting.axisTitleY.text">$unity_label$</option>
                 <option name="charting.axisY.minimumNumber">0</option>

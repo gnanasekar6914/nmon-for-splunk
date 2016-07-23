@@ -61,7 +61,6 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         </search>
         <option name="drilldown">none</option>
         <option name="underLabel">HOSTS HAVE BEEN DEPLOYED</option>
-        <option name="linkView">search</option>
       </single>
       <single>
         <search base="Global_deploy">
@@ -69,7 +68,6 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         </search>
         <option name="drilldown">none</option>
         <option name="underLabel">NUMBER OF DEPLOYMENTS ACTIONS (initial deploy or upgrade)</option>
-        <option name="linkView">search</option>
       </single>
       <html>
         <!-- Placeholder/container for the link switcher to appear -->
@@ -103,7 +101,7 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         <option name="charting.legend.placement">top</option>
         <option name="charting.axisTitleY.text">Nbr Hosts</option>
         <option name="charting.axisTitleY2.text">Nbr Actions</option>
-        <option name="height">400px</option>
+        <option name="height">400</option>
       </chart>
       <table id="link2">
         <title>Events</title>
@@ -134,7 +132,6 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         </search>
         <option name="drilldown">none</option>
         <option name="underLabel">NUMBER OF DEPLOYMENT SERVER CLIENTS</option>
-        <option name="linkView">search</option>
       </single>
       <html>
         <!-- Placeholder/container for the link switcher to appear -->
@@ -153,7 +150,7 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         <option name="dataOverlayMode">none</option>
         <option name="drilldown">cell</option>
         <option name="count">10</option>
-        <option name="height">400px</option>
+        <option name="height">400</option>
       </chart>
       <chart id="link4">
         <title>Chart by os</title>
@@ -167,7 +164,7 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         <option name="dataOverlayMode">none</option>
         <option name="drilldown">cell</option>
         <option name="count">10</option>
-        <option name="height">400px</option>
+        <option name="height">400</option>
       </chart>
       <chart id="link5">
         <title>Chart by arch</title>
@@ -181,7 +178,7 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         <option name="dataOverlayMode">none</option>
         <option name="drilldown">cell</option>
         <option name="count">10</option>
-        <option name="height">400px</option>
+        <option name="height">400</option>
       </chart>
       <chart id="link6">
         <title>Chart by type</title>
@@ -195,7 +192,7 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         <option name="dataOverlayMode">none</option>
         <option name="drilldown">cell</option>
         <option name="count">10</option>
-        <option name="height">400px</option>
+        <option name="height">400</option>
       </chart>
 
 
@@ -255,7 +252,6 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         </search>
         <option name="drilldown">none</option>
         <option name="underLabel">HOSTS HAVE USED PYTHON</option>
-        <option name="linkView">search</option>
       </single>
       <single>
         <search base="Global_interpreter">
@@ -263,7 +259,6 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         </search>
         <option name="drilldown">none</option>
         <option name="underLabel">HOSTS HAVE USED PERL</option>
-        <option name="linkView">search</option>
       </single>
 
       <html>
@@ -281,7 +276,7 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         </search>
         <option name="charting.chart">pie</option>
         <option name="charting.axisY2.enabled">undefined</option>
-        <option name="height">300px</option>
+        <option name="height">300</option>
       </chart>
 
       <table id="link8">
@@ -313,7 +308,6 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         </search>
         <option name="drilldown">none</option>
         <option name="underLabel">DIFFERENT PYTHON VERSIONS</option>
-        <option name="linkView">search</option>
       </single>
 
       <html>
@@ -329,7 +323,7 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         </search>
         <option name="charting.chart">pie</option>
         <option name="charting.axisY2.enabled">undefined</option>
-        <option name="height">300px</option>
+        <option name="height">300</option>
       </chart>
       <table id="link10">
         <title>Table</title>
@@ -360,7 +354,6 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         </search>
         <option name="drilldown">none</option>
         <option name="underLabel">DIFFERENT PERL VERSIONS</option>
-        <option name="linkView">search</option>
       </single>
 
       <html>
@@ -376,7 +369,7 @@ SORT 0 hostname ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1</query>
         </search>
         <option name="charting.chart">pie</option>
         <option name="charting.axisY2.enabled">undefined</option>
-        <option name="height">300px</option>
+        <option name="height">300</option>
       </chart>
       <table id="link12">
         <title>Table</title>
