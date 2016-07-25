@@ -24,29 +24,82 @@ The Nmon Performance application implements the nmon/sarmon binaries to generate
 Data Types (sourcetype)
 ***********************
 
-* **sourcetype=nmon_data**
+--------------------
+sourcetype=nmon_data
+--------------------
 
-The "nmon_data" sourcetype available in the eventtype=nmon:performance contains all the data related to performance metrics of your systems.
+The "**nmon_data**" sourcetype available in the **eventtype=nmon:performance** contains all the data related to performance metrics of your systems.
 
 In the nmon:performance data, the "key" is the **type** field.
 
 This field contains the monitor identifier that matches a category of metrics, such as "type=CPU_ALL". (global CPU usage in percentage)
 
+----------------------
+sourcetype=nmon_config
+----------------------
 
+The "**nmon_config**" sourcetype available in the **eventtype=nmon:config** contains all the data related to the configuration of your systems.
 
+These are the AAA and BBB* sections of nmon raw data, generated during the nmon binary startup.
+The events are long multi-lines events stored per host, in default configuration these data will be extracted almost every 2 hours as the data will not change unless a new nmon process gets launched.
 
+The nmon:config data is associated with the generation of the nmon_inventory lookup and the Nmon_Config data model.
+
+-----------------------
+sourcetype=nmon_collect
+-----------------------
+
+The "**nmon_collect**" sourcetype available in the **eventtype=nmon:collect** contains all the data related to the nmon processes generation on your systems.
+
+These are the ouput of the input script "nmon_helper.sh" thats gets automatically launched by Splunk when deploying the Nmon App.
+By default, the nmon_helper.sh script gets started every minute, its main job is to verify the status of the current nmon process, and start a new one if conditions requires it.
+
+Many nmon starting options can be controlled through the "nmon.conf" configuration file during the deployment of the App.
+
+--------------------------
+sourcetype=nmon_processing
+--------------------------
+
+The "**nmon_processing**" sourceytpe available in the **eventtype=nmon:collect** contains all the data related to the nmon processing steps that converts nmon data into usable data for Splunk.
+
+These are the ouput of nmon2csv Python and Perl parsers provided within the App.
+Every time an existing raw nmon file is updated, or a new one gets created, Splunk will call parsers scripts and generate appropriated data.
+
+---------------------
+sourcetype=nmon_clean
+---------------------
+
+The "**nmon_clean**" sourceytpe available in the **eventtype=nmon:clean** contains all the data related to various cleaning steps operated by nmon_cleaner scripts.
+
+These scripts are responsible in cleaning raw nmon data file periodically, and also cleaning csv raw data in case of an unexpected Splunk failure to prevent from filling the file system with unconsumed csv data.
 
 ********************
 Lookups and KV Store
 ********************
 
+--------------
+nmon_inventory
+--------------
+
+**Nmon Inventory (nmon_inventory): Inventory Extraction of NMON data**
+
+The Nmon Inventory data is an important piece of the Application, it used by most views and interfaces to identify various things like the type of Operating System.
+
+The nmon_inventory data is build over the nmon_config sourcetype which contains the extraction of AAA and BBB* sections of Nmon:
+
+.. image:: img/splunk_nmon.png
+   :alt: splunk_nmon.png
+   :align: center
+
+
+
 ************************
 Main Configuration Files
 ************************
 
-************
+*********
 Configure
-************
+*********
 
 ************
 Troubleshoot
