@@ -83,13 +83,47 @@ nmon_inventory
 
 **Nmon Inventory (nmon_inventory): Inventory Extraction of NMON data**
 
-The Nmon Inventory data is an important piece of the Application, it used by most views and interfaces to identify various things like the type of Operating System.
+The Nmon Inventory data is an important piece of the Application, it is being used to provide useful inventory information about your servers with main configuration items. (CPU and memory configuration, uptime...)
 
 The nmon_inventory data is build over the nmon_config sourcetype which contains the extraction of AAA and BBB* sections of Nmon:
 
-.. image:: img/splunk_nmon.png
-   :alt: splunk_nmon.png
+.. image:: img/nmon_inventory1.png
+   :alt: nmon_inventory1.png
    :align: center
+
+To build with efficiency the nmon_inventory data, the Application uses the accelerated data model "NMON Config - Inventory Items extracted from Nmon raw data" and intensive regular expressions:
+
+.. image:: img/nmon_inventory2.png
+   :alt: nmon_inventory2.png
+   :align: center
+
+.. image:: img/nmon_inventory3.png
+   :alt: nmon_inventory3.png
+   :align: center
+
+.. image:: img/nmon_inventory4.png
+   :alt: nmon_inventory4.png
+   :align: center
+
+.. image:: img/nmon_inventory5.png
+   :alt: nmon_inventory5.png
+   :align: center
+
+.. image:: img/nmon_inventory6.png
+   :alt: nmon_inventory6.png
+   :align: center
+
+.. image:: img/nmon_inventory7.png
+   :alt: nmon_inventory7.png
+   :align: center
+
+.. image:: img/nmon_inventory8.png
+   :alt: nmon_inventory8.png
+   :align: center
+
+
+
+
 
 
 
