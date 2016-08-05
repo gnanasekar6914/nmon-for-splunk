@@ -1,37 +1,5 @@
 # props.conf
 
-##################################
-#			nmon2csv stanza			#
-##################################
-
-# IMPORTANT: Since the V1.6.0, the configuration uses the nmon2csv.sh wrapper that will call nmon2csv.py (prefered choice) or nmon2csv.pl if appropriated
-# You can still force the configuration to use the Python or Perl converter (but the nmon2csv.sh wrapper will do the choice for you, enforcing the choice is not required anymore)
-
-# *** BE UPGRADE RESILIENT: *** Copy this stanza to your local/props.conf to prevent futur upgrades from overwriting your setting
-
-# This source stanza will be called by the archive processor to convert NMON raw data into csv files
-# Splunk can manage. See inputs.conf for the associated monitor
-
-# To force nmon2csv parsers to always consider nmon files as realtime data, you can set the option "--mode realtime":
-# unarchive_cmd = C:\Program Files\Splunk\etc\apps\nmon\bin\nmon2csv.py --mode realtime
-# This is normally not necessary as parsers will automatically detect if we are dealing with realtime data
-
-# host name definition: by default, nmon2csv parsers will use the value returned by nmon for the host name definition. (available in the config section - AAA,host)
-# If you want to have hosts using their fully qualified domain name (fqdn) instead of the nmon hostname value, add the option "--use_fqdn" in the source stanza definition
-# the value of host name will be equivalent to the "hostname -f" command on the host.
-# **CAUTION**: Do use this option when managing nmon data generated out of Splunk (central repositories) or all the data being ingested will be identified as coming the host
-# that managed the nmon data
-# This option must be used on host that are only managing their own nmon data.
-
-# To activate fqdn:
-# unarchive_cmd = C:\Program Files\Splunk\etc\apps\nmon\bin\nmon2csv.py --use_fqdn
-
-[source::...\.*.nmon]
-invalid_cause = archive
-unarchive_cmd = C:\Program Files\Splunk\etc\apps\nmon\bin\nmon2csv.py
-sourcetype = nmon_processing
-NO_BINARY_CHECK = true
-
 ###########################################
 #			nmon converted csv stanza			#
 ###########################################
@@ -59,8 +27,8 @@ pulldown_type=true
 # Overwritting default host field based on event data for nmon_data sourcetype (useful when managing Nmon central shares)
 TRANSFORMS-hostfield=nmon_data_hostoverride
 
-# Automatically create the OStype field from nmon_inventory lookup
-LOOKUP-OStype = nmon_inventory hostname AS hostname OUTPUTNEW OStype AS OStype
+# OStype generation from nmon_inventory data has been removed in V1.7.3 since the field is generated at the row data level since V1.6.15
+# The nmon_inventory lookup table is now stored in a KV collection
 
 # A bug has affected string replacement in nmon2csv.py before V1.1.10
 # This can lead the LPAR section cpu usage stated vs VP to be returned as null
@@ -102,11 +70,13 @@ EVAL-lpar_vp_usage = case(OStype=="AIX", round(((VP_User_PCT+VP_Sys_PCT+VP_Wait_
 EVAL-lpar_vp_usage_PCT = case(OStype=="AIX", round((VP_User_PCT+VP_Sys_PCT+VP_Wait_PCT+VP_Idle_PCT),2), OStype=="Linux", round((PhysicalCPU/partition_active_processors*100),2))
 
 # For Power arch micro-partitions Pool statistics (AIX & PowerLinux)
-EVAL-lpar_pool_vp_usage = case(OStype=="AIX", round((poolCPUs-PoolIdle),3), OStype="Linux", round((system_active_processors-pool_idle_time),3))
-EVAL-lpar_pool_vp_usage_PCT = case(OStype=="AIX", round(((poolCPUs-PoolIdle)*100/poolCPUs),2), OStype="Linux", round((system_active_processors-pool_idle_time)/system_active_processors*100,2))
+# Note: For PowerLinux, at the perf collection startup the pool usage may report almost 100% usage which is incorrect, filtering with pool_idle_time>"0.1" will prevent from loading these data
+
+EVAL-lpar_pool_vp_usage = case(OStype=="AIX", round((poolCPUs-PoolIdle),3), OStype="Linux", case(pool_idle_time>"0.1" AND pool_idle_time<(pool_capacity/100), round(((pool_capacity/100)-pool_idle_time),3)) )
+EVAL-lpar_pool_vp_usage_PCT = case(OStype=="AIX", round(((poolCPUs-PoolIdle)*100/poolCPUs),2), OStype="Linux", case(pool_idle_time>"0.1" AND pool_idle_time<(pool_capacity/100), round(((pool_capacity/100)-pool_idle_time)/(pool_capacity/100)*100,2)) )
 
 # Normalize capacity information
-EVAL-lpar_pool_capacity = case(OStype=="AIX", poolCPUs, OStype="Linux", system_active_processors)
+EVAL-lpar_pool_capacity = case(OStype=="AIX", poolCPUs, OStype="Linux", (pool_capacity/100))
 EVAL-lpar_vp_capacity = case(OStype=="AIX", virtualCPUs, OStype="Linux", partition_active_processors)
 EVAL-lpar_entitled_capacity = case(OStype=="AIX", entitled, OStype="Linux", partition_entitled_capacity)
 
