@@ -2,9 +2,9 @@
 Deployment topologies
 =====================
 
-------------------------
-Splunk native deployment
-------------------------
+---------------------------
+1. Splunk native deployment
+---------------------------
 
 **There are multiple ways to deploy and use the Nmon for Splunk App, the first thing you need to remember is that the App can globally operate in 2 different modes, as follows:**
 
@@ -36,14 +36,16 @@ This is an example of deployment for standard scenario with a single Heavy Forwa
    :alt: topology3_colddata_example.png
    :align: center
 
------------------
-Syslog deployment
------------------
+--------------------
+2. Syslog deployment
+--------------------
 
 **Additionally and since the version 1.6.14, it is possible to use Syslog as the transport layer associated with a third party package called "nmon-logger"**
 
 This deployment topology offers 100% of application functionality without any deployment of Universal Forwarders on end servers, using rsyslog or syslog-ng.
 Such a deployment will for example answers to people that cannot or don't want to install any third party agent.
+
+**The nmon-logger package is available for download in GitHub:** https://github.com/guilhemmarchand/nmon-logger
 
 Such deployment will use and require and/or recommended:
 
@@ -55,7 +57,7 @@ Such deployment will use and require and/or recommended:
 
 * logrotate
 
-Note that this deployment scenario will be recommended mostly with modern Linux deployment scenarios.
+Note that this deployment scenario will be recommended mostly with a modern Linux deployment.
 Although all pieces of software should work fine too on AIX and Solaris, this requires quite up to date versions (for rsyslog / syslog-ng), which could be complex on older OS.
 
 **Example 1: Splunk Universal or Heavy forwarder installed on main syslog-ng collectors:**

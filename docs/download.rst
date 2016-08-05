@@ -5,12 +5,21 @@ Download
 Official Splunk certified release
 =================================
 
-The official and Splunk certified release can be downloaded from Splunk Base: https://splunkbase.splunk.com/app/1753
+The official and Splunk certified release of the Nmon core application can be downloaded from Splunk Base: https://splunkbase.splunk.com/app/1753
+
+The official release of the TA-nmon can be downloaded from Splunk Base: https://splunkbase.splunk.com/app/3248
 
 Github releases
 ===============
 
 The Nmon Performance Monitor is hosted on a Github project, you can freely download the application from the Github project page: https://github.com/guilhemmarchand/nmon-for-splunk
+
+The TA-nmon has also its own Github project: https://github.com/guilhemmarchand/TA-nmon
+
+An alternative version of the TA-nmon called "TA-nmon_selfmode" is also available for download from Github: https://github.com/guilhemmarchand/TA-nmon_selfmode
+
+*This TA-nmon alternative package is supported on Splunk instances and will implement an input script to monitor nmon files instead of the Splunk TailRead / ArchiveProcessor, you should only use in case of unexpected issue with Splunk.*
+
 
 **About main branches and associated versions:**
 
@@ -43,16 +52,17 @@ When downloading from Github, you MUST rename the directory to "nmon" or the App
 Stopped releases for old Splunk versions
 ========================================
 
-As the Nmon Performance Monitor attempts to get the better from Splunk new behaviors, it is possible that new releases will stop being compatible with old Splunk versions.
-
-When this is the case, the master cycle is stopped, and a cold branch will be created to host the tgz archive corresponding to that version.
+As the Nmon Performance Monitor attempts to get the better from Splunk new features, it is possible that new releases will stop being compatible with old Splunk versions.
 
 *Currently, here are stopped versions for older Splunk releases:*
 
-* Last version compatible with Splunk 6.1.x: (not Splunk certified)
+* Last version compatible with Splunk 6.1.x, with release 1.4.902 (not Splunk certified)
 
 https://github.com/guilhemmarchand/nmon-for-splunk/blob/last_release_splunk_61x
 
+* Last version compatible with Splunk 6.2.x with release 1.6.15 (Splunk certified)
+
+https://github.com/guilhemmarchand/nmon-for-splunk/releases
 
 
 

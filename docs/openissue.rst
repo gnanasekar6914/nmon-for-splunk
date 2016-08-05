@@ -8,4 +8,4 @@ For any bug reporting, or enhancement request about the Nmon Performance applica
 
 * Open an issue on the Git project home page: https://github.com/guilhemmarchand/nmon-for-splunk/issues
 
-* By mail: guilhem.marchand@gmail.com
+* Get in touch by mail: guilhem.marchand@gmail.com

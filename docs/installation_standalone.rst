@@ -8,12 +8,14 @@ Installation for standalone instance
 
 **Standalone deployment: A single Splunk instance does all**
 
-+------------------------+------------+----------+----------+
-| Splunk Instance        | Core App   | PA-nmon  | TA-nmon  |
-| (role description)     |            |          |          |
-+========================+============+==========+==========+
-| Standalone             |     X      |          |          |
-+------------------------+------------+----------+----------+
++------------------------+------------+----------+-------------------+
+| Splunk Instance        | Core App   | PA-nmon  | TA-nmon           |
+| (role description)     |            |          |                   |
++========================+============+==========+===================+
+| Standalone             |     X      |          | X (optional)      |
++------------------------+------------+----------+-------------------+
+
+*optional: The TA-nmon provides nmon performance and configuration collection for the host than runs the add-on, which is optional*
 
 Installing with Splunk Web
 ==========================

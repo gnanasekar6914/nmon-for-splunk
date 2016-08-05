@@ -12,15 +12,15 @@ Requirements
 
 * Universal Forwarders clients system lacking a Python 2.7.x interpreter requires Perl WITH Time::HiRes module available
 
-* Proceed to upgrade as usual, people running Splunk 6.3.x please read: http://nmonsplunk.wikidot.com/documentation:userguide:upgrade:v1-7-0-for-splunk63x
-
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 What has been fixed by release
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 =====================
-V1.7.0: Major release
+V1.7.4: Major release
 =====================
+
+Please review update notes: http://nmonsplunk.wikidot.com/documentation:userguide:upgrade:upgrade-notes-v17x
 
 - Removing of the django deprecated django stack, all views were migrated to simple xml views
 - New global bootstrap navigation scheme for easy and efficient user experience with the integrated navigation
@@ -31,8 +31,12 @@ V1.7.0: Major release
 - Embedded Splunk 6.4.x custom viz with fallback to compatibility mode for Splunk 6.3.x
 - Improved Power architectures support (PowerLinux Little / Big endian management, LPAR monitor support for Linux, LPAR parsing model)
 - Binaries upgrade for Linux (16e / 16f), Linux binaries are now stored in tgz archive and will be uncompressed on client if applicant
-- Various bug fixes (Issues #29-#38)
-- TA-nmon and PA-nmon new packages (V1.2.37)
+- Various bug fixes (Issues #29 to #49)
+- Certification app path: The nmon index is not anymore created at installation time for standalone instances
+- Certification app path: The core application does contain anymore data generation related object, the TA-nmon must be installed for this to be achieved
+- Certification app path: The nmon_inventory file base lookup table were migrated to KV store collection
+- inline_customspan macro were renamed to span_nmon for easier usage
+- TA-nmon and PA-nmon new packages (V1.2.40)
 
 ========
 V1.6.15:

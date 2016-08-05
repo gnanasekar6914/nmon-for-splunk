@@ -6,7 +6,9 @@ Scripts and Binaries
 
 The Application has various scripts and binaries that are required for data generation, data processing and management.
 
-Scripts and binaries are shared in same versions between the core application, the PA-nmon addon and the TA-nmon addon.
+*Since the major release V1.7.4, the core application does bring any data generation releated components*
+
+Scripts and binaries are shared in exactly same versions between the PA-nmon add-on and the TA-nmon add-on.
 
 ****************
 Embedded Scripts
@@ -42,7 +44,9 @@ Python script (provided compressed, must be uncompressed before use) that allows
 Embedded Binaries
 *****************
 
-All these binaries are included in totally the same versions in the core application, the PA-nmon and the TA-nmon add-ons
+*Since the major release V1.7.4, the core application does bring any data generation releated components*
+
+Scripts and binaries are shared in exactly same versions between the PA-nmon add-on and the TA-nmon add-on.
 
 The Applications brings Nmon binaries for Linux vendors and Solaris OS, on AIX the application will only try to use the version shipped with system
 
@@ -55,12 +59,14 @@ The Applications brings Nmon binaries for Linux vendors and Solaris OS, on AIX t
  * bin/linux/generic: 32/64/ia64/power/mainframe binaries compiled for generic Linux
  * bin/linux/mint: 32/64 bits binaries for Linux Mint
  * bin/linux/opensuse: 32/64 bits binaries for Linux Opensuse
+ * bin/linux/ol: 32/64 bits binaries for Oracle Linux
  * bin/linux/rhel: 32/64/ia64/mainframe/power binaries for Redhat Entreprise Server
  * bin/linux/sles: 32/64/ia64/power binaries for Suse Linux Entreprise Server
  * bin/linux/ubuntu: 32/64/power binaries for Ubuntu Linux
  * bin/linux/arch: 32/64 bits binaries for Archlinux
 
-All these binaries comes from the official Nmon Linux project site
+Most of these binaries comes from the official Nmon Linux project site.
+On x86 processor and for Centos / Debian / Ubuntu / Oracle Linux these binaries are being compiled by myself using Vagrant and Ansible automation. (See https://github.com/guilhemmarchand/nmon-binaries)
 
 Associated scripts resource (nmon_helper.sh) will try to use the better version of Nmon available, it will fall back to generic or system embedded if none of specially compiled versions can fit the system.
 

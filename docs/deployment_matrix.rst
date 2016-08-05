@@ -11,33 +11,39 @@ What goes where
 
 * TA-nmon: Is available in the resources directory of the Core App (tgz archive)
 
+**Since July 2016, the TA-nmon is also available for download as en entire application in Splunk base:** https://splunkbase.splunk.com/app/3248/
+
 **Standalone deployment: A single Splunk instance does all**
 
-+------------------------+------------+----------+----------+
-| Splunk Instance        | Core App   | PA-nmon  | TA-nmon  |
-| (role description)     |            |          |          |
-+========================+============+==========+==========+
-| Standalone             |     X      |          |          |
-+------------------------+------------+----------+----------+
++------------------------+------------+----------+-------------------+
+| Splunk Instance        | Core App   | PA-nmon  | TA-nmon           |
+| (role description)     |            |          |                   |
++========================+============+==========+===================+
+| Standalone             |     X      |          | X (optional)      |
++------------------------+------------+----------+-------------------+
+
+*The TA-nmon provides nmon performance and configuration collection for the host than runs the add-on, which is optional*
 
 **Distributed deployment:**
 
-+--------------------------------------------+------------+----------+----------+
-| Splunk Instance                            | Core App   | PA-nmon  | TA-nmon  |
-| (role description)                         |            |          |          |
-+============================================+============+==========+==========+
-| Search head (single instance or clustered) |     X      |          |          |
-+--------------------------------------------+------------+----------+----------+
-| Indexer (single instance or clustered)     |            |    X     |          |
-+--------------------------------------------+------------+----------+----------+
-| Master node                                |            |          |    X     |
-+--------------------------------------------+------------+----------+----------+
-| Deployment servers                         |            |          |    X     |
-+--------------------------------------------+------------+----------+----------+
-| Heavy Forwarder                            |            |          |    X     |
-+--------------------------------------------+------------+----------+----------+
-| Universal Forwarder                        |            |          |    X     |
-+--------------------------------------------+------------+----------+----------+
++--------------------------------------------+------------+----------+---------------------+
+| Splunk Instance                            | Core App   | PA-nmon  | TA-nmon             |
+| (role description)                         |            |          |                     |
++============================================+============+==========+=====================+
+| Search head (single instance or clustered) |     X      |          |    X (optional)     |
++--------------------------------------------+------------+----------+---------------------+
+| Indexer (single instance or clustered)     |            |    X     |                     |
++--------------------------------------------+------------+----------+---------------------+
+| Master node                                |            |          |    X (optional)     |
++--------------------------------------------+------------+----------+---------------------+
+| Deployment servers                         |            |          |    X (optional)     |
++--------------------------------------------+------------+----------+---------------------+
+| Heavy Forwarder                            |            |          |    X                |
++--------------------------------------------+------------+----------+---------------------+
+| Universal Forwarder                        |            |          |    X                |
++--------------------------------------------+------------+----------+---------------------+
+
+*The TA-nmon provides nmon performance and configuration collection for the host than runs the add-on, which is optional*
 
 **FAQ:**
 
@@ -46,18 +52,3 @@ What goes where
 *The PA-nmon is the light addon dedicated for indexers, it is very closed to the TA-nmon, but it is adapted to
 be able to automatically generate Nmon performance data for your distributed indexers.
 The PA-nmon addon will be included in the bundle configuration published to indexers by the master node.*
-
-* Why isn't the TA-nmon required in standalone instances or search heads ?
-
-*Because the Core application also includes binaries and required configuration items, it is able to generate Nmon Performance data
-with no additional software.
-Note that by default the Core application will not activate the data generation, and this must be activated from the application
-for standalone installations, or from a local configuration published in the search head bundle for search head clusters.*
-
-
-
-
-
-
-
-
