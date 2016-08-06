@@ -55,15 +55,6 @@ It is important to create a custom input in a "local/inputs.conf" such that it d
 
 **If you are synchronizing HOT nmon data:**
 
-In the case you would be synchronizing hot nmon data (for example, you have rsync jobs to retrieve Hot nmon files every x minutes), it is recommended to enforce the realtime mode:
-
-*Create a local/props.conf with:*
-
-::
-
-    [source::.../*.nmon]
-    unarchive_cmd = $SPLUNK_HOME/etc/apps/TA-nmon/bin/nmon2csv.sh --mode realtime
-
 **After adding the input, please restart Splunk.**
 
 Immediately after restart, the App should start managing available Nmon files, look in the nmon_processing sourcetype to get the current activity of the Nmon processing steps:

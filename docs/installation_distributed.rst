@@ -11,22 +11,24 @@ Installation for distributed deployments
 
 **Distributed deployment matrix:**
 
-+--------------------------------------------+------------+----------+----------+
-| Splunk Instance                            | Core App   | PA-nmon  | TA-nmon  |
-| (role description)                         |            |          |          |
-+============================================+============+==========+==========+
-| Search head (single instance or clustered) |     X      |          |          |
-+--------------------------------------------+------------+----------+----------+
-| Indexer (single instance or clustered)     |            |    X     |          |
-+--------------------------------------------+------------+----------+----------+
-| Master node                                |            |          |    X     |
-+--------------------------------------------+------------+----------+----------+
-| Deployment servers                         |            |          |    X     |
-+--------------------------------------------+------------+----------+----------+
-| Heavy Forwarder                            |            |          |    X     |
-+--------------------------------------------+------------+----------+----------+
-| Universal Forwarder                        |            |          |    X     |
-+--------------------------------------------+------------+----------+----------+
++--------------------------------------------+------------+----------+---------------------+
+| Splunk Instance                            | Core App   | PA-nmon  | TA-nmon             |
+| (role description)                         |            |          |                     |
++============================================+============+==========+=====================+
+| Search head (single instance or clustered) |     X      |          |    X (optional)     |
++--------------------------------------------+------------+----------+---------------------+
+| Indexer (single instance or clustered)     |            |    X     |                     |
++--------------------------------------------+------------+----------+---------------------+
+| Master node                                |            |          |    X (optional)     |
++--------------------------------------------+------------+----------+---------------------+
+| Deployment servers                         |            |          |    X (optional)     |
++--------------------------------------------+------------+----------+---------------------+
+| Heavy Forwarder                            |            |          |    X                |
++--------------------------------------------+------------+----------+---------------------+
+| Universal Forwarder                        |            |          |    X                |
++--------------------------------------------+------------+----------+---------------------+
+
+*The TA-nmon provides nmon performance and configuration collection for the host than runs the add-on, which is optional*
 
 **The following installation tutorial covers all aspects of a distributed deployment scenario:**
 
@@ -218,10 +220,9 @@ If you want to get Performance data to be generated automatically by the Applica
 
     splunk restart
 
-2. Deploying the Core App to search heads
------------------------------------------
+2. Deploying the Core App and TA-nmon to search heads
+-----------------------------------------------------
 
-.. _deploy_sh_cluster:
 
 2.1. Deploying the Nmon Core in a sh cluster
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -261,29 +262,14 @@ The directory has this structure:
 
 Extract the content of the core Application (the tar archive you downloaded from Splunk base) to the "apps" directory.
 
-In default configuration, the Nmon Core Application WILL NOT generate Performance data for search head.
-
-If you want it, you need to create a custom local/inputs.conf and activate the nmon_helper.sh script:
-
-To activate generating Performance data on search heads:
+**Since the release V1.7, the core application does not generate anymore nmon data, if you want to get performance and configuration data from your search heads, extract the content of the TA-nmon addon to the "apps" directory.**
 
 ::
 
-    cd /opt/splunk/etc/apps/nmon
+    cd /opt/splunk/etc/shcluster/apps/
+    tar -xvf /tmp/nmon-performance-monitor-for-unix-and-linux-systems_*.tgz
+    tar -xvf /opt/splunk/etc/shcluster/apps/nmon/resources/TA-nmon*.tgz
 
-    mkdir local
-
-    cp -p default/inputs.conf local/
-
-    <edit local/inputs.conf>
-
-    <replace:>
-
-    disabled = true
-
-    <by:>
-
-    disabled = false
 
 Finally push the configuration bundle to publish the Nmon core application to all search heads:
 
@@ -292,7 +278,7 @@ Finally push the configuration bundle to publish the Nmon core application to al
     splunk apply shcluster-bundle -target <URI>:<management_port> -auth <username>:<password>
 
 
-.. _deploy_sh:
+
 
 2.2. Deploying the Nmon Core in independent search heads or search heads in sh pooling
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -317,29 +303,12 @@ Uncompress the content of the tar.gz archive in $SPLUNK_HOME/etc/apps/ (where $S
 
     tar -xvzf nmon-performance-monitor-for-unix-and-linux-systems*.tgz
 
-In default configuration, the Nmon Core Application WILL NOT generate Performance data for search heads.
-
-if you want it, you need to create a custom local/inputs.conf and activate the nmon_helper.sh script:
-
-To activate generating Performance data on search heads
+**Since the release V1.7, the core application does not generate anymore nmon data, if you want to get performance and configuration data from your search heads, extract the content of the TA-nmon addon to the "apps" directory.**
 
 ::
 
-    cd /opt/splunk/etc/apps/nmon
-
-    mkdir local
-
-    cp -p default/inputs.conf local/
-
-    <edit local/inputs.conf>
-
-    <replace:>
-
-    disabled = true
-
-    <by:>
-
-    disabled = false
+    cd /opt/splunk/etc/apps/
+    tar -xvf /opt/splunk/etc/shcluster/apps/nmon/resources/TA-nmon*.tgz
 
 **Restart each search head manually:**
 

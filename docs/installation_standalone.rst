@@ -17,6 +17,13 @@ Installation for standalone instance
 
 *optional: The TA-nmon provides nmon performance and configuration collection for the host than runs the add-on, which is optional*
 
+
+VIDEO TUTORIAL:
+===============
+
+**Checkout this video demo:** https://www.youtube.com/watch?v=-0H-CJDIGDI
+
+
 Installing with Splunk Web
 ==========================
 
@@ -76,37 +83,21 @@ Access the Application
    :alt: install_access2.png
    :align: center
 
-Enable inputs on *nix instance
-==============================
+Activating performance and configuration collect
+================================================
 
-If you are running Splunk on Linux, AIX or Solaris, then you can generate Nmon performance data for the local machine running Splunk.
+If you are running Splunk on **Linux, AIX or Solaris**, then you can generate Nmon performance data for the local machine running Splunk.
 
-*In a single instance, you can activate inputs within Splunk Web:*
+*Since the major release V1.7.4, the data collection has been removed from the core application, you must deploy the TA-nmon add-on*
 
-.. image:: img/activate_inputs_fromsplunkweb.png
-   :alt: activate_inputs_fromsplunkweb.png
-   :align: center
+::
 
+    cd /opt/splunk/etc/apps/
+    tar -xvf /opt/splunk/etc/apps/nmon/resources/TA-nmon*.tgz
 
+And restart Splunk:
 
+::
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    /opt/splunk/bin/splunk restart
 
