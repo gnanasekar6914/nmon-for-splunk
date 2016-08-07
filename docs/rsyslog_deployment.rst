@@ -2,6 +2,8 @@
 rsyslog / nmon-logger deployment
 ================================
 
+.. _rsyslog_deployment:
+
 .. image:: img/splunk_nmon_rsyslog.png
    :alt: splunk_nmon_rsyslog.png
    :align: center
@@ -68,23 +70,29 @@ The nmon-logger comes with Ansible Playbooks example you can easily adapt to you
 
 **Topology: Examples of possible implementations:**
 
-Example 1: Splunk Universal or Heavy forwarder installed on main rsyslog collectors:
+**Example 1: Splunk Universal or Heavy forwarder installed on main rsyslog collectors:**
 
-screen001.png
+.. image:: img/rsyslog1.png
+   :alt: rsyslog1.png
+   :align: center
 
-Example 2: Splunk Universal or Heavy forwarder installed third party servers running rsyslog:
+**Example 2: Splunk Universal or Heavy forwarder installed third party servers running rsyslog:**
 
-screen002.png
+.. image:: img/rsyslog2.png
+   :alt: rsyslog2.png
+   :align: center
 
-Pre-requisites:
++++++++++++++++
+PRE-REQUISITES:
++++++++++++++++
 
-*Splunk + Nmon Performance app:
+**Splunk + Nmon Performance app:**
 
 First of all, have a Splunk working installation, and the Nmon Performance up and running ! (yeah, songs like an evidence :-)
 
 Some specific requirements must be respected to achieve a deployment that uses rsyslog as the transport layer:
 
-* RSYSLOG V8.x:
+**RSYSLOG V8.x:**
 
 For obvious reasons, Rsyslog v8.x is required to forward Nmon Performance data to centralized rsyslog servers, see:
 
@@ -92,20 +100,14 @@ http://www.rsyslog.com/
 
 On end servers, the "imfile" plugin will be used to read and collect Nmon Performance data.
 
-* PERL (minimal env):
-
-Perl minimal is required on servers, no specific version restriction.
-The Perl interpreter is notably used by the nmon_helper.sh to identify nmon processes ages.
-
-Perl minimal is normally always available on almost any modern *nix / Linux system.
-
-* PERL Time::HiRes module / OR / PYTHON 2.7:
+**PYTHON 2.7.x or PERL with the module Time::HiRes:**
 
 The nmon-logger will by default search for a Python 2.7.x environment.
 If it is not available, scripts will use Perl, when using Perl note that the Time::HiRes module is required.
 
++++++++++++++++++++++++++++++++++++++++++++++++++++++
 STEP 1 : Rsyslog configuration for central collectors
-"""""""""""""""""""""""""""""""""""""""""""""""""""""
++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 A minimal configuration is required on Syslog collectors, this will make rsyslog to listen on a dedicated TCP port to receive incoming data from end servers.
 
@@ -186,8 +188,9 @@ NOTE: Ensure the prefix value is always higher than the prefix value for your nm
 
     sudo service rsyslogd restart
 
+++++++++++++++++++++++++++++++++++++++++++++++
 STEP 2 : Rsyslog configuration for end servers
-""""""""""""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++++++++++++
 
 Each of your end servers must be configured to send its syslog data to the central rsyslog server.
 
@@ -236,8 +239,9 @@ See: http://wiki.rsyslog.com/index.php/FailoverSyslogServer
 
 Immediately after the restart, rsyslog starts to forward data to central rsyslog servers.
 
++++++++++++++++++++++++++++++++++++++++++++++++++++
 STEP 3 : Deploy the nmon-logger to your end servers
-"""""""""""""""""""""""""""""""""""""""""""""""""""
++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 On each end server, you must deploy the "nmon-looger" package:
 
@@ -289,7 +293,9 @@ Copy each file and directory to its destination by respecting the files and dire
 
     chown nmon:nmon /etc/rsyslog.d/20-nmon-logger.conf; chmod 0644 /etc/rsyslog.d/20-nmon-logger.conf
 
-**OPTIONAL : Verification on end server(s)**
+++++++++++++++++++++++++++++++++++++++++
+OPTIONAL : Verification on end server(s)
+++++++++++++++++++++++++++++++++++++++++
 
 For trouble shooting or verification purposes, you may want to verify that things are working fine on the server where the nmon-logger has been deployed.
 
@@ -331,7 +337,9 @@ And Nmon Performance data:
 
 Et voila !
 
-**OPTIONAL : Verifications on syslog collectors**
++++++++++++++++++++++++++++++++++++++++++++++
+OPTIONAL : Verifications on syslog collectors
++++++++++++++++++++++++++++++++++++++++++++++
 
 On active rsyslog collectors, a directory with the name of the server will host Nmon logs:
 
@@ -344,8 +352,9 @@ On active rsyslog collectors, a directory with the name of the server will host 
     -rw-r----- 1 syslog adm 35814228 janv. 27 22:56 /var/log/nmon_performance/syslog-client/nmon_performance.log
     -rw-r----- 1 syslog adm  2554165 janv. 27 22:56 /var/log/nmon_performance/syslog-client/nmon_processing.log
 
+++++++++++++++++++++
 STEP 4 : Splunk it !
-""""""""""""""""""""
+++++++++++++++++++++
 
 The last step is getting the data indexed in Splunk:
 
@@ -394,7 +403,9 @@ Et voilà !
 
 If everything is fine in your configuration, you should start to receive incoming data in Nmon Performance monitor application.
 
-**OPTIONAL : Check your work !**
+++++++++++++++++++++++++++++
+OPTIONAL : Check your work !
+++++++++++++++++++++++++++++
 
 Running a search over the hostname of the end server:
 

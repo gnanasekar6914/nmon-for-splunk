@@ -42,5 +42,6 @@ Documentation:
    installation_splunkcloud
    installation_central_repositories
    rsyslog_deployment
+   syslogng_deployment
    Userguide
    reference_materials
