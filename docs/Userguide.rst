@@ -2048,6 +2048,8 @@ Updating the Nmon App on a minor release or upgrade to a major new release is to
 
 Please consult the Distributed Deployment manual to get details instructions of each step for upgrade: :any:`distributed_deployment_guide`
 
+.. _update_from_version_prior_17:
+
 -----------------------------------------------------------------------------
 03 - Additional upgrade notes - Migrating from release prior to Version 1.7.x
 -----------------------------------------------------------------------------
