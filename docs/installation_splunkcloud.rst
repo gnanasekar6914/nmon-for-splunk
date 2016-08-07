@@ -35,30 +35,7 @@ Finally, Nmon Performance Monitor is installed:
    :alt: install_splunkcloud3.png
    :align: center
 
-Step 2 (Optional): Activate local Performance monitor of your Splunk Cloud instance
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Monitoring Splunk Cloud instance
-""""""""""""""""""""""""""""""""
-
-Splunk Cloud are running Linux OS, it can be easily monitored by the Nmon Core Application:
-
-**Activate local inputs scripts:**
-
-* nmon_helper.sh
-* nmon_clean.sh
-
-.. image:: img/install_splunkcloud4.png
-   :alt: install_splunkcloud4.png
-   :align: center
-
-Within a few minutes, Performance data will start to be collected and available within the Nmon Application:
-
-.. image:: img/install_splunkcloud5.png
-   :alt: install_splunkcloud5.png
-   :align: center
-
-Step 3: Deploy TA-nmon to your Universal Forwarders agents to send Performance data to your Splunk Cloud instance
+Step 2: Deploy TA-nmon to your Universal Forwarders agents to send Performance data to your Splunk Cloud instance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Configure Forwarding to Splunk Cloud
@@ -154,7 +131,7 @@ Restart the Universal Forwarder
                                                                [  OK  ]
     [root@RHEL7 ~]#
 
-Step 4: Check your work and verify incoming Performance events
+Step 3: Check your work and verify incoming Performance events
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A few minutes later you will immediately start to receive incoming Performance data from your servers:
