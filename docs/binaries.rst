@@ -61,9 +61,10 @@ The Applications brings Nmon binaries for Linux vendors and Solaris OS, on AIX t
  * bin/linux/opensuse: 32/64 bits binaries for Linux Opensuse
  * bin/linux/ol: 32/64 bits binaries for Oracle Linux
  * bin/linux/rhel: 32/64/ia64/mainframe/power binaries for Redhat Entreprise Server
- * bin/linux/sles: 32/64/ia64/power binaries for Suse Linux Entreprise Server
- * bin/linux/ubuntu: 32/64/power binaries for Ubuntu Linux
+ * bin/linux/sles: 32/64/ia64/mainframe/power binaries for Suse Linux Entreprise Server
+ * bin/linux/ubuntu: 32/64/power/arm binaries for Ubuntu Linux
  * bin/linux/arch: 32/64 bits binaries for Archlinux
+ * bin/raspbian: arms binaries for Raspbian Linux
 
 Most of these binaries comes from the official Nmon Linux project site.
 On x86 processor and for Centos / Debian / Ubuntu / Oracle Linux these binaries are being compiled by myself using Vagrant and Ansible automation. (See https://github.com/guilhemmarchand/nmon-binaries)
@@ -72,11 +73,12 @@ Associated scripts resource (nmon_helper.sh) will try to use the better version 
 
 **For Solaris OS:**
 
-* sarmon binaries for Oracle Solaris x86 and Sparc:
+*sarmon binaries for Oracle Solaris x86 and Sparc:*
 
  * bin/sarmon_bin_i386: sarmon binaries for Solaris running on x86 arch
  * bin/sarmon_bin_sparc: sarmon binaris for Solaris running on sparc arch
- * sarmon binaries comes from the official sarmon site project
+
+sarmon binaries comes from the official sarmon site project.
 
 **About AIX**:
 
