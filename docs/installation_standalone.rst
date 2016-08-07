@@ -20,8 +20,8 @@ Installation for standalone instance
 *optional: The TA-nmon provides nmon performance and configuration collection for the host than runs the add-on, which is optional*
 
 
-VIDEO TUTORIAL:
-===============
+VIDEO TUTORIAL
+==============
 
 **Checkout this video demo:** https://www.youtube.com/watch?v=-0H-CJDIGDI
 
