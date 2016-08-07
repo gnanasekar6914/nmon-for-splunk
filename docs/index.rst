@@ -43,3 +43,4 @@ Documentation:
    installation_central_repositories
    rsyslog_deployment
    Userguide
+   reference_materials

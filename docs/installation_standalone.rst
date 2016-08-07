@@ -2,6 +2,8 @@
 Deploy to single server instance
 ================================
 
+.. _standalone_deployment_guide:
+
 ------------------------------------
 Installation for standalone instance
 ------------------------------------

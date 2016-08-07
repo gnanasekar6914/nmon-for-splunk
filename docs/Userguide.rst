@@ -77,6 +77,8 @@ These scripts are responsible in cleaning raw nmon data file periodically, and a
 Lookups and KV Store
 ********************
 
+.. _nmon_inventory:
+
 --------------
 nmon_inventory
 --------------
@@ -990,6 +992,8 @@ The new package version will be pushed to clients, and next iteration of Nmon bi
 
 **Manage the Core Application**
 
+.. _custom_span:
+
 ++++++++++++++++++++++++++++
 Custom Span definition macro
 ++++++++++++++++++++++++++++
@@ -1671,12 +1675,530 @@ Clean working directory:
 
 Now that all your custom packages are ready, proceed to deployment the same way as usual, review deployment documentations if required
 
+
 ************
 Troubleshoot
 ************
 
+.. _trouble_guide:
+
+--------------------------------------
+01 - Troubleshooting guide from A to Z
+--------------------------------------
+
+**Troubleshooting guide for Nmon Performance Monitor**
+
+So you've got trouble ? This guide will help in troubleshooting every piece of the Nmon Perf Application from the very beginning!
+
+Note that this guide is oriented in distributed deployment scenario, such that it focuses on issues you may encounter between Splunk and end servers
+
++++++++++++++++++++++++++++++++++++++++
+STEP 1: Checking Splunk internal events
++++++++++++++++++++++++++++++++++++++++
+
+**Checking Splunk internal events from your remote host (Universal or Heavy Forwarders) to Splunk**
+
+**In case of trouble with remote hosts , you should always start by verifying that you successfully receive Splunk internal events from them, this is a simple verification that validates:**
+
+* That your remote hosts are able to send data to your indexers
+* That your basic deployment items (such as outputs.conf) are correctly configured
+
+**When a remote host running Splunk (Universal or Heavy forwarder) is connected to a Splunk infrastructure, it will always send its internal events into various internal indexes:**
+
+* _internal
+* _audit
+* _introspection
+
+**Between other log files, the main log you should care about is the "splunkd.log", you will find it in the "_internal" index, this is the data i strongly recommend to check**
+
+**Ensure you successfully receive Splunk internal data:**
+
+*INFORMATION: In default configuration, internal indexes cannot be accessed by standard users (unless Splunk admin gives the access rights), this step requires admin access or access authorization to internal indexes*
+
+.. image:: img/trouble1.png
+   :alt: trouble1.png
+   :align: center
+
+**Optionally focus on splunkd sourcetype and host(s) you are verifying:**
+
+.. image:: img/trouble2.png
+   :alt: trouble2.png
+   :align: center
+
+—> If you successfully found incoming events for your host(s), swith to step 2
+
+—> If you can't find incoming events for your host(s), common root causes can be:
+
+* Network connection failure between you host(s) and indexers (or intermediate collecters): Verify with a simple telnet connection test that you can access to destination IP and port(s)
+* Bad information in outputs.conf (check IP / Port, syntax)
+* No outputs.conf deployed to Universal or Heavy Forwarder
+
+In such a case, connect directly to the host and verify messages in /opt/splunkforwarder/var/log/splunkd.log
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+STEP 2: Verify Nmon Data Collect (Binary starting process)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+**The first level directly related to Nmon Perf App starts with the "nmon_collect", this is process that will start Nmon binary on remote hosts.**
+
+This relies on the "input" script "nmon_helper.sh" which is scheduled to run every minute by default.
+
+**The output of nmon_helper.sh script is logged within the sourcetype=nmon_collect:**
+
+::
+
+    eventtype=nmon:collect
+
+.. image:: img/trouble3.png
+   :alt: trouble3.png
+   :align: center
+
+Search for host(s) you are troubleshooting:
+
+.. image:: img/trouble4.png
+   :alt: trouble4.png
+   :align: center
+
+The nmon process must be visible on the remote host, example:
+
+.. image:: img/trouble5.png
+   :alt: trouble5.png
+   :align: center
+
+The nmon_helper.sh generates directory structure under $SPLUNK_HOME/var/run/nmon - The nmon raw data file is stored under nmon_repository - the nmon.pid file contains the PID number of the current running Nmon binary
+
+**For debugging purposes, the nmon_helper.sh can be run manually using the following command:**
+
+::
+
+    /opt/splunkforwarder/bin/splunk cmd /opt/splunkforwarder/etc/apps/TA-nmon/bin/nmon_helper.sh
+
+*Example:*
+
+.. image:: img/trouble6.png
+   :alt: trouble6.png
+   :align: center
+
+If this step is Ok, this validates that the Nmon binary is able to start and generates Nmon raw data as expected and required
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+STEP 3: Verify Nmon Data Processing (conversion of Nmon raw data into csv flaw)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+**Next step of verification relies on verifying the Nmon processing which converts Nmon raw data for Splunk:**
+
+* Every time the nmon raw data file is updated, Splunk automatically streams the content of the file to the "nmon2csv.sh" shell wrapper
+* The "nmon2csv.sh" shell wrapper will stream the data to the Python "nmon2csv.py" converter or the Perl "nmon2csv.pl" converter
+* This will generate required data into $SPLUNK_HOME/var/run/nmon/var
+
+**The output of nmon processing is logged within the sourcetype=nmon_processing:**
+
+::
+
+    index=nmon sourcetype=nmon_processing
+
+.. image:: img/trouble7.png
+   :alt: trouble7.png
+   :align: center
+
+**Search for host(s) you are troubleshooting:**
+
+.. image:: img/trouble8.png
+   :alt: trouble8.png
+   :align: center
+
+Many useful information are automatically logged to inform about the nmon processing step, such like sections processed and number of events generated per monitor
+
+**Related internal events can also be very useful for troubleshooting purposes, if the nmon processing steps fails for some reasons (such as unsatisfied Perl dependencies or interpreter incompatibility) these information will be automatically logged by splunkd in Splunk internal events:**
+
+.. image:: img/trouble9.png
+   :alt: trouble9.png
+   :align: center
+
+*Notice that every time the nmon raw file is read by Splunk, each step of data processing is logged*
+
+**Manual processing for debugging purposes:**
+
+You can easily manually debug the nmon processing step by running following commands:
+
+::
+
+    cat <raw data file> | /opt/splunkforwarder/bin/splunk cmd /opt/splunkforwarder/etc/apps/TA-nmon/bin/nmon2csv.sh
+
+Note that as csv files generated by the Nmon processing step are automatically consumed, the easiest way to troubleshoot is stopping Splunk and running the above command
+
+**Example of debug operation stopping Splunk:**
+
+.. image:: img/trouble10.png
+   :alt: trouble10.png
+   :align: center
+
+.. image:: img/trouble11.png
+   :alt: trouble11.png
+   :align: center
+
+**After this manual troubleshoot verification, start Splunk and notice that csv files generated are automatically deleted by Splunk (batch mode indexing):**
+
+.. image:: img/trouble12.png
+   :alt: trouble12.png
+   :align: center
+
+**If this step is Ok, then you have verified that Splunk is able to correctly call nmon2csv scripts, that the conversion script is working fine and generating data as expected and finally that Splunk automatically manages files and delete them upon indexing**
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+STEP 4: Verify Nmon Performance and Configuration data
+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+**Next step of troubleshooting resides in verifying Performance data and Configuration data in Splunk:**
+
+*Access to Performance raw events:*
+
+.. image:: img/trouble13.png
+   :alt: trouble13.png
+   :align: center
+
+**Access to Configuration raw events:**
+
+.. image:: img/trouble14.png
+   :alt: trouble14.png
+   :align: center
+
+**Example of host returning Performance events:**
+
+.. image:: img/trouble15.png
+   :alt: trouble15.png
+   :align: center
+
+**Example of host returning Configuration events:**
+
+.. image:: img/trouble16.png
+   :alt: trouble16.png
+   :align: center
+
+**INFORMATION:**
+
+You will notice the existence of "host" and "hostname" fields, they are totally equivalent, "host" field is a default Splunk field (Metadata) and "hostname" is directly extracted from Nmon data for Performance and Configuration.
+The "host" default field is overridden during indexing time to match Nmon data, this allows between other managing history nmon data transparently.
+
+**If you are fine with the step, you will have validated that incoming Performance and Configuration events are correctly indexed by Splunk**
+
+*Since the release V1.6.15, the OStype is generated directly in the raw data, before it was associated with the nmon_inventory lookup table. It is not necessary anymore to verify the lookup table as it cannot be anymore a root cause of error for data identification*
+
+-------------------------------
+02 - Debugging nmon2csv parsers
+-------------------------------
+
+**nmon2csv Python / Perl converters operations can be debugged by manually running the conversion process:**
+
+**This can easily be achieved, either on nmon / TA-nmon / PA-nmon Application:**
+
+Create a temporary location for csv files, such like the normal directory structure of the App, example:
+
+::
+
+    $ mkdir -p /tmp/nmon2csv_debug/etc/apps/nmon
+    $ mkdir -p /tmp/nmon2csv_debug/var/run/nmon
+
+Have an nmon file ready to test, if you don't have some to get the current copy in $SPLUNK_HOME/etc/apps/nmon/var/nmon_resposity when the Application is running
+
+Initiate conversion steps:
+
+Adapt paths if you want to debug the nmon / TA-nmon / PA-nmon App and the type of Splunk instance (standard, light forwarder, heavy forwarder, peer node…), the following example will reproduce the conversion step for the standard Application:
+
+::
+
+    $ cd /tmp/nmon2csv_debug
+
+    $ export SPLUNK_HOME="/tmp/nmon2csv_debug"
+
+**Use the shell wrapper to let him decide which converter will be used:**
+
+::
+
+    $ cat my_file.nmon | /opt/splunk/etc/apps/nmon/bin/nmon2csv.sh
+
+**For Python version:**
+
+::
+
+    $ cat my_file.nmon | /opt/splunk/etc/apps/nmon/bin/nmon2csv.py
+
+**For Perl version:**
+
+::
+
+    $ cat my_file.nmon | /opt/splunk/etc/apps/nmon/bin/nmon2csv.pl
+
+The converter will output its processing steps and generate various csv files in csv_repository and config_repository
+
+Note that you can achieve the same operation in the proper normal Splunk directory, but if you do so, you need to stop Splunk before as it would immediately index and delete csv files
+
+*Additional Options*
+
+**Some options can be used for testing purposes:**
+
+::
+
+    -debug
+
+This option will show various debugging information like removal of events when running in real time mode.
+
+::
+
+    -mode [ colddata | realtime ]
+
+This option will force the converter to use the colddata mode (the file is entirely proceeded without trying any operation to identify already proceeded data) or real time mode.
+
+real mode is much more complex because we need to identify already proceeded events over each iteration of processing steps.
+
+The real time option should be used when the purpose is simulating the same operation that would do Splunk managing live Nmon data
+
+------------------------
+03 - Troubleshooting FAQ
+------------------------
+
+
+**Problem: I have deployed the TA-nmon add-on to my hosts and i do not seem to receive data**
+
+*Cause:*
+
+root causes can be multiple:
+
+* Universal Forwarder (or full instance) not sending data at all
+* Nmon binary does not start
+* Nmon raw data converter failure
+* input scripts not activated
+* Universal Forwarder not compatible (see requirements)
+* Clients sending data directly to indexers lacking the PA-nmon add-on
+
+**Resolution:**
+
+Please read and execute the trouble shooting guide procedure: :any:`trouble_guide`
+
+
+**Problem: Linux hosts are not identified as Linux Operating Systems**
+
+*Cause:*
+
+Linux configuration can be split at indexing time, this requires indexing time parsing operation that will fail if the the PA-nmon is not installed in indexers (or if the TA-nmon is not installed on intermediate Heavy Forwarders acting as Collectors in front of your indexers)
+
+*Resolution:*
+
+* Install the PA-nmon add-on on indexers (as it is required in installation manual) or the TA-nmon add-on if your are using Heavy Forwarders as collectors in front of your indexers
+* Update the nmon_inventory lookup by running the generation report (see here)
+
+**Problem: I have set frameID Mapping (see here) but past indexed data still have the original frameID value**
+
+*Cause:*
+
+Data Acceleration will keep the previously known values for frameID as long as they won't be rebuilt
+
+*Resolution:*
+
+Enter the data model manager: pivot > Manage
+For each data model, click on Rebuild
+
+
 *******
 Upgrade
 *******
+
+.. _upgrade_standalone:
+
+--------------------------------
+01 - Upgrade Standalone Instance
+--------------------------------
+
+**Upgrade or Update the Nmon Splunk App in a Splunk standalone instance**
+
+*Updating the Nmon App on a minor release or upgrade to a major new release is totally transparent and uses Splunk standard.*
+
+**IMPORTANT:** As for any other Splunk Application, do never modify configuration files in the default directory but create your own copy in the local directory, such that updating the Application will not overwrite your custom settings
+
+**To update or upgrade Nmon Splunk App in a standalone installation, you can:**
+
+* Use the Splunk App manage builtin, Splunk automatically notifies you when a new version is available, the update can be done on the air through the Manager
+* Download the new version on Splunk base https://splunkbase.splunk.com/app/1753/ and use the Manager to proceed to update
+* Uncompress directly the content of the tar.gz archive in $SPLUNK_HOME/etc/apps and restart Splunk
+
+
+.. _upgrade_distributed:
+
+-----------------------------------
+02 - Upgrade Distributed Deployment
+-----------------------------------
+
+**Upgrade or Update the Nmon Splunk App in a Splunk Distributed Deployment**
+
+Updating the Nmon App on a minor release or upgrade to a major new release is totally transparent and uses Splunk standard.
+
+*IMPORTANT: As for any other Splunk Application, do never modify configuration files in the default directory but create your own copy in the local directory, such that updating the Application will not overwrite your custom settings*
+
+**Updating the Application in a Distributed Deployment context follows the same tracking than initial deployment, with three major pieces of the App:**
+
+.. image:: img/steps_summary_distributed.png
+   :alt: steps_summary_distributed.png
+   :align: center
+
+**So, proceed in the order:**
+
+* Update PA-nmon
+* Update Nmon Core App
+* Update TA-nmon and reload your deployment server to update your end clients
+
+Please consult the Distributed Deployment manual to get details instructions of each step for upgrade: :any:`distributed_deployment_guide`
+
+-----------------------------------------------------------------------------
+03 - Additional upgrade notes - Migrating from release prior to Version 1.7.x
+-----------------------------------------------------------------------------
+
+**Upgrade notes**
+
+**The release V1.7.x is a major release of the Nmon Performance Monitor application, follow this procedure when migrating from an existing installation running a version previous to the V1.7.x.**
+
+**SUMMARY OF MAJOR CHANGES**
+
+* The Nmon core application does not create anymore the "nmon" index at installation time (for app certification purposes), the index must be declared manually
+* The Nmon core application does not implement anymore performance and configuration, if you want to get performance of your search heads you must deploy the TA-nmon
+* The TA-nmon working directory has been migrated from $SPLUNK_HOME/var/run to $SPLUNK_HOME/var/log for certification purposes
+* The nmon_inventory lookup table is now stored in a KVstore collection, after upgrade you must re-generate the nmon inventory data to fill the KVstore (or wait for the next auto iteration)
+* Different old components were removed from the core application (such a the django views), extracting using tar will not clean these files
+* The span definition macro "custom_inlinespan" where renamed to "nmon_span" for easier usage, if you used to customize the minimal span value previously, you must update your local configuration (the original macro were left in case of users would be using it, but it is not used anymore in views)
+
+**FILES AND DIRECTORY THAT WERE REMOVED FROM THE CORE APPLICATION**
+
+Bellow is the list of files and directory that were removed in the Version 1.7.x, at the end of your update you can clean these files with no issue.
+
+*If you are running standalone search head, remove them from:*
+
+::
+
+    $SPLUNK_HOME/etc/apps/nmon
+
+If you are running a Search Head Cluster, remove them the deployer and apply the bundle configuration to the search head
+
+::
+
+    $SPLUNK_HOME/etc/shcluster/apps/nmon
+
+**FILES AND DIRECTORIES TO BE REMOVED:**
+
+* nmon/bin
+* nmon/django
+* nmon/default/inputs.conf
+* nmon/default/inputs.conf_forWindows
+* nmon/default/indexes.conf
+* nmon/lookups/nmon_inventory.csv
+* nmon/samples
+
+*All these files, directories and sub-directories can be removed safety.*
+
+**PRE-CHECK - HAVE YOU DECLARED YOUR INDEX ?**
+
+As explained bellow, the nmon core application does create anymore the "nmon" index at startup time.
+
+The reason comes from Splunk certification requirements as this task should be managed by administrators.
+
+If you running in Indexer cluster, then your index has necessarily be declared and you are not concerned.
+
+If you running standalone instances, ensure you have set your index explicitly, you can create the "nmon" index the local/ directory of the Nmon core application for example.
+
+**STEP 1. UPDATE THE CORE APPLICATION**
+
+If you are running on a standalone installation only, you should declare the "nmon" index manually before upgrading, or at least before restarting.
+
+Refer to the standalone installation guide: :any:`standalone_deployment_guide`
+
+If you running the PA-nmon or an indexer cluster where you have already manually declared the nmon index, you are not affected by this change.
+
+**Apply the installation procedure following your configuration, checkout:**
+
+* Upgrade a standalone server: :any:`upgrade_standalone`
+* Upgrade a distributed deployment: any:`upgrade_distributed`
+
+**inputs.conf**
+
+Clean the default/inputs.conf and local/inputs.conf on the search head
+If you were generating performance and configuration data at the search head level using the Nmon core application, you should delete these files as they are not useful anymore.
+
+**RUNNING SPLUNK 6.3 ?**
+
+This release has limited compatibility with Splunk 6.3, if your running on Splunk 6.3:
+
+* Download and update the Nmon Performance application
+* If does not exit, create a local/ui/views and copy compatibility mode versions of the following views from default to local, such that these views will overcharge defaults views:
+
+*Example:*
+
+::
+
+    cd /opt/splunk/etc/apps/nmon
+    mkdir -p local/data/ui/views
+
+    cp -p default/data/ui/views/Dashboard_bulletcharts_compat.xml local/data/ui/views/Dashboard_bulletcharts.xml
+    cp -p default/data/ui/views/Nmon_Summary_compat.xml local/data/ui/views/Nmon_Summary.xml
+    cp -p default/data/ui/views/UI_Nmon_CPU_ALL_compat.xml local/data/ui/views/UI_Nmon_CPU_ALL.xml
+    cp -p default/data/ui/views/UI_Nmon_CPUnn_compat.xml local/data/ui/views/UI_Nmon_CPUnn.xml
+    cp -p default/data/ui/views/UI_Nmon_MEM_LINUX_compat.xml local/data/ui/views/UI_Nmon_MEM_LINUX.xml
+    cp -p default/data/ui/views/UI_RT_Nmon_CPU_ALL_compat.xml local/data/ui/views/UI_RT_Nmon_CPU_ALL.xml
+
+**If you are using a search head cluster, these modification will take place in the SHC deployer:**
+
+::
+
+    cd /opt/splunk/etc/shcluster/apps/nmon
+
+*Restart Splunk or deploy the sh cluster bundle if running a search head cluster*
+
+**STEP 2. DEPLOY THE TA-NMON ON SEARCH HEADS IF RELEVANT**
+
+Since the release V1.7.4, you must deploy the TA-nmon on the search head level if you want to collect performance and configuration data from the search heads
+
+This will be easily achieved by the the deploying the TA-nmon along with the Nmon core application on the SHC deployer, checkout: :any:`distributed_deployment_guide`
+
+**STEP 3. CHECKOUT YOUR LOCAL CONFIGURATION ACCORDING TO MAJOR CHANGES**
+
+According to the summary of major changes, you may have to:
+
+* Review your local/macros.conf if you are using a custom minimal value for the span definition, see :any:`custom_span`
+* Manually re-generate the nmon inventory data by running the "Generate NMON Inventory Lookup Table" report, for more information, see: :any:`nmon_inventory`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
