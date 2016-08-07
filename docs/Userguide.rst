@@ -703,6 +703,974 @@ Using the configuration above, Splunk will always and automatically rewrite the 
 Configure
 *********
 
+**Various configurations and advanced administration tasks**
+
+---------------------------------------------------------------------------
+01 - Manage Nmon Collection (generating Performance and Configuration data)
+---------------------------------------------------------------------------
+
+**Configuration, tips and advanced configuration about Nmon Raw data generation**
+
+++++++++++++++++++++++++++++++
+Edit AIX Nmon starting options
+++++++++++++++++++++++++++++++
+
+For AIX, you can manage the full list of Nmon options and control them from a central place using a "local/nmon.conf" configuration file:
+
+default/nmon.conf related settings:
+
+::
+
+    ### AIX COMMON OPTIONS ###
+
+    # Change this line if you add or remove common options for AIX, do not change NFS options here (see NFS options)
+    # the -p option is mandatory as it is used at launch time to save instance pid
+    AIX_options="-f -T -A -d -K -L -M -P -^ -p"
+
+**To manage AIX Nmon options (but the activation of NFS collection), you will:**
+
+* Change the value of mode in your "local/nmon.conf" accorded to your needs
+* Update your deployment servers
+* The new package version will be pushed to clients, and next iteration of Nmon binaries will start using these values
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Activate the Performance Data collection for NFS Statistics
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The configuration by default will not collect NFS statistics for AIX / Linux (NFS statistics is currently not available on Solaris), its activation can be controlled through a "local/nmon.conf":
+
+*default/nmon.conf related settings:*
+
+::
+
+    ### NFS OPTIONS ###
+
+    # Change to "1" to activate NFS V2 / V3 (option -N) for AIX hosts
+    AIX_NFS23="0"
+
+    # Change to "1" to activate NFS V4 (option -NN) for AIX hosts
+    AIX_NFS4="0"
+
+    # Change to "1" to activate NFS V2 / V3 / V4 (option -N) for Linux hosts
+    # Note: Some versions of Nmon introduced a bug that makes Nmon to core when activating NFS, ensure your version is not outdated
+    Linux_NFS="0"
+
+**To activate NFS collection, you will:**
+
+* Change the value of mode in your "local/nmon.conf" accorded to your needs
+* Update your deployment servers
+
+The new package version will be pushed to clients, and next iteration of Nmon binaries will start using these values
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Manage Nmon parallel run between Nmon collections to prevent data gaps
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Since the Version 1.6.05, the nmon_helper.sh script will automatically manage a temporarily parallel run of 2 Nmon instances to prevent data gaps between collections.
+
+**Things works the following way:**
+
+* Each time the nmon_helper.sh runs, the age in seconds of the current instance is evaluated
+* It also evaluates the expected time to live in seconds of an Nmon instance based on parameters (interval * snapshot)
+* A margin in seconds is applied to the time to live value
+* If the age of the current instance gets higher than the time to live less the margin, a new Nmon instance will be launched
+* On next iteration of nmon_helper.sh script, only the new Nmon instance will be watched and the time to live counter gets reset
+* During the parallel run, both instances will run and generate Nmon raw data, nmon2csv converters will prevent any duplicated events and only new data will be indexed
+* During the parallel run, more data will be temporarily indexed
+* When the time to live of the old Nmon instance reaches its end, the instance will terminate and the parallel run will be finished
+
+**In default configuration, the parallel run uses a 4 minutes time margin (240 seconds) defined in default/nmon.conf, this value can be overwritten using a local/nmon.conf:**
+
+::
+
+    ### VARIOUS COMMON OPTIONS ###
+
+    # Time in seconds of margin before running a new iteration of Nmon process to prevent data gaps between 2 iterations of Nmon
+    # the nmon_helper.sh script will spawn a new Nmon process when the age in seconds of the current process gets higher than this value
+
+    # The endtime is evaluated the following way:
+    # endtime=$(( ${interval} * ${snapshot} - ${endtime_margin} ))
+
+    # When the endtime gets higher than the endtime_margin, a new Nmon process will be spawned
+    # default value to 240 seconds which will start a new process 4 minutes before the current process ends
+
+    # Setting this value to "0" will totally disable this feature
+
+    endtime_margin="240"
+
+If you have gaps in data due to Nmon collections, then you may need to increase the endtime_margin value, on very big systems Nmon may require more time to start the data collection and the 4 minutes parallel run may not be enough.
+
+To solve this, you can create a local/nmon.conf to include your custom endtime_margin and deploy the update.
+
+Note that this feature can also be totally disabled by setting the endtime_margin to a "0" value.
+
+The nmon_collect sourcetype will contains information about the parallel run, age in seconds of the Nmon current instance and time to live less the endtime margin.
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Manage the Volume of data generated by the Nmon Data collection
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Each Universal Forwarder running the TA-nmon add-on generates a volume of data which will vary depending on Nmon options sent at binary startup.
+These settings can be totally managed from a central place using a "local/nmon.conf" configuration file.
+
+**default/nmon.conf related settings:**
+
+::
+
+    ### NMON COLLECT OPTIONS ###
+
+    # The nmon_helper.sh input script is set by default to run every 60 seconds
+    # If Nmon is not running, the script will start Nmon using the configuration above
+
+    # The default mode for Nmon data generation is set to "longperiod_low" which is the most preservative mode to limit the CPU usage due the Nmon/Splunk processing steps
+    # Feel free to test available modes or custom mode to set better options that answer your needs and requirements
+
+    # The "longperiod_high" mode is a good compromise between accuracy, CPU / licensing cost and operational intelligence, and should relevant for very large deployment in Production environments
+
+    # Available modes for proposal bellow:
+
+    #    shortperiod_low)
+    #            interval="60"
+    #            snapshot="10"
+
+    #    shortperiod_middle)
+    #            interval="30"
+    #            snapshot="20"
+
+    #    shortperiod_high)
+    #            interval="20"
+    #            snapshot="30"
+
+    #    longperiod_low)
+    #            interval="240"
+    #            snapshot="120"
+
+    #    longperiod_middle)
+    #            interval="120"
+    #            snapshot="120"
+
+    #    longperiod_high)
+    #            interval="60"
+    #            snapshot="120"
+
+    # Benchmarking of January 2015 with Version 1.5.0 shows that:
+
+    # longperiod_middle --> CPU usage starts to notably increase after 4 hours of Nmon runtime
+
+    # custom --> Set a custom interval and snapshot value, if unset short default values will be used (see custom_interval and custom_snapshot)
+
+    # Default is longperiod_high
+    mode="longperiod_high"
+
+    # Refresh interval in seconds, Nmon will this value to refresh data each X seconds
+    # UNUSED IF NOT SET TO custom MODE
+    custom_interval="60"
+
+    # Number of Data refresh occurrences, Nmon will refresh data X times
+    # UNUSED IF NOT SET TO custom MODE
+    custom_snapshot="120"
+
+As explained above, in default configuration Nmon binaries will use an interval value of 60 secondes (time between 2 measures for each Performance metric) and a snapshot value of 120 iterations.
+
+This will asks Nmon binary to run for 2 hours with a data granularity of 60 seconds
+
+When Nmon binary completes its snapshot value, the process ends and a new Nmon process is launched by the nmon_helper.sh script
+
+Increasing or decreasing the value of interval will influence the volume of data generated per end client, increasing or decreasing the value of snapshot will influence the processing CPU cost at client side
+
+Various combination of interval / snapshot are provided for proposal
+
+**To use a pre-configured mode, you will:**
+
+* Change the value of mode in your "local/nmon.conf", example:
+
+::
+
+    mode="longperiod_low"
+
+
+* Update your deployment servers
+* The new package version will be pushed to clients, and next iteration of Nmon binaries will start using these values
+
+**To use custom values for interval / snapshot, you will:**
+
+* Set the mode to custom in your "local/nmon.conf"
+* Set values for custom_interval and custom_snapshot, example:
+
+::
+
+    mode="custom"
+    custom_interval="60"
+    custom_snapshot="120"
+
+* Update your deployment servers
+
+The new package version will be pushed to clients, and next iteration of Nmon binaries will start using these values
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Prioritization of embedded nmon binaries OR locally available nmon binaries
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+**Using nmon.conf configuration file, you can decide to give priority to embedded binaries OR locally available binaries, you should consider giving the priority to embedded binaries versus binaries available on hosts, this feature offers several advantages:**
+
+* Automatically use best Nmon binaries compiled for your systems and your architecture
+* Manage from a central place binaries versions, updating results in updating only the TA-nmon add-on and pushing it to Deployment Servers
+
+Since release 1.6.07, default configuration sets the priority to embedded binaries:
+
+**To enforce the embedded binaries priority:**
+
+* Create a "local/nmon.conf"
+* Copy the parameter section "Linux_embedded_nmon_priority" from "default/nmon.conf" to your newly created "local/nmon.conf"
+
+*Priority to embedded binaries (default):*
+
+::
+
+    Linux_embedded_nmon_priority="0"
+
+*Priority to local binaries:*
+
+::
+
+    Linux_embedded_nmon_priority="1"
+
+Update your deployment server and let the package be pushed to your clients
+
+New iteration of Nmon will now use embedded binaries, to get information about the binary in use look in nmon_collect
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Linux OS: Number of devices taken in charge at nmon boot time
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+**The maximum number of devices taken in charge by nmon at boot time can be controlled using the "nmon.conf" configuration file.**
+
+By default 1500 devices maximum will be taken in charge, up to 3000 devices can be managed by the Application (current hard limit in nmon2csv.py/nmon2csv.pl), configure your "local/nmon.conf" file:
+
+::
+
+    ### LINUX OPTIONS ###
+
+    # Set the maximum number of devices collected by Nmon, default is set to 1500 devices
+    # Increase this value if you have systems with more devices
+    # Up to 3000 devices will be taken in charge by the Application (hard limit in nmon2csv.py / nmon2csv.pl)
+    Linux_devices="1500"
+
+Take note that increasing the number of devices also increases processing and storage costs, but if you have more than 1500 devices and don't set this to a suitable value, Disks analysis would not be complete
+
+* Set this value in your "local/nmon.conf"
+* Update your Deloyment Servers
+* Let your client have the new package pushed
+
+On next iteration, the Nmon binary will start using the new option
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Activate the Performance Data collection for Solaris VxVM Volumes
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+**The configuration by default will not collect Solaris VxVM, its activation can be controlled through a "local/nmon.conf":**
+
+*default/nmon.conf related settings:*
+
+::
+
+    # CHange to "1" to activate VxVM volumes IO statistics
+    Solaris_VxVM="0"
+
+**To activate NFS collection, you will:**
+
+* Change the value of mode in your "local/nmon.conf" accorded to your needs
+* Update your deployment servers
+
+The new package version will be pushed to clients, and next iteration of Nmon binaries will start using these values
+
+--------------------------------------------------------------
+02 - Manage Core Application: Mapping, Extraction, Restitution
+--------------------------------------------------------------
+
+**Manage the Core Application**
+
+++++++++++++++++++++++++++++
+Custom Span definition macro
+++++++++++++++++++++++++++++
+
+NMON Performance Monitor uses an advanced search (eg. macro) to dynamically define the more accurate interval time definition possible within charts.
+
+Splunk has a charting limit of 1000 points per series, an adapted span value (time interval) has to be defined if we want charts to be more accurate than Splunk automatically affects
+
+This is why this custom macro is being defined based on analysing Time ranges supplied by users, see:
+
+::
+
+    $SPLUNK_HOME/etc/apps/nmon/default/macros.conf
+
+Since the major release V1.7, the span management macro were renamed from "inline_customspan" to "nmon_span" for easier usage
+
+**If you have a different minimal time interval than 60 seconds between 2 measures at the lower level, you can customize these macro to adapt them to your data. (as for an example if you generate NMON data with an other process than Splunk)**
+
+*NOTE: This custom configuration has to be done on search heads only*
+
+* Create an empty "local/macros.conf" configuration file
+* Copy the full stanza of the macro "nmon_span" from "default/macros.conf" to "local/macros.conf", the original macros contains the following:
+
+::
+
+    [nmon_span]
+    definition = [ search index="nmon" sourcetype="nmon_data" | head 1 | addinfo\
+    | eval earliest=if(info_min_time == "0.000", info_search_time,info_min_time)\
+    | eval latest=if(info_max_time == "+Infinity", info_search_time,info_max_time)\
+    | eval searchStartTIme=strftime(earliest,"%a %d %B %Y %H:%M")\
+    | eval searchEndTime=strftime(latest,"%a %d %B %Y %H:%M")\
+    | eval Difference = (latest - earliest)\
+    | eval span=case(\
+    info_min_time == "0.000", "2m",\
+    Difference > (3000*24*60*60),"4d",\
+    Difference > (2000*24*60*60),"3d",\
+    Difference > (1000*24*60*60),"2d",\
+    Difference > (500*24*60*60),"1d",\
+    Difference > (333*24*60*60),"12h",\
+    Difference > (166*24*60*60),"8h",\
+    Difference > (83*24*60*60),"4h",\
+    Difference > (41*24*60*60),"2h",\
+    Difference > (916*60*60),"1h",\
+    Difference > (833*60*60),"55m",\
+    Difference > (750*60*60),"50m",\
+    Difference > (666*60*60),"45m",\
+    Difference > (583*60*60),"40m",\
+    Difference > (500*60*60),"35m",\
+    Difference > (416*60*60),"30m",\
+    Difference > (333*60*60),"25m",\
+    Difference > (250*60*60),"20m",\
+    Difference > (166*60*60),"15m",\
+    Difference > (83*60*60),"10m",\
+    Difference > (66*60*60),"5m",\
+    Difference > (50*60*60),"4m",\
+    Difference > (33*60*60),"3m",\
+    Difference > (16*60*60),"2m",\
+    Difference > (8*60*60),"1m",\
+    Difference <= (8*60*60),"1m"\
+    )\
+    | eval spanrestricted=case(\
+    info_min_time == "0.000", 2*60,\
+    Difference > (916*60*60),60*60,\
+    Difference > (833*60*60),55*60,\
+    Difference > (750*60*60),50*60,\
+    Difference > (666*60*60),45*60,\
+    Difference > (583*60*60),40*60,\
+    Difference > (500*60*60),35*60,\
+    Difference > (416*60*60),30*60,\
+    Difference > (333*60*60),25*60,\
+    Difference > (250*60*60),20*60,\
+    Difference > (166*60*60),15*60,\
+    Difference > (83*60*60),10*60,\
+    Difference > (66*60*60),5*60,\
+    Difference > (50*60*60),4*60,\
+    Difference > (33*60*60),180,\
+    Difference > (16*60*60),120,\
+    Difference > (8*60*60),60,\
+    Difference <= (8*60*60),60\
+    )\
+    | eval span=case(spanrestricted < interval, interval, spanrestricted >= interval, span, isnull(interval), span)\
+    | eval span=if(spanrestricted <= 60, "1m", span)\
+    | return span ]
+    iseval = 0
+
+**They key is modifying that part of the macro code:**
+
+::
+
+    | eval span=if(spanrestricted <= 60, "1m", span)\
+
+By default, if the value of spanrestricted is lower or equal to 60 seconds, a span value of 1 minute will be set
+
+For example, if you want the span value to be never less than 4 minutes (the evaluation will still consider every value), you will set:
+
+::
+
+    | eval span=if(spanrestricted <= 240, "4m", span)\
+
+**Which will give the full following code:**
+
+::
+
+    [nmon_span]
+    definition = [ search index="nmon" sourcetype="nmon_data" | head 1 | addinfo\
+    | eval earliest=if(info_min_time == "0.000", info_search_time,info_min_time)\
+    | eval latest=if(info_max_time == "+Infinity", info_search_time,info_max_time)\
+    | eval searchStartTIme=strftime(earliest,"%a %d %B %Y %H:%M")\
+    | eval searchEndTime=strftime(latest,"%a %d %B %Y %H:%M")\
+    | eval Difference = (latest - earliest)\
+    | eval span=case(\
+    info_min_time == "0.000", "2m",\
+    Difference > (3000*24*60*60),"4d",\
+    Difference > (2000*24*60*60),"3d",\
+    Difference > (1000*24*60*60),"2d",\
+    Difference > (500*24*60*60),"1d",\
+    Difference > (333*24*60*60),"12h",\
+    Difference > (166*24*60*60),"8h",\
+    Difference > (83*24*60*60),"4h",\
+    Difference > (41*24*60*60),"2h",\
+    Difference > (916*60*60),"1h",\
+    Difference > (833*60*60),"55m",\
+    Difference > (750*60*60),"50m",\
+    Difference > (666*60*60),"45m",\
+    Difference > (583*60*60),"40m",\
+    Difference > (500*60*60),"35m",\
+    Difference > (416*60*60),"30m",\
+    Difference > (333*60*60),"25m",\
+    Difference > (250*60*60),"20m",\
+    Difference > (166*60*60),"15m",\
+    Difference > (83*60*60),"10m",\
+    Difference > (66*60*60),"5m",\
+    Difference > (50*60*60),"4m",\
+    Difference > (33*60*60),"3m",\
+    Difference > (16*60*60),"2m",\
+    Difference > (8*60*60),"1m",\
+    Difference <= (8*60*60),"1m"\
+    )\
+    | eval spanrestricted=case(\
+    info_min_time == "0.000", 2*60,\
+    Difference > (916*60*60),60*60,\
+    Difference > (833*60*60),55*60,\
+    Difference > (750*60*60),50*60,\
+    Difference > (666*60*60),45*60,\
+    Difference > (583*60*60),40*60,\
+    Difference > (500*60*60),35*60,\
+    Difference > (416*60*60),30*60,\
+    Difference > (333*60*60),25*60,\
+    Difference > (250*60*60),20*60,\
+    Difference > (166*60*60),15*60,\
+    Difference > (83*60*60),10*60,\
+    Difference > (66*60*60),5*60,\
+    Difference > (50*60*60),4*60,\
+    Difference > (33*60*60),180,\
+    Difference > (16*60*60),120,\
+    Difference > (8*60*60),60,\
+    Difference <= (8*60*60),60\
+    )\
+    | eval span=case(spanrestricted < interval, interval, spanrestricted >= interval, span, isnull(interval), span)\
+    | eval span=if(spanrestricted <= 240, "4m", span)\
+    | return span ]
+    iseval = 0
+
+Save the file, and update your search heads. (in sh cluster apply the bunde, in standalone restart)
+
++++++++++++++++++++++++++++++++++++++++++++++++++++
+FRAME ID: Mapping hostnames with a Frame Identifier
++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+**In large deployment scenarios, mapping hostnames with their Frame Identifier can be very useful to help Analysis, or simply finding the required host.**
+
+Since Version 1.5.0, a Frame ID feature is included within interfaces, in default configuration the frame ID is mapped to the Serial Number of the host.
+
+In AIX OS, the Serial Number is associated the PSeries Serial Number (in Pseries environments), in Linux / Solaris, this is equal to the hostname.
+
+**You can customize the Frame Identifier using any external lookup table which will contains one field for the frameIDs, and one field containing hostnames.***
+
+*To achieve this, please follow the configuration above:*
+
+**1. Configure your table lookup in transforms.conf**
+
+*Create a local/transforms.conf and set your lookup table:*
+
+::
+
+    [myframeidtable]
+    filename = my_frameid_lookup.csv
+
+**Example 1: Map Pseries with hostnames using the serial number field**
+
+::
+
+    PSERIES_NAME,serialnum
+    PSERIESfoo,xxxxxxxxxxx
+    PSERIESbar,xxxxxxxxxxx
+
+**Example 2: Map frameID with hostnames (using the hostname field)**
+
+::
+
+    FRAME_NAME,hostname
+    frame1,hostname1
+    frame1,hostname2
+    frame2,hostname3
+    frame3,hostname4
+
+**2. Map your hostnames with the frameID in props.conf**
+
+*Create a local/props.conf and map your hosts within the nmon_data stanza:*
+
+**Example 1: (Pseries with serial number field)**
+
+::
+
+    [nmon_data]
+    LOOKUP-myframeidtable = myframeidtable serialnum AS serialnum OUTPUT PSERIES AS frameID
+
+**Example 2: (frameID with hostnames)**
+
+::
+
+    [nmon_data]
+    LOOKUP-myframeidtable = myframeidtable hostname OUTPUT FRAME_NAME AS frameID
+
+NOTE: Use "OUTPUT" to generate the frameID field, don't use OUTPUTNEW which wont't overwrite the default frameID field
+
+**3. Restart Splunk to apply settings**
+
+**4. Rebuild Acceleration for Datamodel**
+
+For each accelerated Data model, please rebuild the acceleration to update the frameID field. (Go in Pivot, manage datamodels, develop each data model and rebuild)
+
+---------------------------------
+03 - Manage Application Packaging
+---------------------------------
+
+**Manage Application Packaging**
+
+++++++++++++++++++++++++++++++++++++++++++++
+create_agent.py: Create multiple TA packages
+++++++++++++++++++++++++++++++++++++++++++++
+
+**You may be interested in having different versions of the TA-nmon with the goal to manage different configurations, and target for example specific operating systems or versions with specific configurations.**
+
+A Python script utility is provided to allow creating on demand custom TA-nmon packages ready to be deployed, the Python tool allows to:
+
+* Create a new TA-nmon package with the name of your choice
+* Customize the target index name if required (eg. for example if you use the customization tool to change the default index name
+* Choose between Python Data Processing, or Perl Data Processing
+
+This Python tool is available in the "resources" directory of the Nmon Core Application (as gzip file, uncompress the script before launching)
+
+::
+
+    ./create_agent.py
+
+    create_agent.py
+
+    This utility had been designed to allow creating customized agents for the Nmon Splunk Application, please follow these instructions:
+
+    - Download the current release of Nmon App in Splunk Base: https://apps.splunk.com/app/1753
+    - Uncompress the create_agent.py.gz script available in resources directory of the Application
+    - Place the downloaded tgz Archive and this Python tool a temporary directory of your choice
+    - Run the tool: ./create_agent.py and check for available options
+    - After the execution, a new agent package will have been created in the resources directory
+    - Extract its content to your Splunk deployment server, configure the server class, associated clients and deploy the agent
+    - Don't forget to set the application to restart splunkd after deployment
+    ./create_agent.py -h
+    usage: create_agent.py [-h] [-f INFILE] [--indexname INDEX_NAME]
+                           [--agentname TA_NMON] [--agentmode AGENTMODE]
+                           [--version]
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -f INFILE             Name of the Nmon Splunk APP tgz Archive file
+      --indexname INDEX_NAME
+                            Customize the Application Index Name (default: nmon)
+      --agentname TA_NMON   Define the TA Agent name and root directory
+      --agentmode AGENTMODE
+                            Define the Data Processing mode, valid values are:
+                            python,perl / Default value is python
+      --version             show program's version number and exit
+
+**Example of utilization: Create a custom TA package called "TA-nmon-perl" that will use "myindex" as the App index, and Perl as the Data processing language**
+
+::
+
+    ./create_agent.py -f nmon-performance-monitor-for-unix-and-linux-systems_1514.tgz --agentname TA-nmon-perl --agentmode perl --indexname myindex
+
+    Extracting tgz Archive: nmon-performance-monitor-for-unix-and-linux-systems_1514.tgz
+    INFO: Extracting Agent tgz resources Archives
+    INFO: Renaming TA-nmon default agent to TA-nmon-perl
+    Achieving files transformation...
+    Done.
+    INFO: Customizing any reference to index name in files
+    INFO: ************* Tar creation done of: TA-nmon-perl.tar.gz *************
+
+    *** Agent Creation terminated: To install the agent: ***
+
+     - Upload the tgz Archive TA-nmon-perl.tar.gz to your Splunk deployment server
+     - Extract the content of the TA package in $SPLUNK_HOME/etc/deployment-apps/
+     - Configure the Application (set splunkd to restart), server class and associated clients to push the new package to your clients
+
+    Operation terminated.
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Nmon_SplunkApp_Customize.py: Customize the Application
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+**If for some reason you need to customize the Nmon Splunk Application, A Python command line tool is provided in the resources directory which will help you easily achieving your customizations.**
+
+The Python tool allows to:
+
+* Customize the Appication Index Name (default: nmon)
+* Customize the Application Root Directory (default: nmon)
+* Customize the TA NMON Root Directory (default: TA-nmon)
+* Customize the PA NMON Root Directory (default: PA-nmon)
+* Customize the local CSV Repository (default:csv_repository)
+* Customize the local Config Repository (default:config_repository)
+
+Using this tool over releases, you can easily manage your customizations and update the Application as usual.
+
+This Python tool is available in the "resources" directory of the Nmon Core Application (as gzip file, uncompress the script before launching)
+
+::
+
+    ./Nmon_SplunkApp_Customize.py
+
+    If for some reason you need to customize the Nmon Splunk Application, please follow these instructions:
+
+    - Download the current release of Nmon App in Splunk Base: https://apps.splunk.com/app/1753
+    - Uncompress the Nmon_SplunkApp_Customize.py.gz
+    - Place the downloaded tgz Archive and this Python tool in the directory of your choice
+    - Run the tool: ./customize_indexname.py and check for available options
+
+    After the execution, the Application (including TA-nmon and PA-nmon in resources) will have been customized are ready to be used
+    ./Nmon_SplunkApp_Customize.py -h
+
+    usage: Nmon_SplunkApp_Customize.py [-h] [-f INFILE] [-i INDEX_NAME]
+                                       [-r ROOT_DIR] [-a TA_NMON] [-p PA_NMON]
+                                       [--csvrepo CSV_REPOSITORY]
+                                       [--configrepo CONFIG_REPOSITORY]
+                                       [--version]
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -f INFILE             Name of the Nmon Splunk APP tgz Archive file
+      -i INDEX_NAME         Customize the Appication Index Name (default: nmon)
+      -r ROOT_DIR           Customize the Application Root Directory (default:
+                            nmon)
+      -a TA_NMON            Customize the TA NMON Root Directory (default: TA-
+                            nmon)
+      -p PA_NMON            Customize the PA NMON Root Directory (default: PA-
+                            nmon)
+      --csvrepo CSV_REPOSITORY
+                            Customize the local CSV Repository (default:
+                            csv_repository)
+      --configrepo CONFIG_REPOSITORY
+                            Customize the local Config Repository (default:
+                            config_repository)
+      --version             show program's version number and exit
+
+**Example of utilization:**
+
+::
+
+    ./Nmon_SplunkApp_Customize.py -f nmon-performance-monitor-for-unix-and-linux-systems_146.tgz -i my_custom_index -r my_custom_app -a my_custom_ta -p my_custom_pa --csvrepo my_custom_csvrepo --configrepo my_custom_configrepo
+    Extracting tgz Archive: nmon-performance-monitor-for-unix-and-linux-systems_146.tgz
+    INFO: Changing the App Root Directory frm default "nmon" to custom "my_custom_app"
+    Achieving files transformation:
+    INFO: Customizing any reference to default root directory in files
+    Achieving files conversion
+    INFO: Customizing any reference to index name in files
+    INFO: Customizing indexes.conf
+    INFO: Customizing csv_repository to my_custom_csvrepo
+    INFO: Customizing config_repository to my_custom_configrepo
+    INFO: Removing tgz resources Archives
+    INFO: Customizing the TA-nmon Root directory from the default TA-nmon to my_custom_ta
+    INFO: Tar creation done of: my_custom_ta_custom.tar.gz
+    INFO: Customizing the PA-nmon Root directory from the default PA-nmon to my_custom_pa
+    INFO: Tar creation done of: my_custom_pa_custom.tar.gz
+    INFO: Creating the custom nmon_performance_monitor_custom.spl archive in current root directory
+    INFO: Tar creation done of: nmon_performance_monitor_custom.spl
+    Operation terminated.
+
+-----------------------------------------
+04 - Scenarios of advanced customizations
+-----------------------------------------
+
+**Advanced Customization**
+
+++++++++++++++++++++++++++++++++++++++++++++
+01 - Splitting index by Environment scenario
+++++++++++++++++++++++++++++++++++++++++++++
+
+**Customization scenario: Split indexes**
+
+*The goal:*
+
+Split the default main Nmon index into multiple indexes to fit different needs, such as having Production data into a dedicated index (with its own retention) and others environment in an other dedicated index
+Every Universal Forwarder will send data to using a custom TA package depending on their environment, indexer(s) target(s) can be same indexers for all environments, or dedicated indexer(s) per environment
+The main Application will be customized to be able to manage data from different indexes using a logical index naming (all indexes must share the same starting prefix)
+
+**Indexes:**
+
+* Production data will be stored in "nmon_prod" index
+* Qualification data will be stored in "nmon_qua" index
+
+Both indexes can be searched by the main Nmon Application
+
+Indexer(s) can be dedicated by environment, or manage all environment and can run in standalone or clusters
+
+**Start:**
+
+**Step 1: Extract Python customization tools**
+
+* Download the App here:
+
+https://splunkbase.splunk.com/app/1753/
+
+* Extract the content of the archive in a temporary directory:
+
+For the example purpose, i will assume you upload the tgz archive to /tmp
+
+::
+
+    cd /tmp
+    tar -xvzf nmon-performance-monitor-for-unix-and-linux-systems_<VERSION>.tgz
+
+Create a working directory, copy and extract Python tools:
+
+CAUTION: Python tools requires Python 2.7.x version
+
+::
+
+    mkdir $HOME/nmon_workingdir && cd $HOME/nmon_workingdir
+    cp /tmp/nmon/resources/Nmon_SplunkApp_Customize.py.gz .
+    cp /tmp/nmon/resources/create_agent.py.gz .
+    gunzip -v *.gz
+
+**Step 2: Create the custom global (core) Application package (for search heads) and PA packages (for indexers)**
+
+Let's create a package for the application to use "nmon_*" as the index declaration:
+
+::
+
+    ./Nmon_SplunkApp_Customize.py -i nmon_* -f /tmp/nmon-performance-monitor-for-unix-and-linux-systems_<VERSION>.tgz
+    Sample processing output:
+
+    INFO: No custom root directory of the nmon App core App were provided, using default "nmon" name for root directory
+    INFO: No custom root directory of the TA-nmon were provided, using default "TA-nmon" name for TA-nmon root directory
+    INFO: No custom root directory of the PA-nmon were provided, using default "PA-nmon" name for PA-nmon root directory
+    INFO: No custom csv reposity directory were provided, using default "csv_repository" name for csv repository root directory
+    INFO: No custom csv reposity directory were provided, using default "config_repository" name for csv repository root directory
+    Extracting tgz Archive: /media/BIGDATA/Software_Deposit/Splunk/nmon/nmon-performance-monitor-for-unix-and-linux-systems_1606.tgz
+    Extracting tgz Archive: PA-nmon_V1.2.27.tar.gz
+    Extracting tgz Archive: TA-nmon_V1.2.27.tar.gz
+    Achieving files transformation:
+    INFO: Customizing any reference to index name in files
+    INFO: Customizing indexes.conf
+    INFO: Creating the custom nmon_performance_monitor_custom.spl archive in current root directory
+    INFO: ************* Tar creation done of: nmon_performance_monitor_custom.spl *************
+
+    *** To install your customized packages: ***
+
+     - Extract the content of nmon_performance_monitor_custom.spl to Splunk Apps directory of your search heads (or use the manager to install the App)
+     - Extract the content of the PA package available in resources directory to your indexers
+     - Extract the content of the TA package available in resources directory to your deployment server or clients
+
+    Operation terminated.
+
+**The Application package to be deployed in search heads is available within the working directory:**
+
+::
+
+    /tmp/nmon_workingdir/nmon_performance_monitor_custom.spl
+
+**Depending on your architecture:**
+
+*Splunk single instance (same server for indexer / search head role):*
+
+* Edit the default indexes.conf to match final index names:
+* Edit nmon/default/indexes.conf
+
+Correct the provided index (nmon_*) and create other index(es), example:
+
+::
+
+    [nmon_prod]
+    coldPath = $SPLUNK_DB/nmon_prod/colddb
+    homePath = $SPLUNK_DB/nmon_prod/db
+    thawedPath = $SPLUNK_DB/nmon_prod/thaweddb
+
+    [nmon_qua]
+    coldPath = $SPLUNK_DB/nmon_qua/colddb
+    homePath = $SPLUNK_DB/nmon_qua/db
+    thawedPath = $SPLUNK_DB/nmon_qua/thaweddb
+
+Manually re-package:
+
+::
+
+    tar -cvzf nmon nmon_performance_monitor_custom.spl
+
+Store the spl package a final directory:
+
+::
+
+    mkdir /tmp/nmon_finaldir
+    mv /tmp/nmon_workingdir/nmon_performance_monitor_custom.spl /tmp/nmon_finaldir/
+
+Dedicated indexer(s) per environment (indexers for Prod, indexers for Qua), standalone or in cluster:
+
+**First Store the spl package a final directory, this package is ready to be deployed in search heads:**
+
+::
+
+    mkdir /tmp/nmon_finaldir
+    mv /tmp/nmon_workingdir/nmon_performance_monitor_custom.spl /tmp/nmon_finaldir/
+
+Re-run the process to create the first PA package, for nmon_prod index:
+
+::
+
+    rm -rf nmon nmon*.spl
+    ./Nmon_SplunkApp_Customize.py -i nmon_prod -p PA-nmon-prod -f /tmp/nmon-performance-monitor-for-unix-and-linux-systems_<VERSION>.tgz
+
+**Store the PA package to final directory:**
+
+::
+
+    mv /tmp/nmon_workingdir/nmon/resources/PA-nmon-prod_custom.tar.gz /tmp/nmon_finaldir/
+
+Re-run the process to create the second PA package, for nmon_qua index:
+
+::
+
+    rm -rf nmon nmon*.spl
+    ./Nmon_SplunkApp_Customize.py -i nmon_prod -p PA-nmon-qua -f /tmp/nmon-performance-monitor-for-unix-and-linux-systems_<VERSION>.tgz
+
+**Store the PA package to final directory:**
+
+::
+
+    mv /tmp/nmon_workingdir/nmon/resources/PA-nmon-qua_custom.tar.gz /tmp/nmon_finaldir/
+
+**These 2 packages are ready to be deployed on each typology of indexers (Prod and Qua):**
+
+::
+
+    PA-nmon-prod_custom.tar.gz
+    PA-nmon-qua_custom.tar.gz
+
+**Dedicated indexer(s) for all environments, standalone or in cluster:**
+
+First Store the spl package a final directory, this package is ready to be deployed in search heads:
+
+::
+
+    mkdir /tmp/nmon_finaldir
+    mv /tmp/nmon_workingdir/nmon_performance_monitor_custom.spl /tmp/nmon_finaldir/
+
+Re-run the process to create the PA package, if indexers generates performance data (on by default), data will be stored in nmon_prod:
+
+::
+
+    rm -rf nmon nmon*.spl
+    ./Nmon_SplunkApp_Customize.py -i nmon_prod -p PA-nmon-prod -f /tmp/nmon-performance-monitor-for-unix-and-linux-systems_<VERSION>.tgz
+
+**Add the nmon_qua index, edit the indexes.conf file and re-package:**
+
+::
+
+    cd nmon/resources/
+
+**Edit PA-nmon-prod/default/indexes.conf:**
+
+::
+
+    [nmon_prod]
+    coldPath = $SPLUNK_DB/nmon_prod/colddb
+    homePath = $SPLUNK_DB/nmon_prod/db
+    thawedPath = $SPLUNK_DB/nmon_prod/thaweddb
+    repFactor = auto
+
+    [nmon_qua]
+    coldPath = $SPLUNK_DB/nmon_qua/colddb
+    homePath = $SPLUNK_DB/nmon_qua/db
+    thawedPath = $SPLUNK_DB/nmon_qua/thaweddb
+    repFactor = auto
+
+**Re-package:**
+
+::
+
+    tar -cvzf PA-nmon-prod PA-nmon-prod_custom.tar.gz
+
+**Store the PA package to final directory:**
+
+::
+
+    mv /tmp/nmon_workingdir/nmon/resources/PA-nmon-prod_custom.tar.gz /tmp/nmon_finaldir/
+
+**This PA package is ready to be deployed in indexers:**
+
+::
+
+    PA-nmon-prod_custom.tar.gz
+
+**Step 3: Create TA packages to be deployed in Universal Forwarders clients**
+
+We will create 2 packages, 1 for Production clients and 1 for Qualification:
+
+Clean working directory:
+
+::
+
+    cd /tmp/nmon_workingdir
+    rm -rf nmon nmon*.spl
+
+**Create the Production TA package:**
+
+::
+
+    ./create_agent.py --indexname nmon_prod --agentname TA-nmon-prod -f /tmp/nmon-performance-monitor-for-unix-and-linux-systems_1606.tgz
+
+    Extracting tgz Archive: /media/BIGDATA/Software_Deposit/Splunk/nmon/nmon-performance-monitor-for-unix-and-linux-systems_1606.tgz
+    INFO: Extracting Agent tgz resources Archives
+    INFO: Renaming TA-nmon default agent to TA-nmon-prod
+    Achieving files transformation...
+    Done.
+    INFO: Customizing any reference to index name in files
+    INFO: ************* Tar creation done of: TA-nmon-prod.tar.gz *************
+
+    *** Agent Creation terminated: To install the agent: ***
+
+     - Upload the tgz Archive TA-nmon-prod.tar.gz to your Splunk deployment server
+     - Extract the content of the TA package in $SPLUNK_HOME/etc/deployment-apps/
+     - Configure the Application (set splunkd to restart), server class and associated clients to push the new package to your clients
+
+    Operation terminated.
+
+**Create the Qualification TA package:**
+
+::
+
+    ./create_agent.py --indexname nmon_qua --agentname TA-nmon-qua -f /tmp/nmon-performance-monitor-for-unix-and-linux-systems_1606.tgz
+
+    Extracting tgz Archive: /media/BIGDATA/Software_Deposit/Splunk/nmon/nmon-performance-monitor-for-unix-and-linux-systems_1606.tgz
+    INFO: Extracting Agent tgz resources Archives
+    INFO: Renaming TA-nmon default agent to TA-nmon-qua
+    Achieving files transformation...
+    Done.
+    INFO: Customizing any reference to index name in files
+    INFO: ************* Tar creation done of: TA-nmon-qua.tar.gz *************
+
+    *** Agent Creation terminated: To install the agent: ***
+
+     - Upload the tgz Archive TA-nmon-qua.tar.gz to your Splunk deployment server
+     - Extract the content of the TA package in $SPLUNK_HOME/etc/deployment-apps/
+     - Configure the Application (set splunkd to restart), server class and associated clients to push the new package to your clients
+
+    Operation terminated.
+
+**We have now 2 TA packages ready to be deployed:**
+
+::
+
+    TA-nmon-prod.tar.gz
+    TA-nmon-qua.tar.gz
+
+**Move these packages to the final directory:**
+
+::
+
+    mv /tmp/nmon_workingdir/TA-nmon*.tar.gz /tmp/nmon_finaldir/
+
+**Step 4: Deployment**
+
+Now that all your custom packages are ready, proceed to deployment the same way as usual, review deployment documentations if required
+
 ************
 Troubleshoot
 ************
