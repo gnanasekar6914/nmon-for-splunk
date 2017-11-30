@@ -23,6 +23,7 @@ The Nmon Performance monitor application for Splunk will generate performance an
 **Nmon Performance is now associated with Octamis to provide professional solutions for your business, and professional support for the Nmon Performance solution.**
 
 *For more information:* :ref:`octamis_support`
+For More Information Visit: https://mindmajix.com/splunk-training
 
 ---------------
 Splunk versions
